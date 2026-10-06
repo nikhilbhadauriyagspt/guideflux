@@ -69,12 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'save_flight_settings') {
         $activeTab = 'flights';
         $postData = [
-            'flight_api_provider' => trim($_POST['flight_api_provider'] ?? 'simulator'),
-            'amadeus_environment' => trim($_POST['amadeus_environment'] ?? 'test'),
-            'amadeus_api_key' => trim($_POST['amadeus_api_key'] ?? ''),
-            'amadeus_api_secret' => trim($_POST['amadeus_api_secret'] ?? ''),
-            'tbo_api_key' => trim($_POST['tbo_api_key'] ?? ''),
-            'tripjack_api_key' => trim($_POST['tripjack_api_key'] ?? ''),
+            'flight_api_provider' => 'ignav',
+            'ignav_api_key' => trim($_POST['ignav_api_key'] ?? 'ignav_fO-UFojh4eaCGFqHMzg-hbHj_FSKEtBo'),
+            'usd_to_inr_rate' => (float)($_POST['usd_to_inr_rate'] ?? 86.5),
             'flight_markup_type' => trim($_POST['flight_markup_type'] ?? 'fixed'),
             'flight_commission_domestic' => (float)($_POST['flight_commission_domestic'] ?? 350),
             'flight_commission_international' => (float)($_POST['flight_commission_international'] ?? 850),
@@ -82,11 +79,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         if (updateSettings($postData)) {
-            $alertMessage = "Flight API credentials and Commission / Markup rules saved successfully!";
+            $alertMessage = "Ignav Live Flight API credentials and Commission / Markup rules saved successfully!";
             $alertType = "success";
         } else {
             $alertMessage = "Failed to update Flight API settings.";
             $alertType = "error";
+        }
+
+    } elseif ($action === 'test_ignav_flight') {
+        $activeTab = 'flights';
+        $testKey = trim($_POST['ignav_api_key'] ?? getSetting('ignav_api_key', 'ignav_fO-UFojh4eaCGFqHMzg-hbHj_FSKEtBo'));
+
+        if (empty($testKey)) {
+            $alertMessage = "Please enter your Ignav API Key to test.";
+            $alertType = "error";
+        } else {
+            $payload = json_encode([
+                'origin' => 'DEL',
+                'destination' => 'BOM',
+                'departure_date' => date('Y-m-d', strtotime('+3 days'))
+            ]);
+            $ch = curl_init("https://ignav.com/api/fares/one-way");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "X-Api-Key: " . $testKey,
+                "Content-Type: application/json"
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $res = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($code === 200 && !empty($res)) {
+                $dec = json_decode($res, true);
+                $count = count($dec['itineraries'] ?? []);
+                $alertMessage = "✅ Ignav API Connected Successfully (HTTP 200)! Live flight search is ACTIVE. Found {$count} real live flights on Delhi (DEL) to Mumbai (BOM).";
+                $alertType = "success";
+            } else {
+                $alertMessage = "Ignav API Error (HTTP {$code}): " . mb_strimwidth($res, 0, 150, '...');
+                $alertType = "error";
+            }
         }
 
     } elseif ($action === 'save_location_settings') {
@@ -395,84 +430,49 @@ include 'components/head.php';
                     <form action="settings.php?tab=flights" method="POST" class="space-y-5">
                         <input type="hidden" name="action" value="save_flight_settings">
 
-                        <!-- Flight API Engine Switch -->
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">Flight Search Engine</label>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <label class="flex items-start gap-3 p-3.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition">
-                                    <input type="radio" name="flight_api_provider" value="simulator" <?php echo ($settings['flight_api_provider'] ?? 'simulator') === 'simulator' ? 'checked' : ''; ?> class="mt-0.5 accent-brand-600">
+                        <!-- Ignav Live Flight API Credentials Card -->
+                        <div class="p-6 rounded-2xl border-2 border-brand-500 bg-brand-50/20 space-y-5 shadow-xs">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-brand-200">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-3 py-1 rounded-xl bg-brand-600 text-white font-mono font-black text-xs uppercase tracking-wider">IGNAV LIVE GDS</span>
                                     <div>
-                                        <span class="block text-xs font-bold text-slate-800">High-Fidelity Engine (Free &amp; Always Up)</span>
-                                        <span class="block text-[11px] text-slate-500 mt-0.5">Real schedules for IndiGo, Air India, Akasa Air, Vistara, Emirates, SpiceJet with 3-tier fare matrix.</span>
+                                        <h3 class="text-sm font-bold text-slate-900">Ignav Real-Time Flight Prices &amp; Inventory API</h3>
+                                        <p class="text-[11px] text-slate-500">Live flight data for IndiGo, Air India, Akasa Air, SpiceJet &amp; Global Airlines with real fares</p>
                                     </div>
-                                </label>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5 w-fit">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                                    <span>Active Live API</span>
+                                </span>
+                            </div>
 
-                                <label class="flex items-start gap-3 p-3.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition">
-                                    <input type="radio" name="flight_api_provider" value="amadeus" <?php echo ($settings['flight_api_provider'] ?? 'simulator') === 'amadeus' ? 'checked' : ''; ?> class="mt-0.5 accent-brand-600">
-                                    <div>
-                                        <span class="block text-xs font-bold text-slate-800">Amadeus GDS Live API</span>
-                                        <span class="block text-[11px] text-slate-500 mt-0.5">Connects live to Amadeus Flight Offers API v2 for real-time worldwide flight GDS inventory.</span>
+                            <input type="hidden" name="flight_api_provider" value="ignav">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Ignav API Key (X-Api-Key)</label>
+                                    <input type="text" name="ignav_api_key" value="<?php echo htmlspecialchars($settings['ignav_api_key'] ?? 'ignav_fO-UFojh4eaCGFqHMzg-hbHj_FSKEtBo'); ?>" placeholder="Enter Ignav API Key"
+                                           class="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl font-mono text-slate-800 focus:outline-none focus:border-brand-600 shadow-2xs font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">USD to INR Exchange Rate</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2.5 text-xs font-bold text-slate-400">₹</span>
+                                        <input type="number" step="0.1" name="usd_to_inr_rate" value="<?php echo htmlspecialchars($settings['usd_to_inr_rate'] ?? '86.5'); ?>" placeholder="86.5"
+                                               class="w-full pl-7 pr-3 py-2.5 text-xs bg-white border border-slate-300 rounded-xl font-mono text-slate-800 focus:outline-none focus:border-brand-600 shadow-2xs font-bold">
                                     </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Amadeus GDS API Credentials -->
-                        <div class="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800 font-mono font-bold text-xs">Amadeus</span>
-                                    <span class="text-xs font-bold text-slate-800">Amadeus Self-Service API Credentials</span>
-                                </div>
-                                <a href="https://developers.amadeus.com/register" target="_blank" class="text-xs text-brand-600 font-bold hover:underline inline-flex items-center gap-1">
-                                    <span>Get Free API Key</span>
-                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                                </a>
-                            </div>
-
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Amadeus Environment</label>
-                                <div class="flex items-center gap-4">
-                                    <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                                        <input type="radio" name="amadeus_environment" value="test" <?php echo ($settings['amadeus_environment'] ?? 'test') === 'test' ? 'checked' : ''; ?> class="accent-brand-600">
-                                        <span>Test / Sandbox (<code>test.api.amadeus.com</code>) - Free</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                                        <input type="radio" name="amadeus_environment" value="production" <?php echo ($settings['amadeus_environment'] ?? 'test') === 'production' ? 'checked' : ''; ?> class="accent-brand-600">
-                                        <span>Production (<code>api.amadeus.com</code>) - Live</span>
-                                    </label>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Amadeus API Key (Client ID)</label>
-                                    <input type="text" name="amadeus_api_key" value="<?php echo htmlspecialchars($settings['amadeus_api_key'] ?? ''); ?>" placeholder="Enter Amadeus Client ID / API Key"
-                                           class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800 focus:outline-none focus:border-brand-600">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-brand-200/80">
+                                <div class="text-[11px] text-slate-600 flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                    <span>Zero dummy data. All search queries hit live GDS inventory and verified airline seat availability.</span>
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Amadeus API Secret (Client Secret)</label>
-                                    <input type="password" name="amadeus_api_secret" value="<?php echo htmlspecialchars($settings['amadeus_api_secret'] ?? ''); ?>" placeholder="••••••••"
-                                           class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800 focus:outline-none focus:border-brand-600">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Additional Aggregators (TBO / TripJack) -->
-                        <div class="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
-                            <span class="text-xs font-bold text-slate-800 block">Indian B2B Flight Aggregator API Keys (Optional)</span>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">TBO Holidays Flight API Key</label>
-                                    <input type="text" name="tbo_api_key" value="<?php echo htmlspecialchars($settings['tbo_api_key'] ?? ''); ?>" placeholder="TBO API Key (Optional)"
-                                           class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">TripJack Flight API Key</label>
-                                    <input type="text" name="tripjack_api_key" value="<?php echo htmlspecialchars($settings['tripjack_api_key'] ?? ''); ?>" placeholder="TripJack API Key (Optional)"
-                                           class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-800">
-                                </div>
+                                <button type="submit" name="action" value="test_ignav_flight" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition inline-flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
+                                    <i class="fa-solid fa-bolt text-xs"></i>
+                                    <span>Test Live Ignav Connection</span>
+                                </button>
                             </div>
                         </div>
 
@@ -647,6 +647,23 @@ include 'components/head.php';
                             Save Places &amp; Location API Settings
                         </button>
                     </form>
+
+                    <!-- Live API Diagnostic & Preview Box -->
+                    <div class="mt-6 pt-5 border-t border-slate-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-vial-circle-check text-emerald-600"></i>
+                                <span>Live Location API Tester &amp; Diagnostic</span>
+                            </span>
+                            <span class="text-[11px] text-slate-400">Tests <code>/api/places.php</code> in real-time</span>
+                        </div>
+
+                        <div class="relative">
+                            <input type="text" id="adminLocationTestInput" placeholder="Type any place to test (e.g. Goa, Manali, Dubai, Paris)..."
+                                   class="w-full px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-brand-600">
+                            <div id="adminLocationTestResults" class="mt-2 hidden p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5 max-h-48 overflow-y-auto"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1063,5 +1080,47 @@ function switchSettingsTab(tabName) {
     const url = new URL(window.location);
     url.searchParams.set('tab', tabName);
     window.history.replaceState({}, '', url);
+}
+
+// Live Location API Tester Engine in Admin
+const adminTestInput = document.getElementById('adminLocationTestInput');
+const adminTestResults = document.getElementById('adminLocationTestResults');
+let adminTestTimer = null;
+
+if (adminTestInput && adminTestResults) {
+    adminTestInput.addEventListener('input', () => {
+        const q = adminTestInput.value.trim();
+        clearTimeout(adminTestTimer);
+        if (q.length < 2) {
+            adminTestResults.classList.add('hidden');
+            return;
+        }
+
+        adminTestResults.classList.remove('hidden');
+        adminTestResults.innerHTML = '<div class="text-slate-400 py-1"><i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Calling /api/places.php...</div>';
+
+        adminTestTimer = setTimeout(() => {
+            fetch('../api/places.php?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success || !res.data || res.data.length === 0) {
+                        adminTestResults.innerHTML = '<div class="text-slate-400 py-1">No locations returned from active provider (' + (res.provider || 'default') + ')</div>';
+                        return;
+                    }
+
+                    let out = '<div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pb-1">Provider: <span class="text-emerald-600 uppercase font-mono">' + res.provider + '</span> &bull; Found ' + res.data.length + ' results:</div>';
+                    res.data.forEach(item => {
+                        out += '<div class="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2">' +
+                            '<div><strong class="text-slate-800">' + item.name + '</strong> <span class="text-[11px] text-slate-500">(' + item.full_address + ')</span></div>' +
+                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold ' + (item.has_packages ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-600') + '">' + (item.badge || 'Place') + '</span>' +
+                        '</div>';
+                    });
+                    adminTestResults.innerHTML = out;
+                })
+                .catch(err => {
+                    adminTestResults.innerHTML = '<div class="text-rose-500 py-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Error connecting to API proxy</div>';
+                });
+        }, 250);
+    });
 }
 </script>

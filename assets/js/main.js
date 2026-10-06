@@ -205,36 +205,214 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Direct Typeahead Input Auto-complete Engine
+    // Helper for safe HTML rendering in autocomplete
+    function escapeHtmlStr(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // ==========================================
+    // Live API Autocomplete Engine (Hero & Global)
+    // Powered by /api/places.php (OSM / Google Places / DB Availability)
+    // ==========================================
     const typeaheadInputs = document.querySelectorAll('.typeahead-input');
     typeaheadInputs.forEach(input => {
         const wrapper = input.closest('.dropdown-wrapper');
         if (!wrapper) return;
         const menu = wrapper.querySelector('.dropdown-menu');
+        const listContainer = wrapper.querySelector('.suggestion-list');
+        const statusIndicator = wrapper.querySelector('.dropdown-status-indicator');
 
-        const handleTypeahead = (e) => {
-            const query = input.value.trim().toLowerCase();
+        const category = input.getAttribute('data-category') || '';
+        const searchType = input.getAttribute('data-type') || 'package';
+        let debounceTimer = null;
+        let activeIndex = -1;
+
+        // Function to bind click to rendered suggestion items
+        function attachItemClickHandlers() {
+            if (!listContainer) return;
+            const items = listContainer.querySelectorAll('.dropdown-select-item');
+            items.forEach((item, idx) => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const val = item.getAttribute('data-val');
+                    const sub = item.getAttribute('data-sub');
+
+                    if (val) input.value = val;
+                    const destSubtext = wrapper.querySelector('.dest-subtext');
+                    if (destSubtext && sub) destSubtext.innerHTML = escapeHtmlStr(sub);
+
+                    closeAllDropdowns();
+                });
+            });
+        }
+
+        // Attach to initial pre-rendered items
+        attachItemClickHandlers();
+
+        // Fetch suggestions from live API endpoint
+        function fetchLiveSuggestions(query) {
+            if (!listContainer) return;
+
+            const q = query.trim();
+            const url = `api/places.php?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}&type=${encodeURIComponent(searchType)}`;
+
+            if (statusIndicator) {
+                statusIndicator.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i> Fetching';
+            }
+
+            fetch(url)
+                .then(res => res.json())
+                .then(res => {
+                    if (statusIndicator) {
+                        statusIndicator.innerHTML = '<i class="fa-solid fa-bolt text-[10px]"></i> Live API';
+                    }
+
+                    if (!res.success || !res.data || res.data.length === 0) {
+                        listContainer.innerHTML = `
+                            <div class="p-3 text-center text-xs text-slate-400">
+                                <i class="fa-solid fa-location-dot text-slate-300 mr-1.5"></i>
+                                <span>No destinations found for "${escapeHtmlStr(q)}"</span>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+                    res.data.forEach(item => {
+                        let iconBg = 'bg-slate-100';
+                        let iconColor = 'text-slate-500';
+                        let iconClass = 'fa-solid fa-location-dot';
+                        let badgeClass = 'bg-slate-100 text-slate-600';
+
+                        if (item.has_packages) {
+                            iconBg = 'bg-teal-50';
+                            iconColor = 'text-teal-600';
+                            iconClass = 'fa-solid fa-map-location-dot';
+                            badgeClass = 'bg-teal-50 text-teal-700 font-bold';
+                        } else if (item.has_hotels) {
+                            iconBg = 'bg-amber-50';
+                            iconColor = 'text-amber-600';
+                            iconClass = 'fa-solid fa-hotel';
+                            badgeClass = 'bg-amber-50 text-amber-700 font-bold';
+                        } else if (category === 'international') {
+                            iconBg = 'bg-sky-50';
+                            iconColor = 'text-sky-600';
+                            iconClass = 'fa-solid fa-globe';
+                            badgeClass = 'bg-sky-50 text-sky-700 font-bold';
+                        }
+
+                        html += `
+                            <div class="dropdown-select-item flex items-center justify-between p-2 hover:bg-slate-50 cursor-pointer transition rounded-xl"
+                                 data-val="${escapeHtmlStr(item.name)}" 
+                                 data-sub="${escapeHtmlStr(item.full_address)}">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <div class="w-7 h-7 rounded-lg ${iconBg} ${iconColor} flex items-center justify-center shrink-0">
+                                        <i class="${iconClass} text-xs"></i>
+                                    </div>
+                                    <div class="truncate">
+                                        <span class="block text-xs font-bold text-slate-800">${escapeHtmlStr(item.name)}</span>
+                                        <span class="block text-[10px] text-slate-400 truncate">${escapeHtmlStr(item.full_address)}</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] ${badgeClass} px-2 py-0.5 shrink-0 rounded">
+                                    ${escapeHtmlStr(item.badge || 'Destination')}
+                                </span>
+                            </div>
+                        `;
+                    });
+
+                    listContainer.innerHTML = html;
+                    attachItemClickHandlers();
+                })
+                .catch(err => {
+                    if (statusIndicator) {
+                        statusIndicator.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-[10px] text-rose-500"></i> Error';
+                    }
+                });
+        }
+
+        // Event listener for user input typing
+        input.addEventListener('input', () => {
+            const query = input.value.trim();
             closeAllDropdowns();
             if (menu) menu.classList.remove('hidden');
 
-            const items = wrapper.querySelectorAll('.dropdown-select-item');
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                const val = (item.getAttribute('data-val') || '').toLowerCase();
-                if (query === '' || text.includes(query) || val.includes(query)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+            clearTimeout(debounceTimer);
+            if (query.length === 0) {
+                // If emptied, fetch popular defaults
+                fetchLiveSuggestions('');
+                return;
+            }
+
+            if (listContainer) {
+                listContainer.innerHTML = `
+                    <div class="p-3 text-center text-xs text-slate-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-teal-600 mr-2"></i>
+                        <span>Searching destinations via API...</span>
+                    </div>
+                `;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetchLiveSuggestions(query);
+            }, 220);
+        });
+
+        // Event listener for focus / click
+        const handleFocus = (e) => {
+            e.stopPropagation();
+            closeAllDropdowns();
+            if (menu) menu.classList.remove('hidden');
+
+            // If empty or only 1 character and no items rendered, fetch defaults
+            if (input.value.trim().length === 0 && (!listContainer || listContainer.children.length === 0)) {
+                fetchLiveSuggestions('');
+            }
         };
 
-        input.addEventListener('focus', handleTypeahead);
-        input.addEventListener('input', handleTypeahead);
-        input.addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleTypeahead(e);
+        input.addEventListener('focus', handleFocus);
+        input.addEventListener('click', handleFocus);
+
+        // Keyboard navigation (Arrow keys + Enter)
+        input.addEventListener('keydown', (e) => {
+            if (!menu || menu.classList.contains('hidden') || !listContainer) return;
+            const items = listContainer.querySelectorAll('.dropdown-select-item');
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = (activeIndex + 1) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = (activeIndex - 1 + items.length) % items.length;
+                updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                if (activeIndex >= 0 && activeIndex < items.length) {
+                    e.preventDefault();
+                    items[activeIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                closeAllDropdowns();
+            }
         });
+
+        function updateActiveItem(items) {
+            items.forEach((item, idx) => {
+                if (idx === activeIndex) {
+                    item.classList.add('bg-slate-100', 'ring-1', 'ring-teal-500');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('bg-slate-100', 'ring-1', 'ring-teal-500');
+                }
+            });
+        }
     });
 
     // Close all dropdowns when clicking outside
@@ -405,6 +583,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // 7.1 Flights & Hotels Specific Interactivity
     // ==========================================
     
+    // ==========================================
+    // Dedicated Flight Airport Instant Search Engine
+    // Filters by Official Airport Name, City, or IATA Code
+    // ==========================================
+    const flightAirportInputs = document.querySelectorAll('.flight-airport-typeahead');
+    flightAirportInputs.forEach(input => {
+        const wrapper = input.closest('.dropdown-wrapper');
+        if (!wrapper) return;
+        const menu = wrapper.querySelector('.dropdown-menu');
+        const items = wrapper.querySelectorAll('.flight-select-item');
+
+        const filterAirports = () => {
+            const query = input.value.trim().toLowerCase();
+            closeAllDropdowns();
+            if (menu) menu.classList.remove('hidden');
+
+            items.forEach(item => {
+                const searchData = (item.getAttribute('data-search') || '').toLowerCase();
+                const code = (item.getAttribute('data-code') || '').toLowerCase();
+                const name = (item.getAttribute('data-name') || '').toLowerCase();
+
+                if (query === '' || searchData.includes(query) || name.includes(query) || code.includes(query)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        };
+
+        input.addEventListener('focus', filterAirports);
+        input.addEventListener('input', filterAirports);
+        input.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filterAirports();
+        });
+
+        // Click on airport item
+        items.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const val = item.getAttribute('data-val') || (item.getAttribute('data-name') + ' (' + item.getAttribute('data-code') + ')');
+                const code = item.getAttribute('data-code');
+                const name = item.getAttribute('data-name');
+                input.value = val;
+
+                const dispCode = wrapper.querySelector('#dispFromCode, #dispToCode');
+                if (dispCode && code) dispCode.textContent = code;
+                const dispName = wrapper.querySelector('#dispFromName, #dispToName');
+                if (dispName && name) dispName.textContent = name;
+
+                closeAllDropdowns();
+            });
+        });
+    });
+
     // Flight Swap Button (Origin <-> Destination)
     const flightSwapBtn = document.getElementById('flightSwapBtn');
     const flightFromInput = document.getElementById('flightFromInput');
@@ -423,29 +656,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Flight Trip Type Toggle (One Way / Round Trip / Multi-City)
     const flightTypeRadios = document.querySelectorAll('.flight-type-radio');
     const flightReturnDateBlock = document.getElementById('flightReturnDateBlock');
+    const flightMultiCityContainer = document.getElementById('flightMultiCityContainer');
+    const flightReturnDateHidden = document.getElementById('flightReturnDateHidden');
     const flightDateLabel = document.getElementById('flightDateLabel');
     const flightDateInput = document.getElementById('flightDateInput');
     const flightDepDate = document.getElementById('flightDepDate');
     const flightRetDate = document.getElementById('flightRetDate');
+    const flightFrom2Input = document.getElementById('flightFrom2Input');
 
     function updateFlightDateDisplay() {
         const selectedType = document.querySelector('.flight-type-radio:checked')?.value || 'oneway';
         const depVal = flightDepDate?.value;
         const retVal = flightRetDate?.value;
 
-        if (flightDateInput) {
-            if (selectedType === 'roundtrip') {
-                if (flightDateLabel) flightDateLabel.textContent = 'Departure - Return';
-                if (depVal && retVal) {
-                    flightDateInput.value = `${depVal} to ${retVal}`;
-                } else if (depVal) {
-                    flightDateInput.value = `${depVal} (Return Pending)`;
-                }
-            } else {
-                if (flightDateLabel) flightDateLabel.textContent = 'Departure Date';
-                if (depVal) {
-                    flightDateInput.value = depVal;
-                }
+        if (selectedType === 'roundtrip') {
+            if (flightDateLabel) flightDateLabel.textContent = 'Departure & Return';
+            if (flightDateInput && depVal) {
+                flightDateInput.value = depVal;
+            }
+            if (flightReturnDateHidden && retVal) {
+                flightReturnDateHidden.value = retVal;
+            }
+        } else if (selectedType === 'multicity') {
+            if (flightDateLabel) flightDateLabel.textContent = 'Leg 1 Departure';
+            if (flightDateInput && depVal) {
+                flightDateInput.value = depVal;
+            }
+            if (flightReturnDateHidden) {
+                flightReturnDateHidden.value = '';
+            }
+        } else {
+            if (flightDateLabel) flightDateLabel.textContent = 'Departure Date';
+            if (flightDateInput && depVal) {
+                flightDateInput.value = depVal;
+            }
+            if (flightReturnDateHidden) {
+                flightReturnDateHidden.value = '';
             }
         }
     }
@@ -454,8 +700,26 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', () => {
             if (radio.value === 'roundtrip') {
                 if (flightReturnDateBlock) flightReturnDateBlock.classList.remove('hidden');
+                if (flightMultiCityContainer) flightMultiCityContainer.classList.add('hidden');
+                if (flightReturnDateHidden && flightRetDate) {
+                    flightReturnDateHidden.value = flightRetDate.value;
+                }
+            } else if (radio.value === 'multicity') {
+                if (flightReturnDateBlock) flightReturnDateBlock.classList.add('hidden');
+                if (flightMultiCityContainer) flightMultiCityContainer.classList.remove('hidden');
+                if (flightReturnDateHidden) {
+                    flightReturnDateHidden.value = '';
+                }
+                // Auto-sync Leg 2 From with Leg 1 Destination if empty
+                if (flightFrom2Input && !flightFrom2Input.value && flightToInput && flightToInput.value) {
+                    flightFrom2Input.value = flightToInput.value;
+                }
             } else {
                 if (flightReturnDateBlock) flightReturnDateBlock.classList.add('hidden');
+                if (flightMultiCityContainer) flightMultiCityContainer.classList.add('hidden');
+                if (flightReturnDateHidden) {
+                    flightReturnDateHidden.value = '';
+                }
             }
             updateFlightDateDisplay();
         });
@@ -465,6 +729,12 @@ document.addEventListener('DOMContentLoaded', () => {
         flightDepDate.addEventListener('change', () => {
             if (flightRetDate && flightDepDate.value) {
                 flightRetDate.min = flightDepDate.value;
+                // If return date is earlier than departure date, advance it
+                if (!flightRetDate.value || flightRetDate.value < flightDepDate.value) {
+                    const d = new Date(flightDepDate.value);
+                    d.setDate(d.getDate() + 3);
+                    flightRetDate.value = d.toISOString().split('T')[0];
+                }
             }
             updateFlightDateDisplay();
             const selectedType = document.querySelector('.flight-type-radio:checked')?.value || 'oneway';
@@ -480,6 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeAllDropdowns();
         });
     }
+
 
     // Flight Cabin Class Chips & Apply Button
     const flightCabinChips = document.querySelectorAll('.flight-cabin-chip');
@@ -500,13 +771,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const flightApplyBtn = document.getElementById('flightApplyBtn');
     const flightClassInput = document.getElementById('flightClassInput');
+    const flightClassDisplayInput = document.getElementById('flightClassDisplayInput');
+    const flightAdultsHidden = document.getElementById('flightAdultsHidden');
     const flightAdultsCount = document.getElementById('flightAdultsCount');
 
-    if (flightApplyBtn && flightClassInput) {
+    if (flightApplyBtn) {
         flightApplyBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const adults = flightAdultsCount ? parseInt(flightAdultsCount.textContent, 10) : 1;
-            flightClassInput.value = `${adults} Traveler${adults > 1 ? 's' : ''}, ${selectedCabin}`;
+            const cabin = typeof selectedCabin !== 'undefined' ? selectedCabin : 'Economy';
+            if (flightClassDisplayInput) {
+                flightClassDisplayInput.value = `${cabin}, ${adults} Traveler${adults > 1 ? 's' : ''}`;
+            }
+            if (flightClassInput) {
+                flightClassInput.value = cabin;
+            }
+            if (flightAdultsHidden) {
+                flightAdultsHidden.value = adults;
+            }
             closeAllDropdowns();
         });
     }
@@ -528,52 +810,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 8. Search Button Click Handler (Redirects to search.php)
+    // 8. Search Button Click Handler (Submits Active Panel Form)
     // ==========================================
     const topSearchBtn = document.getElementById('topSearchBtn');
     if (topSearchBtn) {
-        topSearchBtn.addEventListener('click', () => {
+        topSearchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             const activePanel = document.querySelector('.tab-panel:not(.hidden)');
             if (activePanel) {
-                let type = 'all';
-                let queryParam = '';
-
-                if (activePanel.id === 'panel-domestic' || activePanel.id === 'panel-international') {
-                    type = 'package';
-                    const destEl = activePanel.querySelector('input[name="destination"], .typeahead-input, .field-val');
-                    if (destEl) {
-                        const raw = (destEl.value || destEl.textContent || '').trim();
-                        if (raw && !raw.toLowerCase().includes('select') && !raw.toLowerCase().includes('choose')) {
-                            queryParam = raw.split(',')[0].trim();
-                        }
-                    }
-                } else if (activePanel.id === 'panel-flights') {
-                    type = 'flight';
-                    const toInput = activePanel.querySelector('input[name="to"]');
-                    if (toInput && toInput.value.trim()) {
-                        queryParam = toInput.value.trim().split(',')[0].trim();
-                    }
-                } else if (activePanel.id === 'panel-hotels') {
-                    type = 'hotel';
-                    const cityInput = activePanel.querySelector('input[name="city"]');
-                    if (cityInput && cityInput.value.trim()) {
-                        queryParam = cityInput.value.trim().split(',')[0].trim();
-                    }
+                const form = activePanel.querySelector('form');
+                if (form) {
+                    topSearchBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>Searching...</span>`;
+                    setTimeout(() => {
+                        form.submit();
+                    }, 200);
                 }
-
-                const originalHtml = topSearchBtn.innerHTML;
-                topSearchBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>Searching...</span>`;
-                setTimeout(() => {
-                    const searchUrl = `search.php?type=${encodeURIComponent(type)}${queryParam ? '&query=' + encodeURIComponent(queryParam) : ''}`;
-                    window.location.href = searchUrl;
-                }, 300);
             }
         });
     }
 
     const mobileHeroSearchBtn = document.getElementById('mobileHeroSearchBtn');
     if (mobileHeroSearchBtn && topSearchBtn) {
-        mobileHeroSearchBtn.addEventListener('click', () => {
+        mobileHeroSearchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             mobileHeroSearchBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>Searching...</span>`;
             topSearchBtn.click();
         });

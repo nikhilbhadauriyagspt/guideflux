@@ -40,12 +40,9 @@ function getGlobalSettings($reload = false) {
         'facebook_app_secret' => '',
         
         // Flight Search API & Commission / Markup Configuration
-        'flight_api_provider' => 'simulator', // 'amadeus' or 'simulator'
-        'amadeus_environment' => 'test', // 'test' or 'production'
-        'amadeus_api_key' => '',
-        'amadeus_api_secret' => '',
-        'tbo_api_key' => '',
-        'tripjack_api_key' => '',
+        'flight_api_provider' => 'ignav', // 'ignav' (primary live GDS API)
+        'ignav_api_key' => 'ignav_fO-UFojh4eaCGFqHMzg-hbHj_FSKEtBo',
+        'usd_to_inr_rate' => '86.5',
         'flight_markup_type' => 'fixed', // 'fixed' (₹) or 'percentage' (%)
         'flight_commission_domestic' => '350', // e.g. ₹350 or 5%
         'flight_commission_international' => '850', // e.g. ₹850 or 8%

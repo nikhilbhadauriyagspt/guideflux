@@ -12,718 +12,55 @@
 $pageTitle = 'Search Holiday Packages, Flights & Hotels | Orion Advent';
 
 // Initial Server-Side Query Fallbacks (can be refined via JS client-side instantly)
-$initialType = isset($_GET['type']) ? htmlspecialchars(trim($_GET['type'])) : 'all';
-$initialQuery = isset($_GET['query']) ? htmlspecialchars(trim($_GET['query'])) : '';
+$initialType = isset($_GET['type']) ? strtolower(trim($_GET['type'])) : 'all';
+$initialCategory = isset($_GET['category']) ? strtolower(trim($_GET['category'])) : '';
 
-// Master Datasets: Packages, Flights, Hotels
-$searchItems = [
-    // ==========================================
-    // 1. TOUR PACKAGES (10 Handpicked Circuits)
-    // ==========================================
-    [
-        'id' => 'PKG-KASHMIR-01',
-        'type' => 'package',
-        'sub_type' => 'Domestic Tour',
-        'title' => 'Kashmir Paradise & Dal Lake Houseboat',
-        'destination' => 'Kashmir • Srinagar • Gulmarg • Pahalgam',
-        'route' => 'Srinagar • Gulmarg • Pahalgam • Sonmarg',
-        'duration' => '5N / 6D',
-        'badge' => 'Bestseller',
-        'badge_class' => 'bg-brand-600 text-white',
-        'price' => 17999,
-        'original_price' => 22999,
-        'rating' => 4.9,
-        'reviews' => '1,420 reviews',
-        'image' => 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-sailboat', 'label' => 'Houseboat Stay'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Breakfast & Dinner'],
-            ['icon' => 'fa-solid fa-car', 'label' => 'Private Cab'],
-            ['icon' => 'fa-solid fa-camera', 'label' => 'Sightseeing'],
-        ],
-        'perks' => 'Free Cancellation till 48 hrs • Instant Voucher',
-        'tags' => 'kashmir srinagar gulmarg pahalgam domestic hills honeymoon breakfast cancellation cab sightseeing houseboat',
-    ],
-    [
-        'id' => 'PKG-KERALA-02',
-        'type' => 'package',
-        'sub_type' => 'Domestic Tour',
-        'title' => 'Kerala Backwaters & Misty Munnar Hills',
-        'destination' => 'Kerala • Munnar • Alleppey • Thekkady',
-        'route' => 'Kochi • Munnar • Thekkady • Alleppey',
-        'duration' => '4N / 5D',
-        'badge' => 'Honeymoon Fav',
-        'badge_class' => 'bg-emerald-600 text-white',
-        'price' => 18500,
-        'original_price' => 24000,
-        'rating' => 4.8,
-        'reviews' => '980 reviews',
-        'image' => 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-sailboat', 'label' => 'Luxury Houseboat'],
-            ['icon' => 'fa-solid fa-mug-hot', 'label' => 'Tea Plantation Tour'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Meals Included'],
-            ['icon' => 'fa-solid fa-car', 'label' => 'Private Sedan'],
-        ],
-        'perks' => 'Ayurvedic Massage Voucher • Free Reschedule',
-        'tags' => 'kerala munnar alleppey thekkady domestic nature honeymoon breakfast cancellation cab houseboat sightseeing',
-    ],
-    [
-        'id' => 'PKG-HIMACHAL-03',
-        'type' => 'package',
-        'sub_type' => 'Domestic Tour',
-        'title' => 'Himachal Alpine Valley & Solang Adventure',
-        'destination' => 'Himachal • Shimla • Manali • Solang',
-        'route' => 'Shimla • Kufri • Kullu • Manali • Solang',
-        'duration' => '5N / 6D',
-        'badge' => 'Snow Peaks',
-        'badge_class' => 'bg-sky-600 text-white',
-        'price' => 14999,
-        'original_price' => 19500,
-        'rating' => 4.8,
-        'reviews' => '1,650 reviews',
-        'image' => 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-mountain', 'label' => 'Valley Resort'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Daily Breakfast'],
-            ['icon' => 'fa-solid fa-car', 'label' => 'Solang & Atal Cab'],
-            ['icon' => 'fa-solid fa-camera', 'label' => 'Local Sightseeing'],
-        ],
-        'perks' => 'Campfire Night Included • Free Cancellation',
-        'tags' => 'manali shimla solang himachal domestic hills adventure breakfast cancellation cab sightseeing',
-    ],
-    [
-        'id' => 'PKG-RAJASTHAN-04',
-        'type' => 'package',
-        'sub_type' => 'Domestic Tour',
-        'title' => 'Royal Rajasthan Havelis & Fort Heritage',
-        'destination' => 'Rajasthan • Jaipur • Udaipur • Jodhpur',
-        'route' => 'Jaipur • Ajmer • Pushkar • Jodhpur • Udaipur',
-        'duration' => '5N / 6D',
-        'badge' => 'Heritage Circuit',
-        'badge_class' => 'bg-amber-600 text-white',
-        'price' => 16500,
-        'original_price' => 21000,
-        'rating' => 4.7,
-        'reviews' => '890 reviews',
-        'image' => 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-chess-rook', 'label' => 'Heritage Haveli'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Royal Breakfast'],
-            ['icon' => 'fa-solid fa-water', 'label' => 'Pichola Boat Ride'],
-            ['icon' => 'fa-solid fa-car', 'label' => 'Private Chauffeur'],
-        ],
-        'perks' => 'Fort Entry Fast-Track • Free Cancellation',
-        'tags' => 'rajasthan jaipur udaipur jodhpur heritage royal domestic breakfast cancellation cab sightseeing',
-    ],
-    [
-        'id' => 'PKG-GOA-05',
-        'type' => 'package',
-        'sub_type' => 'Domestic Tour',
-        'title' => 'Goa Beachside Luxury & Mandovi Sunset Cruise',
-        'destination' => 'Goa • Calangute • Baga • Mandovi River',
-        'route' => 'North Goa Beaches • Fort Aguada • Cruise',
-        'duration' => '3N / 4D',
-        'badge' => 'Beach Special',
-        'badge_class' => 'bg-teal-600 text-white',
-        'price' => 11999,
-        'original_price' => 15500,
-        'rating' => 4.9,
-        'reviews' => '2,100 reviews',
-        'image' => 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-umbrella-beach', 'label' => 'Beachside Resort'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Buffet Breakfast'],
-            ['icon' => 'fa-solid fa-ship', 'label' => 'Sunset Cruise Pass'],
-            ['icon' => 'fa-solid fa-van-shuttle', 'label' => 'Airport Transfers'],
-        ],
-        'perks' => 'Free Pool Access • Zero Cancellation Charges',
-        'tags' => 'goa beach cruise calangute baga domestic pool breakfast cancellation cab sightseeing',
-    ],
-    [
-        'id' => 'PKG-DUBAI-06',
-        'type' => 'package',
-        'sub_type' => 'International Tour',
-        'title' => 'Dubai Extravaganza, Burj Khalifa & Desert Safari',
-        'destination' => 'Dubai, UAE • Downtown • Marina • Desert',
-        'route' => 'Dubai City • Burj Khalifa • Desert Camp • Marina',
-        'duration' => '4N / 5D',
-        'badge' => 'Trending Global',
-        'badge_class' => 'bg-brand-600 text-white',
-        'price' => 34999,
-        'original_price' => 42500,
-        'rating' => 4.9,
-        'reviews' => '1,780 reviews',
-        'image' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-city', 'label' => '4★ Central Hotel'],
-            ['icon' => 'fa-solid fa-building', 'label' => 'Burj Khalifa 124F'],
-            ['icon' => 'fa-solid fa-car-side', 'label' => 'Desert Dune Safari'],
-            ['icon' => 'fa-solid fa-passport', 'label' => 'UAE Visa Guidance'],
-        ],
-        'perks' => 'BBQ Dinner & Belly Dance Show • Instant Confirmation',
-        'tags' => 'dubai uae desert burj khalifa international luxury visa breakfast cancellation cab sightseeing',
-    ],
-    [
-        'id' => 'PKG-BALI-07',
-        'type' => 'package',
-        'sub_type' => 'International Tour',
-        'title' => 'Bali Tropical Island Escape & Private Pool Villa',
-        'destination' => 'Bali, Indonesia • Ubud • Seminyak • Nusa Penida',
-        'route' => 'Ubud Terraces • Seminyak Beach • Nusa Penida Island',
-        'duration' => '5N / 6D',
-        'badge' => 'Island Paradise',
-        'badge_class' => 'bg-emerald-600 text-white',
-        'price' => 28500,
-        'original_price' => 36000,
-        'rating' => 4.9,
-        'reviews' => '1,340 reviews',
-        'image' => 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-water-ladder', 'label' => '2N Private Pool Villa'],
-            ['icon' => 'fa-solid fa-ship', 'label' => 'Nusa Penida Boat'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Floating Breakfast'],
-            ['icon' => 'fa-solid fa-car', 'label' => 'Private Chauffeur'],
-        ],
-        'perks' => 'Balinese Spa Massage Included • Free Date Change',
-        'tags' => 'bali indonesia ubud seminyak nusa penida international pool villa honeymoon breakfast cancellation cab sightseeing',
-    ],
-    [
-        'id' => 'PKG-THAILAND-08',
-        'type' => 'package',
-        'sub_type' => 'International Tour',
-        'title' => 'Thailand Explorer: Bangkok & Coral Island Phuket',
-        'destination' => 'Thailand • Bangkok • Pattaya • Phuket',
-        'route' => 'Bangkok City • Coral Island Speedboat • Phuket Beach',
-        'duration' => '4N / 5D',
-        'badge' => 'Top Value',
-        'badge_class' => 'bg-indigo-600 text-white',
-        'price' => 25999,
-        'original_price' => 32000,
-        'rating' => 4.8,
-        'reviews' => '1,150 reviews',
-        'image' => 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-hotel', 'label' => '4★ City Stays'],
-            ['icon' => 'fa-solid fa-ship', 'label' => 'Coral Island Speedboat'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Daily Breakfast'],
-            ['icon' => 'fa-solid fa-van-shuttle', 'label' => 'Airport Transfers'],
-        ],
-        'perks' => 'Chao Phraya Cruise Dinner Included • Free Reschedule',
-        'tags' => 'thailand bangkok pattaya phuket international beach budget breakfast cancellation cab sightseeing',
-    ],
-    [
-        'id' => 'PKG-MALDIVES-09',
-        'type' => 'package',
-        'sub_type' => 'International Tour',
-        'title' => 'Maldives Luxury Overwater Pool Villa Sanctuary',
-        'destination' => 'Maldives • North Male Atoll • Private Island',
-        'route' => 'Private Speedboat • Overwater Villa • Coral Lagoon',
-        'duration' => '3N / 4D',
-        'badge' => 'Ultra Luxury',
-        'badge_class' => 'bg-cyan-600 text-white',
-        'price' => 52000,
-        'original_price' => 68000,
-        'rating' => 5.0,
-        'reviews' => '820 reviews',
-        'image' => 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-house-chimney-water', 'label' => 'Overwater Villa'],
-            ['icon' => 'fa-solid fa-champagne-glasses', 'label' => 'All-Inclusive Dine'],
-            ['icon' => 'fa-solid fa-ship', 'label' => 'Return Speedboat'],
-            ['icon' => 'fa-solid fa-fish-fins', 'label' => 'Snorkeling Kit'],
-        ],
-        'perks' => 'Champagne on Arrival • Free Cancellation',
-        'tags' => 'maldives overwater villa luxury honeymoon island international pool breakfast cancellation spa',
-    ],
-    [
-        'id' => 'PKG-VIETNAM-10',
-        'type' => 'package',
-        'sub_type' => 'International Tour',
-        'title' => 'Vietnam Discovery: Hanoi & Halong Bay Luxury Cruise',
-        'destination' => 'Vietnam • Hanoi • Halong Bay • Da Nang',
-        'route' => 'Hanoi French Quarter • Halong Bay Overnight • Da Nang',
-        'duration' => '5N / 6D',
-        'badge' => 'Culture & Cruise',
-        'badge_class' => 'bg-teal-600 text-white',
-        'price' => 36999,
-        'original_price' => 45000,
-        'rating' => 4.8,
-        'reviews' => '640 reviews',
-        'image' => 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
-        'inclusions' => [
-            ['icon' => 'fa-solid fa-ship', 'label' => 'Overnight 5★ Cruise'],
-            ['icon' => 'fa-solid fa-archway', 'label' => 'Golden Bridge Pass'],
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Meals on Cruise'],
-            ['icon' => 'fa-solid fa-car', 'label' => 'Private AC Vehicle'],
-        ],
-        'perks' => 'Kayaking in Halong Included • Free Cancellation',
-        'tags' => 'vietnam hanoi halong bay cruise international culture breakfast cancellation cab sightseeing',
-    ],
-
-    // ==========================================
-    // 2. FLIGHT DEALS (8 Verified Flight Routes)
-    // ==========================================
-    [
-        'id' => 'FL-IND-101',
-        'type' => 'flight',
-        'sub_type' => 'Domestic Flight',
-        'airline' => 'IndiGo',
-        'airline_code' => '6E-2134',
-        'airline_class' => 'Economy Regular',
-        'airline_badge' => 'bg-indigo-600 text-white',
-        'destination' => 'New Delhi (DEL) to Mumbai (BOM)',
-        'title' => 'IndiGo: New Delhi (DEL) to Mumbai (BOM)',
-        'from_city' => 'New Delhi',
-        'from_code' => 'DEL',
-        'from_time' => '06:15 AM',
-        'from_airport' => 'IGI Airport, Terminal 3',
-        'to_city' => 'Mumbai',
-        'to_code' => 'BOM',
-        'to_time' => '08:30 AM',
-        'to_airport' => 'CSMIA, Terminal 2',
-        'duration' => '2h 15m',
-        'stops' => 'Non-Stop',
-        'badge' => 'Lowest Fare',
-        'badge_class' => 'bg-emerald-600 text-white',
-        'price' => 3899,
-        'original_price' => 4999,
-        'rating' => 4.8,
-        'reviews' => '5,400+ bookings',
-        'baggage' => '15 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Free Reschedule • Instant Web Check-in • Direct Flight',
-        'tags' => 'delhi mumbai indigo domestic flight nonstop cancellation baggage 6e',
-    ],
-    [
-        'id' => 'FL-AI-102',
-        'type' => 'flight',
-        'sub_type' => 'Domestic Flight',
-        'airline' => 'Air India',
-        'airline_code' => 'AI-804',
-        'airline_class' => 'Economy Standard',
-        'airline_badge' => 'bg-rose-600 text-white',
-        'destination' => 'Bengaluru (BLR) to New Delhi (DEL)',
-        'title' => 'Air India: Bengaluru (BLR) to New Delhi (DEL)',
-        'from_city' => 'Bengaluru',
-        'from_code' => 'BLR',
-        'from_time' => '09:40 AM',
-        'from_airport' => 'Kempegowda Intl, Terminal 2',
-        'to_city' => 'New Delhi',
-        'to_code' => 'DEL',
-        'to_time' => '12:25 PM',
-        'to_airport' => 'IGI Airport, Terminal 3',
-        'duration' => '2h 45m',
-        'stops' => 'Non-Stop',
-        'badge' => 'Complimentary Meal',
-        'badge_class' => 'bg-amber-600 text-white',
-        'price' => 4850,
-        'original_price' => 5999,
-        'rating' => 4.6,
-        'reviews' => '3,100+ bookings',
-        'baggage' => '20 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Hot Meal Included • Free Seat Selection • Non-Stop',
-        'tags' => 'bangalore bengaluru delhi air india domestic flight nonstop breakfast baggage ai',
-    ],
-    [
-        'id' => 'FL-VIS-103',
-        'type' => 'flight',
-        'sub_type' => 'Domestic Flight',
-        'airline' => 'Vistara',
-        'airline_code' => 'UK-817',
-        'airline_class' => 'Premium Economy',
-        'airline_badge' => 'bg-purple-700 text-white',
-        'destination' => 'Mumbai (BOM) to Goa (GOI)',
-        'title' => 'Vistara: Mumbai (BOM) to Goa Dabolim (GOI)',
-        'from_city' => 'Mumbai',
-        'from_code' => 'BOM',
-        'from_time' => '11:15 AM',
-        'from_airport' => 'CSMIA, Terminal 2',
-        'to_city' => 'Goa',
-        'to_code' => 'GOI',
-        'to_time' => '12:35 PM',
-        'to_airport' => 'Dabolim Airport',
-        'duration' => '1h 20m',
-        'stops' => 'Non-Stop',
-        'badge' => 'Premium Service',
-        'badge_class' => 'bg-brand-600 text-white',
-        'price' => 3299,
-        'original_price' => 4400,
-        'rating' => 4.9,
-        'reviews' => '4,200+ bookings',
-        'baggage' => '15 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Gourmet In-Flight Snack • Priority Baggage • Free Date Change',
-        'tags' => 'mumbai goa vistara domestic flight nonstop cancellation baggage breakfast uk',
-    ],
-    [
-        'id' => 'FL-AKA-104',
-        'type' => 'flight',
-        'sub_type' => 'Domestic Flight',
-        'airline' => 'Akasa Air',
-        'airline_code' => 'QP-1302',
-        'airline_class' => 'Economy Saver',
-        'airline_badge' => 'bg-orange-600 text-white',
-        'destination' => 'New Delhi (DEL) to Leh Ladakh (IXL)',
-        'title' => 'Akasa Air: New Delhi (DEL) to Leh Ladakh (IXL)',
-        'from_city' => 'New Delhi',
-        'from_code' => 'DEL',
-        'from_time' => '07:00 AM',
-        'from_airport' => 'IGI Airport, Terminal 2',
-        'to_city' => 'Leh Ladakh',
-        'to_code' => 'IXL',
-        'to_time' => '08:25 AM',
-        'to_airport' => 'Kushok Bakula Rimpochee',
-        'duration' => '1h 25m',
-        'stops' => 'Non-Stop',
-        'badge' => 'Scenic Route',
-        'badge_class' => 'bg-sky-600 text-white',
-        'price' => 5499,
-        'original_price' => 6800,
-        'rating' => 4.7,
-        'reviews' => '1,890+ bookings',
-        'baggage' => '15 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'In-Seat USB Charging • Café Akasa Snack Pack • Direct',
-        'tags' => 'delhi leh ladakh akasa domestic flight nonstop baggage qp',
-    ],
-    [
-        'id' => 'FL-SPJ-105',
-        'type' => 'flight',
-        'sub_type' => 'Domestic Flight',
-        'airline' => 'SpiceJet',
-        'airline_code' => 'SG-124',
-        'airline_class' => 'Economy Promo',
-        'airline_badge' => 'bg-red-600 text-white',
-        'destination' => 'New Delhi (DEL) to Srinagar (SXR)',
-        'title' => 'SpiceJet: New Delhi (DEL) to Srinagar Kashmir (SXR)',
-        'from_city' => 'New Delhi',
-        'from_code' => 'DEL',
-        'from_time' => '02:10 PM',
-        'from_airport' => 'IGI Airport, Terminal 3',
-        'to_city' => 'Srinagar',
-        'to_code' => 'SXR',
-        'to_time' => '03:40 PM',
-        'to_airport' => 'Sheikh ul-Alam Intl Airport',
-        'duration' => '1h 30m',
-        'stops' => 'Non-Stop',
-        'badge' => 'Direct Kashmir',
-        'badge_class' => 'bg-emerald-600 text-white',
-        'price' => 4199,
-        'original_price' => 5200,
-        'rating' => 4.5,
-        'reviews' => '2,400+ bookings',
-        'baggage' => '15 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Instant Boarding Pass • SpiceMax Option Available',
-        'tags' => 'delhi srinagar kashmir spicejet domestic flight nonstop baggage sg',
-    ],
-    [
-        'id' => 'FL-EMI-106',
-        'type' => 'flight',
-        'sub_type' => 'International Flight',
-        'airline' => 'Emirates',
-        'airline_code' => 'EK-511',
-        'airline_class' => 'Economy Flex',
-        'airline_badge' => 'bg-red-700 text-white',
-        'destination' => 'New Delhi (DEL) to Dubai (DXB)',
-        'title' => 'Emirates: New Delhi (DEL) to Dubai Intl (DXB)',
-        'from_city' => 'New Delhi',
-        'from_code' => 'DEL',
-        'from_time' => '10:35 AM',
-        'from_airport' => 'IGI Airport, Terminal 3',
-        'to_city' => 'Dubai',
-        'to_code' => 'DXB',
-        'to_time' => '01:00 PM',
-        'to_airport' => 'Dubai Intl, Terminal 3',
-        'duration' => '3h 55m',
-        'stops' => 'Non-Stop',
-        'badge' => 'World-Class',
-        'badge_class' => 'bg-amber-600 text-white',
-        'price' => 18990,
-        'original_price' => 23500,
-        'rating' => 4.9,
-        'reviews' => '6,800+ bookings',
-        'baggage' => '30 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Multi-Course Dining • In-Flight Wi-Fi & ice Entertainment',
-        'tags' => 'delhi dubai emirates international flight nonstop breakfast baggage cancellation wifi ek',
-    ],
-    [
-        'id' => 'FL-SIA-107',
-        'type' => 'flight',
-        'sub_type' => 'International Flight',
-        'airline' => 'Singapore Airlines',
-        'airline_code' => 'SQ-403',
-        'airline_class' => 'Economy Standard',
-        'airline_badge' => 'bg-blue-900 text-white',
-        'destination' => 'New Delhi (DEL) to Singapore Changi (SIN)',
-        'title' => 'Singapore Airlines: New Delhi (DEL) to Singapore (SIN)',
-        'from_city' => 'New Delhi',
-        'from_code' => 'DEL',
-        'from_time' => '09:50 AM',
-        'from_airport' => 'IGI Airport, Terminal 3',
-        'to_city' => 'Singapore',
-        'to_code' => 'SIN',
-        'to_time' => '06:15 PM',
-        'to_airport' => 'Changi Airport, Terminal 3',
-        'duration' => '5h 55m',
-        'stops' => 'Non-Stop',
-        'badge' => '5-Star Airline',
-        'badge_class' => 'bg-brand-600 text-white',
-        'price' => 22400,
-        'original_price' => 28000,
-        'rating' => 5.0,
-        'reviews' => '4,900+ bookings',
-        'baggage' => '25 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Generous Legroom • KrisWorld Entertainment • Free Meals',
-        'tags' => 'delhi singapore singapore airlines international flight nonstop breakfast baggage cancellation wifi sq',
-    ],
-    [
-        'id' => 'FL-QAT-108',
-        'type' => 'flight',
-        'sub_type' => 'International Flight',
-        'airline' => 'Qatar Airways',
-        'airline_code' => 'QR-571',
-        'airline_class' => 'Economy Classic',
-        'airline_badge' => 'bg-pink-900 text-white',
-        'destination' => 'Mumbai (BOM) to Doha (DOH)',
-        'title' => 'Qatar Airways: Mumbai (BOM) to Doha Hamad Intl (DOH)',
-        'from_city' => 'Mumbai',
-        'from_code' => 'BOM',
-        'from_time' => '04:30 AM',
-        'from_airport' => 'CSMIA, Terminal 2',
-        'to_city' => 'Doha',
-        'to_code' => 'DOH',
-        'to_time' => '06:05 AM',
-        'to_airport' => 'Hamad Intl Airport',
-        'duration' => '4h 05m',
-        'stops' => 'Non-Stop',
-        'badge' => 'Global Winner',
-        'badge_class' => 'bg-rose-700 text-white',
-        'price' => 19850,
-        'original_price' => 25000,
-        'rating' => 4.9,
-        'reviews' => '3,700+ bookings',
-        'baggage' => '30 Kg Check-in • 7 Kg Cabin',
-        'perks' => 'Oryx Screen • Gourmet Snacks • Free Date Reschedule',
-        'tags' => 'mumbai doha qatar international flight nonstop breakfast baggage cancellation wifi qr',
-    ],
-
-    // ==========================================
-    // 3. HOTELS & LUXURY RESORTS (8 Top Stays)
-    // ==========================================
-    [
-        'id' => 'HTL-GOA-01',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Beach Resort',
-        'title' => 'Taj Fort Aguada Resort & Spa, North Goa',
-        'destination' => 'Goa • Sinquerim Beach • Candolim',
-        'room_type' => 'Deluxe Sea Facing Room with Private Balcony',
-        'location' => 'Sinquerim Beach, Candolim, North Goa',
-        'badge' => '5★ Luxury Beachfront',
-        'badge_class' => 'bg-brand-600 text-white',
-        'price' => 8500,
-        'original_price' => 11500,
-        'price_unit' => '/ night',
-        'rating' => 4.9,
-        'reviews' => '2,410 reviews',
-        'image' => 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Free Breakfast'],
-            ['icon' => 'fa-solid fa-person-swimming', 'label' => 'Ocean Infinity Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Jiva Spa'],
-            ['icon' => 'fa-solid fa-wifi', 'label' => 'High-Speed Wi-Fi'],
-            ['icon' => 'fa-solid fa-umbrella-beach', 'label' => 'Beach Access'],
-        ],
-        'perks' => 'Free Cancellation till 24 hrs • Welcome Drinks on Arrival',
-        'tags' => 'goa candolim calangute beach taj resort 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-SHM-02',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Heritage Stay',
-        'title' => 'The Oberoi Cecil, Heritage Mountain Retreat',
-        'destination' => 'Shimla • Mall Road • Chaura Maidan',
-        'room_type' => 'Premier Mountain View Room with Fireplace',
-        'location' => 'Chaura Maidan, Mall Road, Shimla, Himachal',
-        'badge' => '5★ Colonial Heritage',
-        'badge_class' => 'bg-amber-600 text-white',
-        'price' => 11200,
-        'original_price' => 15000,
-        'price_unit' => '/ night',
-        'rating' => 4.9,
-        'reviews' => '1,850 reviews',
-        'image' => 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Free Breakfast'],
-            ['icon' => 'fa-solid fa-temperature-arrow-up', 'label' => 'Heated Indoor Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Oberoi Spa'],
-            ['icon' => 'fa-solid fa-wifi', 'label' => 'Free Wi-Fi'],
-        ],
-        'perks' => 'Heritage Walk with Historian • Zero Cancellation Fee',
-        'tags' => 'shimla manali himachal hills oberoi cecil resort 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-GOA-03',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Luxury Resort',
-        'title' => 'W Goa Beachfront Retreat & Sunset Rock',
-        'destination' => 'Goa • Vagator Beach • North Goa',
-        'room_type' => 'Wonderful King Room with Private Garden Terrace',
-        'location' => 'Vagator Beach, North Goa',
-        'badge' => '5★ Vibrant Luxury',
-        'badge_class' => 'bg-teal-600 text-white',
-        'price' => 9800,
-        'original_price' => 13000,
-        'price_unit' => '/ night',
-        'rating' => 4.8,
-        'reviews' => '1,590 reviews',
-        'image' => 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Artisan Breakfast'],
-            ['icon' => 'fa-solid fa-person-swimming', 'label' => 'WET Outdoor Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Away Spa'],
-            ['icon' => 'fa-solid fa-martini-glass-citrus', 'label' => 'Rock Bar Access'],
-        ],
-        'perks' => 'Direct Beach Boardwalk • Free Reschedule',
-        'tags' => 'goa vagator beach w goa luxury resort 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-KER-04',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Heritage Sanctuary',
-        'title' => 'Kumarakom Lake Resort & Heritage Villas',
-        'destination' => 'Kerala • Vembanad Lake • Kottayam',
-        'room_type' => 'Heritage Villa with Private Meandering Pool Access',
-        'location' => 'Vembanad Lake, Kumarakom, Kerala',
-        'badge' => '5★ Lake Backwaters',
-        'badge_class' => 'bg-emerald-600 text-white',
-        'price' => 12800,
-        'original_price' => 17000,
-        'price_unit' => '/ night',
-        'rating' => 4.9,
-        'reviews' => '2,120 reviews',
-        'image' => 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Traditional Breakfast'],
-            ['icon' => 'fa-solid fa-water-ladder', 'label' => 'Infinity Lake Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Ayurmana Spa'],
-            ['icon' => 'fa-solid fa-ship', 'label' => 'Evening Sunset Cruise'],
-        ],
-        'perks' => 'Complimentary Pottery & Weaving Workshop • Free Cancellation',
-        'tags' => 'kerala kumarakom alleppey lake backwaters resort 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-UDR-05',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Palace Stay',
-        'title' => 'Taj Lake Palace, Floating Marble Jewel',
-        'destination' => 'Rajasthan • Lake Pichola • Udaipur',
-        'room_type' => 'Luxury Lake View Room with Royal Butler Service',
-        'location' => 'Lake Pichola, Udaipur, Rajasthan',
-        'badge' => '5★ Royal Palace Icon',
-        'badge_class' => 'bg-amber-700 text-white',
-        'price' => 28000,
-        'original_price' => 36000,
-        'price_unit' => '/ night',
-        'rating' => 5.0,
-        'reviews' => '3,150 reviews',
-        'image' => 'https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Royal Mewari Breakfast'],
-            ['icon' => 'fa-solid fa-person-swimming', 'label' => 'Jharokha Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Jiva Spa Boat'],
-            ['icon' => 'fa-solid fa-bell-concierge', 'label' => '24/7 Royal Butler'],
-        ],
-        'perks' => 'Private Boat Transfer Included • Guaranteed Palace Lake View',
-        'tags' => 'udaipur rajasthan taj lake palace heritage royal 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-KSH-06',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Alpine Resort',
-        'title' => 'The Khyber Himalayan Resort & Spa, Gulmarg',
-        'destination' => 'Kashmir • Gulmarg • Pir Panjal Range',
-        'room_type' => 'Premier Pine View Room with Central Glass Hearth',
-        'location' => 'Gulmarg, Jammu & Kashmir',
-        'badge' => '5★ Snow Ski Sanctuary',
-        'badge_class' => 'bg-sky-600 text-white',
-        'price' => 16500,
-        'original_price' => 22000,
-        'price_unit' => '/ night',
-        'rating' => 4.9,
-        'reviews' => '1,740 reviews',
-        'image' => 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Kashmiri Buffet'],
-            ['icon' => 'fa-solid fa-temperature-arrow-up', 'label' => 'Heated Indoor Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => "L'Occitane Spa"],
-            ['icon' => 'fa-solid fa-person-skiing', 'label' => 'Ski In / Ski Out'],
-        ],
-        'perks' => 'Gondola Station Distance: 3 Mins • Free Cancellation',
-        'tags' => 'kashmir gulmarg khyber snow hills resort 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-DXB-07',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Global Landmark',
-        'title' => 'Atlantis, The Palm Island Luxury Resort',
-        'destination' => 'Dubai, UAE • Palm Jumeirah Crescent',
-        'room_type' => 'Ocean King Room with Panoramic Arabian Gulf View',
-        'location' => 'Crescent Road, Palm Jumeirah, Dubai',
-        'badge' => '5★ World Icon',
-        'badge_class' => 'bg-brand-600 text-white',
-        'price' => 32000,
-        'original_price' => 42000,
-        'price_unit' => '/ night',
-        'rating' => 4.9,
-        'reviews' => '4,800 reviews',
-        'image' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Gourmet Breakfast'],
-            ['icon' => 'fa-solid fa-water-ladder', 'label' => 'Aquaventure Access'],
-            ['icon' => 'fa-solid fa-fish', 'label' => 'The Lost Chambers'],
-            ['icon' => 'fa-solid fa-umbrella-beach', 'label' => 'Private Beach'],
-        ],
-        'perks' => 'Free Unlimited Waterpark Tickets Included • Instant Booking',
-        'tags' => 'dubai uae atlantis palm jumeirah international resort 5star breakfast pool spa wifi cancellation',
-    ],
-    [
-        'id' => 'HTL-BALI-08',
-        'type' => 'hotel',
-        'sub_type' => '5-Star Rainforest Retreat',
-        'title' => 'The Kayon Jungle Resort & Valley Sanctuary',
-        'destination' => 'Bali, Indonesia • Ubud Rainforest',
-        'room_type' => 'Jungle Valley Suite with Multi-Tier Pool Vista',
-        'location' => 'Bresela, Payangan, Ubud, Bali',
-        'badge' => '5★ Tropical Sanctuary',
-        'badge_class' => 'bg-emerald-600 text-white',
-        'price' => 18500,
-        'original_price' => 24000,
-        'price_unit' => '/ night',
-        'rating' => 4.9,
-        'reviews' => '1,920 reviews',
-        'image' => 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
-        'amenities' => [
-            ['icon' => 'fa-solid fa-utensils', 'label' => 'Floating Breakfast'],
-            ['icon' => 'fa-solid fa-water-ladder', 'label' => '3-Tier Valley Pool'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Serapung Spa'],
-            ['icon' => 'fa-solid fa-spa', 'label' => 'Daily Yoga Session'],
-        ],
-        'perks' => 'Afternoon Herbal Tea Included • Free Date Reschedule',
-        'tags' => 'bali ubud indonesia kayon rainforest luxury resort 5star breakfast pool spa wifi cancellation',
-    ],
-];
-
-// Dynamically fetch and merge active Packages & Hotels from MySQL Database
-if (function_exists('getDBConnection')) {
-    $pdoSearch = getDBConnection();
+if ($initialType === 'domestic' || $initialCategory === 'domestic') {
+    $initialType = 'domestic';
+} elseif ($initialType === 'international' || $initialCategory === 'international') {
+    $initialType = 'international';
+} elseif ($initialType === 'flight' || $initialType === 'flights') {
+    $initialType = 'flight';
+} elseif ($initialType === 'hotel' || $initialType === 'hotels') {
+    $initialType = 'hotel';
+} elseif ($initialType === 'package' || $initialType === 'packages') {
+    $initialType = 'domestic';
 } else {
-    require_once __DIR__ . '/config/db.php';
-    $pdoSearch = getDBConnection();
+    $initialType = 'all';
 }
 
+$initialQuery = '';
+if (!empty($_GET['query'])) {
+    $initialQuery = htmlspecialchars(trim($_GET['query']));
+} elseif (!empty($_GET['destination'])) {
+    $initialQuery = htmlspecialchars(trim($_GET['destination']));
+} elseif (!empty($_GET['city'])) {
+    $initialQuery = htmlspecialchars(trim($_GET['city']));
+} elseif (!empty($_GET['to'])) {
+    $initialQuery = htmlspecialchars(trim($_GET['to']));
+}
+
+$initialTheme = 'all';
+if (!empty($_GET['theme'])) {
+    $tRaw = strtolower(trim($_GET['theme']));
+    if (str_contains($tRaw, 'honeymoon') || str_contains($tRaw, 'romantic')) $initialTheme = 'honeymoon';
+    elseif (str_contains($tRaw, 'family')) $initialTheme = 'family';
+    elseif (str_contains($tRaw, 'adventure') || str_contains($tRaw, 'trek')) $initialTheme = 'adventure';
+    elseif (str_contains($tRaw, 'beach')) $initialTheme = 'beach';
+    elseif (str_contains($tRaw, 'spiritual') || str_contains($tRaw, 'pilgrimage')) $initialTheme = 'spiritual';
+    elseif (str_contains($tRaw, 'luxury')) $initialTheme = 'luxury';
+}
+
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/includes/flights_service.php';
+
+$pdoSearch = getDBConnection();
+$searchItems = [];
+
+// 1. Fetch Dynamic Packages from MySQL Database
 if ($pdoSearch) {
     try {
-        // 1. Fetch Dynamic Database Packages
         $dbPackages = $pdoSearch->query("SELECT * FROM `packages` WHERE `status` = 'active' ORDER BY `id` DESC")->fetchAll();
-        $dynamicSearchPackages = [];
         foreach ($dbPackages as $p) {
             $inclusions = [];
             if (!empty($p['inclusions'])) {
@@ -755,18 +92,30 @@ if ($pdoSearch) {
 
             $img = !empty($p['featured_image']) ? $p['featured_image'] : 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=800&q=80';
             $destStr = $p['location'] . (!empty($p['state_country']) ? ' • ' . $p['state_country'] : '');
-            $tagsStr = strtolower($p['title'] . ' ' . $p['location'] . ' ' . $p['state_country'] . ' ' . $p['category'] . ' ' . $p['circuit_type'] . ' package tour cancellation cab');
+            
+            $themeSlug = 'general';
+            $lowerText = strtolower($p['title'] . ' ' . ($p['circuit_type'] ?? '') . ' ' . $p['location'] . ' ' . ($p['subtitle'] ?? ''));
+            if (str_contains($lowerText, 'honeymoon') || str_contains($lowerText, 'romantic') || str_contains($lowerText, 'couple') || str_contains($lowerText, 'kashmir')) $themeSlug = 'honeymoon';
+            elseif (str_contains($lowerText, 'family') || str_contains($lowerText, 'kid') || str_contains($lowerText, 'leisure')) $themeSlug = 'family';
+            elseif (str_contains($lowerText, 'trek') || str_contains($lowerText, 'adventure') || str_contains($lowerText, 'mountain') || str_contains($lowerText, 'snow') || str_contains($lowerText, 'safari') || str_contains($lowerText, 'rafting') || str_contains($lowerText, 'himalaya') || str_contains($lowerText, 'manali')) $themeSlug = 'adventure';
+            elseif (str_contains($lowerText, 'temple') || str_contains($lowerText, 'pilgrimage') || str_contains($lowerText, 'spiritual') || str_contains($lowerText, 'darshan') || str_contains($lowerText, 'ghat')) $themeSlug = 'spiritual';
+            elseif (str_contains($lowerText, 'beach') || str_contains($lowerText, 'coastal') || str_contains($lowerText, 'island') || str_contains($lowerText, 'watersport') || str_contains($lowerText, 'sea') || str_contains($lowerText, 'goa') || str_contains($lowerText, 'bali')) $themeSlug = 'beach';
+            elseif (str_contains($lowerText, 'luxury') || str_contains($lowerText, 'resort') || str_contains($lowerText, 'villa') || str_contains($lowerText, 'palace') || str_contains($lowerText, 'houseboat') || str_contains($lowerText, 'dubai')) $themeSlug = 'luxury';
 
-            $dynamicSearchPackages[] = [
+            $tagsStr = strtolower($p['title'] . ' ' . $p['location'] . ' ' . $p['state_country'] . ' ' . $p['category'] . ' ' . $p['circuit_type'] . ' ' . $themeSlug . ' package tour cancellation cab breakfast sightseeing');
+
+            $searchItems[] = [
                 'id' => 'PKG-DB-' . $p['id'],
                 'type' => 'package',
-                'sub_type' => ucfirst($p['category']) . ' Tour',
+                'category' => $p['category'] ?: 'domestic',
+                'theme' => $themeSlug,
+                'sub_type' => ucfirst($p['category'] ?: 'Domestic') . ' Tour',
                 'title' => $p['title'],
                 'destination' => $destStr,
                 'route' => $p['location'],
                 'duration' => $p['duration_text'] ?: ($p['duration_nights'] . 'N / ' . $p['duration_days'] . 'D'),
                 'badge' => $p['badge'] ?: 'Bestseller',
-                'badge_class' => 'bg-brand-600 text-white',
+                'badge_class' => ($p['category'] === 'international') ? 'bg-amber-600 text-white' : 'bg-brand-600 text-white',
                 'price' => (float)$p['price'],
                 'original_price' => (float)($p['original_price'] ?: ($p['price'] * 1.25)),
                 'rating' => (float)($p['rating'] ?: 4.9),
@@ -774,13 +123,13 @@ if ($pdoSearch) {
                 'image' => $img,
                 'inclusions' => $inclusions,
                 'perks' => '100% Customizable • Verified 4★ Partner Hotels • Instant Confirmation',
-                'tags' => $tagsStr
+                'tags' => $tagsStr,
+                'slug' => $p['slug'] ?? ''
             ];
         }
 
-        // 2. Fetch Dynamic Database Hotels
+        // 2. Fetch Dynamic Hotels from MySQL Database
         $dbHotels = $pdoSearch->query("SELECT * FROM `hotels` WHERE `status` = 'active' ORDER BY `id` DESC")->fetchAll();
-        $dynamicSearchHotels = [];
         foreach ($dbHotels as $h) {
             $amenities = [];
             if (!empty($h['amenities'])) {
@@ -803,13 +152,18 @@ if ($pdoSearch) {
                 ];
             }
 
+            $hotelCountry = strtolower($h['country'] ?? '');
+            $isDomHotel = empty($hotelCountry) || str_contains($hotelCountry, 'india') || str_contains($hotelCountry, 'in');
+            $hotelCategory = $isDomHotel ? 'domestic' : 'international';
+
             $img = !empty($h['featured_image']) ? $h['featured_image'] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';
             $destStr = (!empty($h['city']) ? $h['city'] : '') . (!empty($h['country']) ? ' • ' . $h['country'] : '');
-            $tagsStr = strtolower($h['name'] . ' ' . $h['city'] . ' ' . $h['state'] . ' ' . $h['country'] . ' hotel resort ' . $h['star_rating'] . 'star pool breakfast wifi');
+            $tagsStr = strtolower($h['name'] . ' ' . $h['city'] . ' ' . $h['state'] . ' ' . $h['country'] . ' ' . $hotelCategory . ' hotel resort stay ' . $h['star_rating'] . 'star pool breakfast wifi');
 
-            $dynamicSearchHotels[] = [
+            $searchItems[] = [
                 'id' => 'HTL-DB-' . $h['id'],
                 'type' => 'hotel',
+                'category' => $hotelCategory,
                 'sub_type' => ($h['star_rating'] ?: 4) . '-Star ' . ($h['property_type'] ?: 'Hotel'),
                 'title' => $h['name'],
                 'destination' => $destStr,
@@ -825,20 +179,59 @@ if ($pdoSearch) {
                 'image' => $img,
                 'amenities' => $amenities,
                 'perks' => $h['policies'] ?: 'Free Cancellation • Pay at Hotel • Instant Confirmation',
-                'tags' => $tagsStr
+                'tags' => $tagsStr,
+                'slug' => $h['slug'] ?? ''
             ];
         }
-
-        // Merge dynamic database items at the top
-        $searchItems = array_merge($dynamicSearchPackages, $dynamicSearchHotels, $searchItems);
     } catch (Exception $e) {}
 }
 
-// Calculate category counts
+// 3. Dynamic Flights Engine & Aggregator (ONLY triggered if explicitly searching flights)
+$showFlights = ($initialType === 'flight') || (!empty($_GET['from']) && !empty($_GET['to']));
+if ($showFlights) {
+    $flightOrigin = !empty($_GET['from']) ? strtoupper(trim($_GET['from'])) : 'DEL';
+    $flightDest = !empty($_GET['to']) ? strtoupper(trim($_GET['to'])) : 'BOM';
+    if (preg_match('/\b([A-Z]{3})\b/', $flightOrigin, $m)) $flightOrigin = $m[1];
+    if (preg_match('/\b([A-Z]{3})\b/', $flightDest, $m)) $flightDest = $m[1];
+    if (!empty($initialQuery) && preg_match('/\b([A-Z]{3})\b/', $initialQuery, $m)) {
+        $flightDest = $m[1];
+    }
+    $dynamicFlights = getFlightsForSearchPortal($flightOrigin, $flightDest);
+    foreach ($dynamicFlights as $fl) {
+        $searchItems[] = $fl;
+    }
+}
+
+// Calculate accurate category counts directly from database items
+$countDomestic = count(array_filter($searchItems, fn($i) => $i['type'] === 'package' && ($i['category'] ?? '') === 'domestic'));
+$countInternational = count(array_filter($searchItems, fn($i) => $i['type'] === 'package' && ($i['category'] ?? '') === 'international'));
 $countPackages = count(array_filter($searchItems, fn($i) => $i['type'] === 'package'));
-$countFlights = count(array_filter($searchItems, fn($i) => $i['type'] === 'flight'));
 $countHotels = count(array_filter($searchItems, fn($i) => $i['type'] === 'hotel'));
-$countAll = count($searchItems);
+$countHolidays = $countPackages + $countHotels; // Combined tour packages & hotels (no flights!)
+$countFlights = $showFlights ? count(array_filter($searchItems, fn($i) => $i['type'] === 'flight')) : 0;
+$countAll = $countHolidays;
+
+$initialHeading = 'Tours & Hotels';
+$initialSubtext = 'Showing verified tour packages, boutique resorts, and 5-star handpicked stays';
+$initialCount = $countHolidays;
+
+if ($initialType === 'domestic') {
+    $initialHeading = 'Domestic Tours';
+    $initialSubtext = 'Showing verified Indian holiday packages';
+    $initialCount = $countDomestic;
+} elseif ($initialType === 'international') {
+    $initialHeading = 'International Tours';
+    $initialSubtext = 'Showing world tour packages, luxury getaways & international resorts';
+    $initialCount = $countInternational;
+} elseif ($initialType === 'hotel') {
+    $initialHeading = 'Hotels & Resorts';
+    $initialSubtext = 'Showing verified partner stays, luxury villas and resorts';
+    $initialCount = $countHotels;
+} elseif ($initialType === 'flight') {
+    $initialHeading = 'Flight Deals';
+    $initialSubtext = 'Showing non-stop flights and verified airline schedules';
+    $initialCount = $countFlights;
+}
 
 require_once 'components/header.php';
 require_once 'components/navbar.php';
@@ -896,7 +289,9 @@ require_once 'components/navbar.php';
             <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Goa">Goa</button>
             <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Dubai">Dubai</button>
             <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Himachal">Himachal</button>
+            <?php if ($showFlights): ?>
             <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="IndiGo">IndiGo</button>
+            <?php endif; ?>
             <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Bali">Bali</button>
             <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Kerala">Kerala</button>
         </div>
@@ -913,41 +308,52 @@ require_once 'components/navbar.php';
             
             <!-- Category Navigation Tabs -->
             <div class="flex items-center space-x-2 shrink-0" id="searchCategoryTabs">
-                <!-- All Services -->
+                <!-- All Holidays & Stays (Tour Packages + Hotels) -->
                 <button type="button" 
                         class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'all' || empty($initialType)) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="all">
                     <i class="fa-solid fa-layer-group text-xs"></i>
-                    <span>All Listings</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-all"><?= $countAll ?></span>
+                    <span>Tours &amp; Hotels</span>
+                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-all"><?= $countHolidays ?></span>
                 </button>
 
-                <!-- Tour Packages -->
+                <!-- Domestic Tours & Stays -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= in_array($initialType, ['package', 'packages', 'domestic', 'international']) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
-                        data-type="package">
+                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'domestic') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        data-type="domestic">
                     <i class="fa-solid fa-map-location-dot text-xs"></i>
-                    <span>Tour Packages</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-package"><?= $countPackages ?></span>
+                    <span>Domestic Tours</span>
+                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-domestic"><?= $countDomestic ?></span>
                 </button>
 
-                <!-- Flights -->
+                <!-- International Tours & Stays -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'flight' || $initialType === 'flights') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'international') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        data-type="international">
+                    <i class="fa-solid fa-globe text-xs"></i>
+                    <span>International Tours</span>
+                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-international"><?= $countInternational ?></span>
+                </button>
+
+                <!-- Hotels & Resorts Only -->
+                <button type="button" 
+                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'hotel') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        data-type="hotel">
+                    <i class="fa-solid fa-hotel text-xs"></i>
+                    <span>Hotels Only</span>
+                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-hotel"><?= $countHotels ?></span>
+                </button>
+
+                <?php if ($showFlights): ?>
+                <!-- Flights (Separate - Only when clicked/searched) -->
+                <button type="button" 
+                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'flight') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="flight">
                     <i class="fa-solid fa-plane-departure text-xs"></i>
                     <span>Flights</span>
                     <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-flight"><?= $countFlights ?></span>
                 </button>
-
-                <!-- Hotels & Resorts -->
-                <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'hotel' || $initialType === 'hotels') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
-                        data-type="hotel">
-                    <i class="fa-solid fa-hotel text-xs"></i>
-                    <span>Hotels & Resorts</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-hotel"><?= $countHotels ?></span>
-                </button>
+                <?php endif; ?>
             </div>
 
             <!-- Sort By Select Box -->
@@ -984,11 +390,11 @@ require_once 'components/navbar.php';
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200">
             <div>
                 <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
-                    <span id="resultsTypeTitle">All Travel Listings</span>
-                    <span class="text-slate-400 font-normal text-sm sm:text-base">(&bull; <span id="resultsCount"><?= $countAll ?></span> available)</span>
+                    <span id="resultsTypeTitle"><?= htmlspecialchars($initialHeading) ?></span>
+                    <span class="text-slate-400 font-normal text-sm sm:text-base">(&bull; <span id="resultsCount"><?= $initialCount ?></span> available)</span>
                 </h1>
                 <p class="text-xs text-slate-500 mt-0.5" id="resultsSubtext">
-                    Showing verified tour packages, non-stop flights, and 5-star handpicked stays
+                    <?= htmlspecialchars($initialSubtext) ?>
                 </p>
             </div>
 
@@ -1020,38 +426,108 @@ require_once 'components/navbar.php';
                         <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
                             <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
                                 <input type="radio" name="sideCategory" value="all" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'all' || empty($initialType)) ? 'checked' : '' ?>>
-                                <span>All Categories</span>
+                                <span>Tours &amp; Hotels</span>
                             </span>
-                            <span class="text-[11px] font-mono text-slate-400"><?= $countAll ?></span>
+                            <span class="text-[11px] font-mono text-slate-400"><?= $countHolidays ?></span>
                         </label>
 
                         <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
                             <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
-                                <input type="radio" name="sideCategory" value="package" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= in_array($initialType, ['package', 'packages', 'domestic', 'international']) ? 'checked' : '' ?>>
-                                <span>Tour Packages</span>
+                                <input type="radio" name="sideCategory" value="domestic" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'domestic') ? 'checked' : '' ?>>
+                                <span>Domestic Tours</span>
                             </span>
-                            <span class="text-[11px] font-mono text-slate-400"><?= $countPackages ?></span>
+                            <span class="text-[11px] font-mono text-slate-400"><?= $countDomestic ?></span>
                         </label>
 
                         <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
                             <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
-                                <input type="radio" name="sideCategory" value="flight" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'flight' || $initialType === 'flights') ? 'checked' : '' ?>>
+                                <input type="radio" name="sideCategory" value="international" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'international') ? 'checked' : '' ?>>
+                                <span>International Tours</span>
+                            </span>
+                            <span class="text-[11px] font-mono text-slate-400"><?= $countInternational ?></span>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
+                            <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
+                                <input type="radio" name="sideCategory" value="hotel" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'hotel') ? 'checked' : '' ?>>
+                                <span>Hotels Only</span>
+                            </span>
+                            <span class="text-[11px] font-mono text-slate-400"><?= $countHotels ?></span>
+                        </label>
+
+                        <?php if ($showFlights): ?>
+                        <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
+                            <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
+                                <input type="radio" name="sideCategory" value="flight" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'flight') ? 'checked' : '' ?>>
                                 <span>Flights</span>
                             </span>
                             <span class="text-[11px] font-mono text-slate-400"><?= $countFlights ?></span>
                         </label>
+                        <?php endif; ?>
+                    </div>
+                </div>
 
-                        <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
-                            <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
-                                <input type="radio" name="sideCategory" value="hotel" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'hotel' || $initialType === 'hotels') ? 'checked' : '' ?>>
-                                <span>Hotels & Stays</span>
+                <!-- Filter Box: Experience Theme / Style -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-brand-600"></i>
+                            <span>Theme &amp; Style</span>
+                        </h3>
+                        <button type="button" class="reset-filter-group text-[11px] text-brand-600 hover:underline font-semibold" data-group="theme">Reset</button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="all" <?= ($initialTheme === 'all' || empty($initialTheme)) ? 'checked' : '' ?> class="accent-teal-600">
+                            <span>All Themes</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="honeymoon" <?= ($initialTheme === 'honeymoon') ? 'checked' : '' ?> class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-champagne-glasses text-rose-500 text-xs"></i>
+                                <span>Honeymoon &amp; Romantic</span>
                             </span>
-                            <span class="text-[11px] font-mono text-slate-400"><?= $countHotels ?></span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="family" <?= ($initialTheme === 'family') ? 'checked' : '' ?> class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-people-roof text-teal-600 text-xs"></i>
+                                <span>Family &amp; Leisure</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="adventure" <?= ($initialTheme === 'adventure') ? 'checked' : '' ?> class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-person-hiking text-amber-500 text-xs"></i>
+                                <span>Adventure &amp; Treks</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="beach" <?= ($initialTheme === 'beach') ? 'checked' : '' ?> class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-umbrella-beach text-sky-500 text-xs"></i>
+                                <span>Beach &amp; Coastal</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="spiritual" <?= ($initialTheme === 'spiritual') ? 'checked' : '' ?> class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-om text-indigo-500 text-xs"></i>
+                                <span>Pilgrimage &amp; Spiritual</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="themeFilter" value="luxury" <?= ($initialTheme === 'luxury') ? 'checked' : '' ?> class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-crown text-amber-500 text-xs"></i>
+                                <span>Luxury Escapes</span>
+                            </span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Filter Box 2: Price Budget Ranges -->
+                <!-- Filter Box 3: Price Budget Ranges -->
                 <div class="bg-white rounded-2xl border border-slate-200 p-5">
                     <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center space-x-2">
@@ -1148,6 +624,7 @@ require_once 'components/navbar.php';
                             </span>
                         </label>
 
+                        <?php if ($showFlights): ?>
                         <label class="flex items-center space-x-2.5 cursor-pointer p-1 rounded-lg hover:bg-slate-50 text-xs font-semibold text-slate-700">
                             <input type="checkbox" value="nonstop" class="perk-checkbox rounded text-brand-600 focus:ring-brand-500 accent-teal-600">
                             <span class="flex items-center space-x-1.5">
@@ -1155,6 +632,7 @@ require_once 'components/navbar.php';
                                 <span>Non-Stop Flights</span>
                             </span>
                         </label>
+                        <?php endif; ?>
 
                         <label class="flex items-center space-x-2.5 cursor-pointer p-1 rounded-lg hover:bg-slate-50 text-xs font-semibold text-slate-700">
                             <input type="checkbox" value="pool" class="perk-checkbox rounded text-brand-600 focus:ring-brand-500 accent-teal-600">
@@ -1215,9 +693,11 @@ require_once 'components/navbar.php';
                         <article class="search-result-card bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition flex flex-col md:flex-row overflow-hidden"
                                  data-id="<?= htmlspecialchars($item['id']) ?>"
                                  data-type="package"
+                                 data-package-category="<?= htmlspecialchars($item['category'] ?? 'domestic') ?>"
                                  data-price="<?= $item['price'] ?>"
                                  data-rating="<?= $item['rating'] ?>"
                                  data-tags="<?= htmlspecialchars($item['tags']) ?>"
+                                 data-theme="<?= htmlspecialchars($item['theme'] ?? 'general') ?>"
                                  data-title="<?= htmlspecialchars($item['title']) ?>">
                             
                             <!-- Thumbnail with Duration Pill -->
@@ -1332,9 +812,15 @@ require_once 'components/navbar.php';
                             <!-- Airline Identity Column -->
                             <div class="w-full md:w-48 p-5 shrink-0 bg-slate-50/50 border-b md:border-b-0 md:border-r border-slate-200 flex md:flex-col items-center justify-between md:justify-center text-center">
                                 <div class="flex md:flex-col items-center space-x-3 md:space-x-0 md:space-y-2">
-                                    <span class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-sm">
-                                        <i class="fa-solid fa-plane-departure text-sm"></i>
-                                    </span>
+                                    <?php if (!empty($item['airline_logo'])): ?>
+                                        <div class="h-10 w-24 bg-white border border-slate-200 rounded-xl p-1 flex items-center justify-center shadow-xs">
+                                            <img src="<?= htmlspecialchars($item['airline_logo']) ?>" alt="<?= htmlspecialchars($item['airline']) ?>" class="max-h-full max-w-full object-contain">
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-sm">
+                                            <i class="fa-solid fa-plane-departure text-sm"></i>
+                                        </span>
+                                    <?php endif; ?>
                                     <div>
                                         <h4 class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($item['airline']) ?></h4>
                                         <span class="text-[11px] font-mono text-slate-500 block"><?= htmlspecialchars($item['airline_code']) ?></span>
@@ -1385,7 +871,7 @@ require_once 'components/navbar.php';
                                         </span>
                                         <span class="inline-flex items-center space-x-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
                                             <i class="fa-solid fa-couch text-slate-500 text-[10px]"></i>
-                                            <span><?= htmlspecialchars($item['airline_class']) ?></span>
+                                            <span><?= htmlspecialchars($item['airline_class'] ?? 'Economy Standard') ?></span>
                                         </span>
                                     </div>
                                 </div>
@@ -1431,6 +917,8 @@ require_once 'components/navbar.php';
                         <article class="search-result-card bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition flex flex-col md:flex-row overflow-hidden"
                                  data-id="<?= htmlspecialchars($item['id']) ?>"
                                  data-type="hotel"
+                                 data-package-category="<?= htmlspecialchars($item['category'] ?? 'domestic') ?>"
+                                 data-city="<?= htmlspecialchars($item['destination'] ?? '') ?>"
                                  data-price="<?= $item['price'] ?>"
                                  data-rating="<?= $item['rating'] ?>"
                                  data-tags="<?= htmlspecialchars($item['tags']) ?>"
@@ -1549,7 +1037,11 @@ require_once 'components/navbar.php';
 
                     <div class="pt-2">
                         <button type="button" id="emptyStateResetBtn" class="px-6 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition">
-                            Reset All Filters &amp; Show Everything
+                            Reset Filters &amp; View All Packages
+                        </button>
+                        <button type="button" id="emptyStateInquireBtn" class="px-6 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition inline-flex items-center space-x-1.5">
+                            <i class="fa-solid fa-paper-plane text-[10px] text-brand-600"></i>
+                            <span>Request Custom Itinerary</span>
                         </button>
                     </div>
                 </div>
@@ -1665,12 +1157,14 @@ require_once 'components/navbar.php';
 =========================================== -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const activeCategoryFilter = "";
     // Elements
     const searchInput = document.getElementById('liveSearchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const searchActionBtn = document.getElementById('searchActionBtn');
     const categoryTabs = document.querySelectorAll('.cat-tab-btn');
     const sideCategoryRadios = document.querySelectorAll('input[name="sideCategory"]');
+    const themeRadios = document.querySelectorAll('input[name="themeFilter"]');
     const priceRadios = document.querySelectorAll('input[name="priceRange"]');
     const ratingRadios = document.querySelectorAll('input[name="ratingFilter"]');
     const perkCheckboxes = document.querySelectorAll('.perk-checkbox');
@@ -1740,7 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setCategory(type) {
         // Normalize
-        if (type === 'packages' || type === 'domestic' || type === 'international') type = 'package';
+        if (type === 'packages') type = 'domestic';
         if (type === 'flights') type = 'flight';
         if (type === 'hotels') type = 'hotel';
 
@@ -1765,6 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Filter Listeners
+    themeRadios.forEach(r => r.addEventListener('change', runFilters));
     priceRadios.forEach(r => r.addEventListener('change', runFilters));
     ratingRadios.forEach(r => r.addEventListener('change', runFilters));
     perkCheckboxes.forEach(cb => cb.addEventListener('change', runFilters));
@@ -1776,6 +1271,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const group = btn.getAttribute('data-group');
             if (group === 'category') {
                 setCategory('all');
+            } else if (group === 'theme') {
+                const defaultTheme = document.querySelector('input[name="themeFilter"][value="all"]');
+                if (defaultTheme) defaultTheme.checked = true;
+                runFilters();
             } else if (group === 'price') {
                 const defaultPrice = document.querySelector('input[name="priceRange"][value="all"]');
                 if (defaultPrice) defaultPrice.checked = true;
@@ -1796,23 +1295,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput) searchInput.value = '';
         if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
         setCategory('all');
+        const defaultTheme = document.querySelector('input[name="themeFilter"][value="all"]');
+        if (defaultTheme) defaultTheme.checked = true;
         const defaultPrice = document.querySelector('input[name="priceRange"][value="all"]');
         if (defaultPrice) defaultPrice.checked = true;
         const defaultRating = document.querySelector('input[name="ratingFilter"][value="all"]');
         if (defaultRating) defaultRating.checked = true;
         perkCheckboxes.forEach(cb => cb.checked = false);
         if (sortBySelect) sortBySelect.value = 'recommended';
+        initialPackageCategory = '';
         runFilters();
     }
 
     if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFilters);
     if (emptyStateResetBtn) emptyStateResetBtn.addEventListener('click', resetAllFilters);
 
+    let initialPackageCategory = '<?= $initialCategory ?>';
+
     // Master Filter & Sort Execution Engine
     function runFilters() {
         const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
         const activeCatRadio = document.querySelector('input[name="sideCategory"]:checked');
         const cat = activeCatRadio ? activeCatRadio.value : 'all';
+        const activeThemeRadio = document.querySelector('input[name="themeFilter"]:checked');
+        const selectedTheme = activeThemeRadio ? activeThemeRadio.value : 'all';
         const activePriceRadio = document.querySelector('input[name="priceRange"]:checked');
         const priceRange = activePriceRadio ? activePriceRadio.value : 'all';
         const activeRatingRadio = document.querySelector('input[name="ratingFilter"]:checked');
@@ -1834,12 +1340,42 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardTitle = (card.getAttribute('data-title') || '').toLowerCase();
 
             // 1. Category Check
-            let matchCat = (cat === 'all' || cardType === cat);
+            // Flights tabhi dikhenge jab flight search/select ho. Baki tour packages and hotels ek sath dikhenge.
+            const cardPkgCat = (card.getAttribute('data-package-category') || '').toLowerCase();
+            let matchCat = false;
+            if (cat === 'all') {
+                // Tour packages and hotels are shown together in one place!
+                // Flights are strictly excluded unless searching flights explicitly!
+                matchCat = (cardType === 'package' || cardType === 'hotel');
+            } else if (cat === 'domestic') {
+                // Domestic tour packages only!
+                matchCat = (cardType === 'package' && cardPkgCat === 'domestic');
+            } else if (cat === 'international') {
+                // International tour packages only!
+                matchCat = (cardType === 'package' && cardPkgCat === 'international');
+            } else if (cat === 'package') {
+                matchCat = (cardType === 'package');
+            } else if (cat === 'hotel') {
+                matchCat = (cardType === 'hotel');
+            } else if (cat === 'flight') {
+                // Flights only!
+                matchCat = (cardType === 'flight');
+            }
 
             // 2. Query Text Check
             let matchQuery = true;
             if (query.length > 0) {
-                matchQuery = cardTitle.includes(query) || cardTags.includes(query);
+                if (cardTitle.includes(query) || cardTags.includes(query)) {
+                    matchQuery = true;
+                } else {
+                    const stopWords = new Set(['and', 'the', 'for', 'with', 'from', 'near', 'tour', 'package', 'hotel', 'trip', 'holiday', 'city', 'state']);
+                    const tokens = query.split(/[\s,–—\/-]+/).map(t => t.trim()).filter(t => t.length >= 3 && !stopWords.has(t));
+                    if (tokens.length > 0) {
+                        matchQuery = tokens.some(t => cardTags.includes(t) || cardTitle.includes(t));
+                    } else {
+                        matchQuery = false;
+                    }
+                }
             }
 
             // 3. Price Budget Check
@@ -1871,8 +1407,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // 6. Theme Check
+            let matchTheme = true;
+            if (selectedTheme !== 'all') {
+                if (cardType === 'package') {
+                    const cardTheme = (card.getAttribute('data-theme') || '').toLowerCase();
+                    matchTheme = (cardTheme === selectedTheme || cardTags.includes(selectedTheme));
+                } else {
+                    matchTheme = false;
+                }
+            }
+
             // Final Decision
-            if (matchCat && matchQuery && matchPrice && matchRating && matchPerks) {
+            if (matchCat && matchTheme && matchQuery && matchPrice && matchRating && matchPerks) {
                 card.style.display = '';
                 visibleCount++;
                 visibleCardsArray.push(card);
@@ -1905,6 +1452,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (emptyState) {
             if (visibleCount === 0) {
                 emptyState.classList.remove('hidden');
+                const emptyTitle = emptyState.querySelector('h3');
+                const emptyDesc = emptyState.querySelector('p');
+                if (query.length > 0) {
+                    if (emptyTitle) emptyTitle.textContent = `No Packages Found for "${query}"`;
+                    if (emptyDesc) emptyDesc.innerHTML = `We currently do not have departures or packages for <strong class="text-slate-800">"${escapeHtml(query)}"</strong> in our database. Our travel concierge can craft a custom itinerary for you, or you can browse other active holiday packages.`;
+                } else {
+                    if (emptyTitle) emptyTitle.textContent = 'No Travel Listings Found';
+                    if (emptyDesc) emptyDesc.textContent = "We couldn't find any packages, flights, or hotels matching your filter criteria.";
+                }
             } else {
                 emptyState.classList.add('hidden');
             }
@@ -1912,10 +1468,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Title according to active category
         if (resultsTypeTitleEl) {
-            if (cat === 'package') resultsTypeTitleEl.textContent = 'Tour Packages';
-            else if (cat === 'flight') resultsTypeTitleEl.textContent = 'Flight Deals';
+            if (cat === 'domestic') resultsTypeTitleEl.textContent = 'Domestic Tours';
+            else if (cat === 'international') resultsTypeTitleEl.textContent = 'International Tours';
             else if (cat === 'hotel') resultsTypeTitleEl.textContent = 'Hotels & Resorts';
-            else resultsTypeTitleEl.textContent = 'All Travel Listings';
+            else if (cat === 'flight') resultsTypeTitleEl.textContent = 'Flight Deals';
+            else resultsTypeTitleEl.textContent = 'Tours & Hotels';
         }
 
         // Update Subtext
@@ -1923,17 +1480,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (query.length > 0) {
                 resultsSubtextEl.innerHTML = `Showing filtered results for keyword <strong class="text-brand-700">"${escapeHtml(query)}"</strong>`;
             } else {
-                resultsSubtextEl.textContent = 'Showing verified tour packages, non-stop flights, and 5-star handpicked stays';
+                if (cat === 'domestic') resultsSubtextEl.textContent = 'Showing verified Indian holiday packages';
+                else if (cat === 'international') resultsSubtextEl.textContent = 'Showing world tour packages, luxury getaways & international resorts';
+                else if (cat === 'hotel') resultsSubtextEl.textContent = 'Showing verified partner stays, luxury villas and resorts';
+                else if (cat === 'flight') resultsSubtextEl.textContent = 'Showing non-stop flights and verified airline schedules';
+                else resultsSubtextEl.textContent = 'Showing verified tour packages, boutique resorts, and 5-star handpicked stays';
             }
         }
 
         // Render Active Filter Chips
-        renderActiveChips(query, cat, priceRange, minRating, checkedPerks);
+        renderActiveChips(query, cat, selectedTheme, priceRange, minRating, checkedPerks);
 
         // Synchronize with Browser URL (without reloading)
         const newUrl = new URL(window.location);
         if (cat !== 'all') newUrl.searchParams.set('type', cat);
         else newUrl.searchParams.delete('type');
+
+        if (selectedTheme !== 'all') newUrl.searchParams.set('theme', selectedTheme);
+        else newUrl.searchParams.delete('theme');
 
         if (query.length > 0) newUrl.searchParams.set('query', query);
         else newUrl.searchParams.delete('query');
@@ -1941,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState({}, '', newUrl);
     }
 
-    function renderActiveChips(query, cat, priceRange, minRating, checkedPerks) {
+    function renderActiveChips(query, cat, selectedTheme, priceRange, minRating, checkedPerks) {
         if (!activeFilterChipsContainer) return;
         activeFilterChipsContainer.innerHTML = '';
 
@@ -1954,8 +1518,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (cat !== 'all') {
-            const catLabels = { package: 'Tour Packages', flight: 'Flights', hotel: 'Hotels' };
+            const catLabels = {
+                domestic: 'Domestic Tours',
+                international: 'International Tours',
+                hotel: 'Hotels Only',
+                package: 'Tour Packages',
+                flight: 'Flights'
+            };
             createChip(`Category: ${catLabels[cat] || cat}`, () => setCategory('all'));
+        }
+
+        if (selectedTheme !== 'all') {
+            const themeLabels = {
+                'honeymoon': 'Honeymoon & Romantic',
+                'family': 'Family & Leisure',
+                'adventure': 'Adventure & Treks',
+                'beach': 'Beach & Coastal',
+                'spiritual': 'Pilgrimage & Spiritual',
+                'luxury': 'Luxury Escapes'
+            };
+            createChip(`Theme: ${themeLabels[selectedTheme] || selectedTheme}`, () => {
+                const defaultTheme = document.querySelector('input[name="themeFilter"][value="all"]');
+                if (defaultTheme) defaultTheme.checked = true;
+                runFilters();
+            });
         }
 
         if (priceRange !== 'all') {
@@ -2035,6 +1621,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    const emptyStateInquireBtn = document.getElementById('emptyStateInquireBtn');
+    if (emptyStateInquireBtn) {
+        emptyStateInquireBtn.addEventListener('click', () => {
+            const queryVal = (searchInput ? searchInput.value : '').trim() || 'Custom Destination';
+            if (modalTitle) modalTitle.textContent = `Custom Itinerary: ${queryVal}`;
+            if (modalCategoryText) modalCategoryText.textContent = 'Custom Tour Package';
+            if (modalPrice) modalPrice.textContent = 'Contact for Custom Quote';
+            if (modalDuration) modalDuration.textContent = 'Customized Days & Nights • Tailored by Experts';
+            if (inquireModal) inquireModal.classList.remove('hidden');
+        });
+    }
 
     if (closeInquireBtn && inquireModal) {
         closeInquireBtn.addEventListener('click', () => {
