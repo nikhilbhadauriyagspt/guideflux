@@ -1,8 +1,9 @@
 -- GuideFlux Database Dump
--- Generated on: 2026-10-06 21:33:15
+-- Generated on: 2026-10-06 21:35:04
 -- Compatible with cPanel, Localhost & Cloud Servers
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET FOREIGN_KEY_CHECKS = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -337,6 +338,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `avatar`, `oaut
 ('5', 'Nikhil Singh', 'nikhilbhadauriya.gspt@gmail.com', NULL, NULL, 'https://lh3.googleusercontent.com/a/ACg8ocIkJAuR0S2iKdkUjPueFqZmu2xSX1YoUf_Yvtv65mK5V-bZeCw=s96-c', 'google', '112081495439939830062', '1', NULL, NULL, 'active', '2026-10-06 21:58:37', '2026-10-06 22:05:03');
 
 
+SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

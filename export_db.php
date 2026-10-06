@@ -18,6 +18,7 @@ $sql = "-- GuideFlux Database Dump\n";
 $sql .= "-- Generated on: " . date('Y-m-d H:i:s') . "\n";
 $sql .= "-- Compatible with cPanel, Localhost & Cloud Servers\n\n";
 $sql .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
+$sql .= "SET FOREIGN_KEY_CHECKS = 0;\n";
 $sql .= "START TRANSACTION;\n";
 $sql .= "SET time_zone = \"+00:00\";\n";
 $sql .= "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n";
@@ -85,7 +86,8 @@ foreach ($tables as $table) {
     }
 }
 
-$sql .= "\nCOMMIT;\n\n";
+$sql .= "\nSET FOREIGN_KEY_CHECKS = 1;\n";
+$sql .= "COMMIT;\n\n";
 $sql .= "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n";
 $sql .= "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n";
 $sql .= "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
