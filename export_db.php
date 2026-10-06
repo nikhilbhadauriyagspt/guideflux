@@ -16,7 +16,7 @@ $outputFile = __DIR__ . '/guideflux_db.sql';
 
 $sql = "-- GuideFlux Database Dump\n";
 $sql .= "-- Generated on: " . date('Y-m-d H:i:s') . "\n";
-$sql .= "-- Database: `" . $dbName . "`\n\n";
+$sql .= "-- Compatible with cPanel, Localhost & Cloud Servers\n\n";
 $sql .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
 $sql .= "START TRANSACTION;\n";
 $sql .= "SET time_zone = \"+00:00\";\n";
@@ -24,8 +24,6 @@ $sql .= "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n";
 $sql .= "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n";
 $sql .= "/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n";
 $sql .= "/*!40101 SET NAMES utf8mb4 */;\n\n";
-$sql .= "CREATE DATABASE IF NOT EXISTS `" . $dbName . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n";
-$sql .= "USE `" . $dbName . "`;\n\n";
 
 $tablesStmt = $pdo->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'");
 $tables = [];
