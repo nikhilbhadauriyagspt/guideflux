@@ -1400,6 +1400,13 @@ function closeFlightModal() {
     document.getElementById('flightDetailsModal').classList.remove('flex');
 }
 
+const isUserLoggedIn = <?= isset($_SESSION['user_id']) && !empty($_SESSION['user_id']) ? 'true' : 'false' ?>;
+const loggedInUser = {
+    name: <?= json_encode($_SESSION['user_name'] ?? '') ?>,
+    email: <?= json_encode($_SESSION['user_email'] ?? '') ?>,
+    phone: <?= json_encode($_SESSION['user_phone'] ?? '') ?>
+};
+
 function lockFlightSeat() {
     if (currentSelectedFlight) {
         bookFlightTier(currentSelectedFlight.id, "Standard", currentSelectedFlight.fare);
@@ -1415,16 +1422,180 @@ function bookFlightTier(flightId, tier, amount) {
         flight = currentSelectedFlight;
     }
     if (!flight) {
-        flight = { airline: 'Airline', flight_number: flightId, from_code: '<?= $origin ?>', to_code: '<?= $destination ?>' };
+        flight = { airline: 'Air India', flight_number: flightId, from_code: '<?= $origin ?>', to_code: '<?= $destination ?>', fare: amount };
     }
-    const name = prompt("Please enter Lead Passenger Full Name:", "Traveler");
-    if (!name) return;
-    const phone = prompt("Please enter WhatsApp / Mobile Number:", "+91 9876543210");
-    if (!phone) return;
 
-    const bookingCode = 'FLT-' + Math.random().toString(36).substr(2, 7).toUpperCase();
-    alert(`🎉 Booking Confirmed!\n\nBooking Code: ${bookingCode}\nLead Passenger: ${name}\nFlight: ${flight.airline} (${flight.flight_number})\nRoute: ${flight.from_code} -> ${flight.to_code}\nFare Tier: ${tier}\nTotal Amount: ₹${amount.toLocaleString('en-IN')}\n\nE-Ticket and Boarding Pass have been sent to ${phone}.`);
     closeFlightModal();
+
+    if (!isUserLoggedIn) {
+        showLoginRequiredModal('flight', flight.airline + ' ' + flight.flight_number);
+        return;
+    }
+
+    openFlightInquiryModal(flight, tier, amount);
+}
+
+function showLoginRequiredModal(type, title) {
+    const existing = document.getElementById('loginRequiredModalOverlay');
+    if (existing) existing.remove();
+
+    const currentUrl = window.location.href;
+    const modalHtml = `
+        <div id="loginRequiredModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
+                <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                        Sign In Required
+                    </span>
+                    <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Continue Booking</h3>
+                    <p class="text-xs text-slate-500">Please log in to your GuideFlux account to secure your reservation and receive vouchers.</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700">
+                    <span>${title}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <a href="login.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
+                        Log In Now
+                    </a>
+                    <a href="signup.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider text-center transition">
+                        Create Account
+                    </a>
+                </div>
+                <button type="button" onclick="document.getElementById('loginRequiredModalOverlay').remove()" class="text-xs text-slate-400 hover:text-slate-600 font-bold">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function openFlightInquiryModal(flight, tier, amount) {
+    const existing = document.getElementById('flightInquiryModalOverlay');
+    if (existing) existing.remove();
+
+    const modalHtml = `
+        <div id="flightInquiryModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 flex items-center justify-center text-sm font-bold">
+                            <i class="fa-solid fa-plane-departure"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-base font-black text-slate-900">Flight Reservation Request</h3>
+                            <p class="text-[11px] text-slate-400">${flight.airline} (${flight.flight_number}) &bull; ${flight.from_code} &rarr; ${flight.to_code}</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('flightInquiryModalOverlay').remove()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="p-3 bg-sky-50/60 rounded-2xl border border-sky-100 flex items-center justify-between text-xs">
+                    <div>
+                        <span class="text-slate-500 block">Selected Fare Tier (${tier}):</span>
+                        <strong class="text-slate-900 text-sm font-space">₹${parseInt(amount).toLocaleString('en-IN')}</strong>
+                    </div>
+                    <span class="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-200">
+                        Instant Callback Desk
+                    </span>
+                </div>
+
+                <form id="flightInquiryForm" class="space-y-3" onsubmit="event.preventDefault(); submitFlightInquiryForm();">
+                    <input type="hidden" id="fi_airline" value="${flight.airline}">
+                    <input type="hidden" id="fi_flight_number" value="${flight.flight_number}">
+                    <input type="hidden" id="fi_origin" value="${flight.from_code}">
+                    <input type="hidden" id="fi_destination" value="${flight.to_code}">
+                    <input type="hidden" id="fi_fare" value="${amount}">
+                    <input type="hidden" id="fi_class" value="${tier}">
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Lead Passenger Full Name (As on Govt ID / Passport)</label>
+                        <input type="text" id="fi_name" required value="${loggedInUser.name || ''}" placeholder="e.g. Rahul Sharma" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-medium">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp / Contact Phone</label>
+                            <input type="tel" id="fi_phone" required value="${loggedInUser.phone || ''}" placeholder="+91 98765 43210" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Email (For E-Ticket)</label>
+                            <input type="email" id="fi_email" required value="${loggedInUser.email || ''}" placeholder="traveler@example.com" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-medium">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Number of Passengers</label>
+                            <input type="number" min="1" max="9" id="fi_pax" value="1" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Departure Date</label>
+                            <input type="date" id="fi_date" required value="<?= $departureDate ?>" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-bold">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="fi_submit_btn" class="w-full py-3 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer mt-2">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Submit Flight Request &amp; Get E-Ticket</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function submitFlightInquiryForm() {
+    const btn = document.getElementById('fi_submit_btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Submitting Request...</span>';
+    }
+
+    const formData = new FormData();
+    formData.append('passenger_name', document.getElementById('fi_name')?.value || '');
+    formData.append('passenger_phone', document.getElementById('fi_phone')?.value || '');
+    formData.append('passenger_email', document.getElementById('fi_email')?.value || '');
+    formData.append('airline', document.getElementById('fi_airline')?.value || '');
+    formData.append('flight_number', document.getElementById('fi_flight_number')?.value || '');
+    formData.append('origin', document.getElementById('fi_origin')?.value || '');
+    formData.append('destination', document.getElementById('fi_destination')?.value || '');
+    formData.append('departure_date', document.getElementById('fi_date')?.value || '');
+    formData.append('passengers_count', document.getElementById('fi_pax')?.value || '1');
+    formData.append('travel_class', document.getElementById('fi_class')?.value || 'Economy');
+    formData.append('total_fare', document.getElementById('fi_fare')?.value || '0');
+
+    fetch('api/book-flight-inquiry.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.login_required) {
+            document.getElementById('flightInquiryModalOverlay')?.remove();
+            showLoginRequiredModal('flight', 'Flight Booking');
+            return;
+        }
+        if (data.success && data.redirect) {
+            window.location.href = data.redirect;
+        } else {
+            alert(data.message || 'Error submitting flight request');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Submit Flight Request</span>';
+            }
+        }
+    })
+    .catch(err => {
+        alert('Your flight request was received! Our ticketing team will call you.');
+        window.location.href = 'my-trips.php';
+    });
 }
 </script>
 

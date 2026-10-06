@@ -6,6 +6,35 @@ $siteName = getSetting('site_name', 'GuideFlux');
 $sitePhone = getSetting('site_phone', '+91 98765 43210');
 $siteWhatsapp = getSetting('site_whatsapp', '919876543210');
 $siteLogo = getSetting('site_logo', 'assets/images/logo/logo.webp');
+
+$currentScript = basename($_SERVER['SCRIPT_NAME'] ?? '');
+$currentUri = $_SERVER['REQUEST_URI'] ?? '';
+$authRedirectQuery = '';
+if (!in_array($currentScript, ['login.php', 'signup.php', 'forgot-password.php', 'reset-password.php'])) {
+    $authRedirectQuery = '?redirect=' . urlencode($currentUri);
+}
+
+// Active navigation state resolution
+$currentSearchType = $_GET['type'] ?? '';
+$activeNav = '';
+if ($currentScript === 'flights.php' || ($currentScript === 'search.php' && $currentSearchType === 'flight')) {
+    $activeNav = 'flights';
+} elseif ($currentScript === 'hotel-details.php' || ($currentScript === 'search.php' && $currentSearchType === 'hotel')) {
+    $activeNav = 'hotels';
+} elseif ($currentScript === 'contact.php' || $currentScript === 'help.php') {
+    $activeNav = 'contact';
+} elseif ($currentScript === 'about.php') {
+    $activeNav = 'about';
+} elseif ($currentScript === 'package-details.php' || ($currentScript === 'search.php' && $currentSearchType === 'package')) {
+    $activeNav = 'packages';
+}
+
+$isPackagesActive = ($activeNav === 'packages');
+$isFlightsActive  = ($activeNav === 'flights');
+$isHotelsActive   = ($activeNav === 'hotels');
+$isHolidaysActive = ($activeNav === 'holidays');
+$isContactActive  = ($activeNav === 'contact');
+$isAboutActive    = ($activeNav === 'about');
 ?>
 <!-- Dynamic Navbar Header - Full Width, 100% Flat Border-First (No Shadows, Icon Library Only) -->
 <header class="w-full sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
@@ -68,212 +97,34 @@ $siteLogo = getSetting('site_logo', 'assets/images/logo/logo.webp');
             <!-- Center Navigation: Clean Rounded-Full Capsule -->
             <nav class="hidden lg:flex items-center p-1 bg-slate-50 rounded-full border border-slate-200">
                 
-                <!-- Tour Packages (Dropdown with Domestic & International) -->
-                <div class="relative group">
-                    <button type="button" class="flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold bg-white text-brand-700 border border-brand-200/80 transition-all focus:outline-none">
-                        <i class="fa-solid fa-map-location-dot text-brand-600 text-xs"></i>
-                        <span>Tour Packages</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-brand-500 group-hover:rotate-180 transition-transform duration-200"></i>
-                    </button>
-
-                    <!-- Dropdown: Categorized into Domestic Travel & International Travel (Flat Border) -->
-                    <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full -left-20 mt-3 w-[720px] bg-white rounded-3xl border border-slate-200 p-6 z-50">
-                        <!-- Dropdown Header -->
-                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-900">Explore Tour Packages</h3>
-                                <p class="text-xs text-slate-500">Choose from top handpicked domestic getaways & international holiday trips</p>
-                            </div>
-                            <span class="rounded-full bg-brand-50 text-brand-700 text-xs font-semibold px-3 py-1 border border-brand-200">
-                                150+ Itineraries
-                            </span>
-                        </div>
-
-                        <!-- 2 Main Columns: Domestic Travel & International Travel -->
-                        <div class="grid grid-cols-2 gap-6">
-                            <!-- Column 1: Domestic Travel (India) -->
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="fa-solid fa-map-location-dot text-brand-600 text-sm"></i>
-                                        <h4 class="font-bold text-slate-900 text-sm">Domestic Travel</h4>
-                                    </div>
-                                    <span class="rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5">India Tours</span>
-                                </div>
-
-                                <div class="space-y-1">
-                                    <a href="search.php?type=package&query=Kashmir" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-mountain-sun text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Kashmir Paradise</p>
-                                                <span class="text-[10px] text-slate-400">5D/4N &bull; Srinagar & Gulmarg</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹17,999</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Himachal" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-tree text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Himachal Highlights</p>
-                                                <span class="text-[10px] text-slate-400">6D/5N &bull; Manali & Shimla</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹14,999</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Kerala" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-umbrella-beach text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Kerala Backwaters</p>
-                                                <span class="text-[10px] text-slate-400">5D/4N &bull; Munnar & Alleppey</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹18,500</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Goa" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-water text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Goa Holiday Escape</p>
-                                                <span class="text-[10px] text-slate-400">4D/3N &bull; Cruise & Resort</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹11,999</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Rajasthan" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-monument text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Royal Rajasthan</p>
-                                                <span class="text-[10px] text-slate-400">6D/5N &bull; Jaipur & Udaipur</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹16,500</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Column 2: International Travel (World) -->
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="fa-solid fa-globe text-brand-600 text-sm"></i>
-                                        <h4 class="font-bold text-slate-900 text-sm">International Travel</h4>
-                                    </div>
-                                    <span class="rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5">World Tours</span>
-                                </div>
-
-                                <div class="space-y-1">
-                                    <a href="search.php?type=package&query=Dubai" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-city text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Dubai Extravaganza</p>
-                                                <span class="text-[10px] text-slate-400">5D/4N &bull; Burj & Safari</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹34,999</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Bali" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-spa text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Bali Island Bliss</p>
-                                                <span class="text-[10px] text-slate-400">6D/5N &bull; Pool Villa</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹28,500</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Thailand" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-landmark text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Thailand Explorer</p>
-                                                <span class="text-[10px] text-slate-400">5D/4N &bull; Bangkok & Phuket</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹25,999</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Maldives" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-sun text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Maldives Luxury Stay</p>
-                                                <span class="text-[10px] text-slate-400">4D/3N &bull; Water Villa</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹52,000</span>
-                                    </a>
-
-                                    <a href="search.php?type=package&query=Vietnam" class="flex items-center justify-between p-2 rounded-2xl hover:bg-brand-50/70 transition group/item">
-                                        <div class="flex items-center space-x-2.5">
-                                            <span class="w-7 h-7 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                                                <i class="fa-solid fa-compass text-xs"></i>
-                                            </span>
-                                            <div>
-                                                <p class="text-xs font-semibold text-slate-800 group-hover/item:text-brand-700">Vietnam Discovery</p>
-                                                <span class="text-[10px] text-slate-400">6D/5N &bull; Hanoi & Cruise</span>
-                                            </div>
-                                        </div>
-                                        <span class="rounded-full bg-slate-100 text-slate-700 group-hover/item:bg-brand-100 group-hover/item:text-brand-800 text-[11px] font-bold px-2.5 py-0.5 transition">From ₹36,999</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dropdown Footer -->
-                        <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
-                            <span class="text-xs text-slate-500 font-medium">Looking for customized itineraries or group discounts?</span>
-                            <a href="#custom-quote" class="rounded-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2 transition">
-                                Request Custom Quote &rarr;
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <!-- Tour Packages -->
+                <a href="search.php?type=package" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= $isPackagesActive ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
+                    <i class="fa-solid fa-map-location-dot text-xs <?= $isPackagesActive ? 'text-brand-600' : 'text-slate-400' ?>"></i>
+                    <span>Tour Packages</span>
+                </a>
 
                 <!-- Flights -->
-                <a href="flights.php" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-white transition">
-                    <i class="fa-solid fa-plane-departure text-slate-400 text-xs"></i>
+                <a href="flights.php" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= $isFlightsActive ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
+                    <i class="fa-solid fa-plane-departure text-xs <?= $isFlightsActive ? 'text-brand-600' : 'text-slate-400' ?>"></i>
                     <span>Flights</span>
                 </a>
 
                 <!-- Hotels -->
-                <a href="search.php?type=hotel" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-white transition">
-                    <i class="fa-solid fa-hotel text-slate-400 text-xs"></i>
+                <a href="search.php?type=hotel" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= $isHotelsActive ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
+                    <i class="fa-solid fa-hotel text-xs <?= $isHotelsActive ? 'text-brand-600' : 'text-slate-400' ?>"></i>
                     <span>Hotels</span>
                 </a>
 
                 <!-- Holidays -->
-                <a href="search.php?type=package" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-white transition">
-                    <i class="fa-solid fa-umbrella-beach text-slate-400 text-xs"></i>
+                <a href="search.php?type=package" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= $isHolidaysActive ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
+                    <i class="fa-solid fa-umbrella-beach text-xs <?= $isHolidaysActive ? 'text-brand-600' : 'text-slate-400' ?>"></i>
                     <span>Holidays</span>
+                </a>
+
+                <!-- Contact & Help -->
+                <a href="contact.php" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= $isContactActive ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
+                    <i class="fa-solid fa-headset text-xs <?= $isContactActive ? 'text-brand-600' : 'text-slate-400' ?>"></i>
+                    <span>Help &amp; Contact</span>
                 </a>
             </nav>
 
@@ -302,17 +153,13 @@ $siteLogo = getSetting('site_logo', 'assets/images/logo/logo.webp');
                             </div>
 
                             <div class="py-1">
-                                <a href="dashboard.php" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition">
+                                <a href="my-trips.php" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition">
                                     <i class="fa-solid fa-suitcase-rolling text-slate-400 w-4 text-center"></i>
                                     <span>My Bookings &amp; Trips</span>
                                 </a>
-                                <a href="dashboard.php#saved" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition">
-                                    <i class="fa-regular fa-bookmark text-slate-400 w-4 text-center"></i>
-                                    <span>Saved Itineraries</span>
-                                </a>
-                                <a href="dashboard.php#profile" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition">
-                                    <i class="fa-regular fa-user text-slate-400 w-4 text-center"></i>
-                                    <span>Account Profile</span>
+                                <a href="search.php" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition">
+                                    <i class="fa-solid fa-compass text-slate-400 w-4 text-center"></i>
+                                    <span>Explore Holidays</span>
                                 </a>
                             </div>
 
@@ -329,12 +176,12 @@ $siteLogo = getSetting('site_logo', 'assets/images/logo/logo.webp');
 
                 <?php else: ?>
                     <!-- Guest: Log In and Sign Up Buttons -->
-                    <a href="login.php" class="rounded-full px-5 py-2.5 text-xs font-bold text-slate-700 hover:text-brand-700 hover:bg-slate-100 border border-slate-300 transition flex items-center space-x-1.5">
+                    <a href="login.php<?php echo $authRedirectQuery; ?>" class="rounded-full px-5 py-2.5 text-xs font-bold text-slate-700 hover:text-brand-700 hover:bg-slate-100 border border-slate-300 transition flex items-center space-x-1.5">
                         <i class="fa-regular fa-user text-xs text-slate-500"></i>
                         <span>Log In</span>
                     </a>
 
-                    <a href="signup.php" class="rounded-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-6 py-2.5 transition active:scale-95 flex items-center space-x-1.5">
+                    <a href="signup.php<?php echo $authRedirectQuery; ?>" class="rounded-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-6 py-2.5 transition active:scale-95 flex items-center space-x-1.5">
                         <i class="fa-solid fa-user-plus text-xs text-teal-200"></i>
                         <span>Sign Up</span>
                     </a>
@@ -373,21 +220,29 @@ $siteLogo = getSetting('site_logo', 'assets/images/logo/logo.webp');
 
         <!-- Service Categories -->
         <div class="grid grid-cols-2 gap-2">
-            <a href="search.php?type=package" class="flex items-center space-x-2 p-3 rounded-2xl bg-brand-50 text-brand-700 font-bold text-xs border border-brand-200/80 justify-center">
-                <i class="fa-solid fa-map-location-dot text-sm"></i>
+            <a href="search.php?type=package" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isPackagesActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
+                <i class="fa-solid fa-map-location-dot text-sm <?= $isPackagesActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
                 <span>Tour Packages</span>
             </a>
-            <a href="search.php?type=flight" class="flex items-center space-x-2 p-3 rounded-2xl bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 justify-center hover:bg-slate-100">
-                <i class="fa-solid fa-plane-departure text-sm text-brand-600"></i>
+            <a href="flights.php" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isFlightsActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
+                <i class="fa-solid fa-plane-departure text-sm <?= $isFlightsActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
                 <span>Flights</span>
             </a>
-            <a href="search.php?type=hotel" class="flex items-center space-x-2 p-3 rounded-2xl bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 justify-center hover:bg-slate-100">
-                <i class="fa-solid fa-hotel text-sm text-brand-600"></i>
+            <a href="search.php?type=hotel" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isHotelsActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
+                <i class="fa-solid fa-hotel text-sm <?= $isHotelsActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
                 <span>Hotels</span>
             </a>
-            <a href="search.php?type=package" class="flex items-center space-x-2 p-3 rounded-2xl bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 justify-center hover:bg-slate-100">
-                <i class="fa-solid fa-umbrella-beach text-sm text-brand-600"></i>
+            <a href="search.php?type=package" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isHolidaysActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
+                <i class="fa-solid fa-umbrella-beach text-sm <?= $isHolidaysActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
                 <span>Holidays</span>
+            </a>
+            <a href="about.php" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isAboutActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
+                <i class="fa-solid fa-circle-info text-sm <?= $isAboutActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
+                <span>About Us</span>
+            </a>
+            <a href="contact.php" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isContactActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center col-span-2 transition">
+                <i class="fa-solid fa-headset text-sm <?= $isContactActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
+                <span>24x7 Help &amp; Contact Concierge</span>
             </a>
         </div>
 
@@ -409,11 +264,11 @@ $siteLogo = getSetting('site_logo', 'assets/images/logo/logo.webp');
             <!-- Mobile Guest Login & Sign Up -->
             <div class="pt-3 border-t border-slate-100">
                 <div class="grid grid-cols-2 gap-2">
-                    <a href="login.php" class="flex items-center justify-center space-x-1.5 py-2.5 rounded-full text-slate-700 border border-slate-300 font-bold text-xs hover:bg-slate-50">
+                    <a href="login.php<?php echo $authRedirectQuery; ?>" class="flex items-center justify-center space-x-1.5 py-2.5 rounded-full text-slate-700 border border-slate-300 font-bold text-xs hover:bg-slate-50">
                         <i class="fa-regular fa-user text-xs text-slate-500"></i>
                         <span>Log In</span>
                     </a>
-                    <a href="signup.php" class="flex items-center justify-center space-x-1.5 py-2.5 rounded-full bg-brand-600 text-white font-bold text-xs hover:bg-brand-700">
+                    <a href="signup.php<?php echo $authRedirectQuery; ?>" class="flex items-center justify-center space-x-1.5 py-2.5 rounded-full bg-brand-600 text-white font-bold text-xs hover:bg-brand-700">
                         <i class="fa-solid fa-user-plus text-xs text-teal-200"></i>
                         <span>Sign Up</span>
                     </a>

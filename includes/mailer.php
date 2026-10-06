@@ -147,3 +147,224 @@ function getOtpEmailTemplate($userName, $otpCode, $purpose = 'signup') {
     </body>
     </html>';
 }
+
+/**
+ * Generate a luxury HTML email confirmation ticket for Tour & Hotel Bookings
+ */
+function generateBookingConfirmationEmailHtml(array $b) {
+    $siteName = getSetting('site_name', 'GuideFlux');
+    $siteEmail = getSetting('site_email', 'support@guideflux.com');
+    $sitePhone = getSetting('site_phone', '+91 98765 43210');
+    $siteWhatsapp = getSetting('site_whatsapp', '919876543210');
+
+    $bookingCode = htmlspecialchars($b['booking_code'] ?? 'BK-10001');
+    $customerName = htmlspecialchars($b['customer_name'] ?? 'Traveler');
+    $itemTitle = htmlspecialchars($b['package_title'] ?? 'Holiday Tour');
+    $travelDate = !empty($b['travel_date']) ? date('l, d F Y', strtotime($b['travel_date'])) : 'Flexible Date';
+    $totalAmount = number_format((float)($b['amount'] ?? 0));
+    $advanceAmount = number_format((float)($b['advance_amount'] ?? 0));
+    $balanceAmount = number_format((float)($b['balance_amount'] ?? 0));
+    $paymentId = htmlspecialchars($b['payment_id'] ?? 'ONLINE_VERIFIED');
+    $typeLabel = ($b['booking_type'] ?? 'package') === 'hotel' ? 'Hotel & Resort Stay' : 'Holiday Tour Package';
+
+    return '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Booking Confirmation - ' . $bookingCode . '</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f6f5ef; margin: 0; padding: 24px 12px; color: #1e293b; }
+            .container { max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e4dc; border-radius: 12px; overflow: hidden; }
+            .header-strip { background: #3a5c3d; color: #ffffff; padding: 28px 24px; text-align: center; }
+            .badge-code { display: inline-block; background: #ffffff; color: #283d2a; padding: 6px 14px; font-family: monospace; font-size: 14px; font-weight: bold; border-radius: 4px; margin-top: 12px; letter-spacing: 1px; }
+            .body-content { padding: 28px 24px; }
+            .trip-card { background: #fbfbf8; border: 1px solid #e5e4dc; padding: 18px; border-radius: 8px; margin: 20px 0; }
+            .data-grid { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+            .data-grid td { padding: 8px 0; border-bottom: 1px solid #f1f0e9; vertical-align: top; }
+            .label { color: #64748b; font-weight: 500; }
+            .val { color: #0f172a; font-weight: 700; text-align: right; }
+            .price-table { width: 100%; background: #f4f7f4; border: 1px solid #cfe0cf; border-radius: 8px; padding: 16px; margin: 20px 0; }
+            .btn-cta { display: inline-block; background: #3a5c3d; color: #ffffff !important; padding: 12px 24px; font-weight: bold; font-size: 13px; text-decoration: none; border-radius: 6px; margin-top: 10px; }
+            .footer { background: #fbfbf8; border-top: 1px solid #e5e4dc; padding: 20px; text-align: center; font-size: 11px; color: #64748b; line-height: 1.6; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header-strip">
+                <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; opacity: 0.9;">Verified Travel Voucher</div>
+                <h1 style="margin: 6px 0 0 0; font-size: 24px; font-weight: 800;">' . htmlspecialchars($siteName) . '</h1>
+                <div class="badge-code">BOOKING ID: ' . $bookingCode . '</div>
+            </div>
+
+            <div class="body-content">
+                <p style="font-size: 15px; margin: 0 0 8px 0; color: #0f172a;">Dear <strong>' . $customerName . '</strong>,</p>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.6;">
+                    Thank you for booking with <strong>' . htmlspecialchars($siteName) . '</strong>! Your ' . strtolower($typeLabel) . ' reservation is successfully confirmed. Below are your travel voucher and payment details.
+                </p>
+
+                <div class="trip-card">
+                    <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #3a5c3d; letter-spacing: 0.5px;">' . $typeLabel . '</div>
+                    <h2 style="font-size: 16px; margin: 4px 0 12px 0; color: #0f172a; font-weight: 700;">' . $itemTitle . '</h2>
+                    
+                    <table class="data-grid">
+                        <tr>
+                            <td class="label">Primary Traveler:</td>
+                            <td class="val">' . $customerName . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Registered Email:</td>
+                            <td class="val">' . htmlspecialchars($b['customer_email'] ?? '') . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Contact Phone:</td>
+                            <td class="val">' . htmlspecialchars($b['customer_phone'] ?? '') . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Departure / Check-in:</td>
+                            <td class="val" style="color: #3a5c3d;">' . $travelDate . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Payment Reference:</td>
+                            <td class="val" style="font-family: monospace;">' . $paymentId . '</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="price-table">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #283d2a; margin-bottom: 8px;">Payment &amp; Fare Summary</div>
+                    <table style="width: 100%; font-size: 13px;">
+                        <tr>
+                            <td style="color: #475569; padding: 4px 0;">Total Itinerary Cost:</td>
+                            <td style="text-align: right; font-weight: 700; color: #0f172a;">₹' . $totalAmount . '</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #3a5c3d; font-weight: 700; padding: 4px 0;">Advance Token Paid (Online):</td>
+                            <td style="text-align: right; font-weight: 800; color: #3a5c3d;">₹' . $advanceAmount . '</td>
+                        </tr>
+                        <tr style="border-top: 1px dashed #cfe0cf;">
+                            <td style="color: #b45309; font-weight: 700; padding: 8px 0 0 0;">Balance Payable on Arrival:</td>
+                            <td style="text-align: right; font-weight: 800; color: #b45309; padding: 8px 0 0 0;">₹' . $balanceAmount . '</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="text-align: center; margin: 24px 0;">
+                    <a href="https://wa.me/' . htmlspecialchars($siteWhatsapp) . '?text=' . urlencode("Hi GuideFlux, I booked " . $itemTitle . " (ID: " . $bookingCode . ") and need support.") . '" class="btn-cta" target="_blank">
+                        Chat with Tour Concierge on WhatsApp
+                    </a>
+                </div>
+
+                <p style="font-size: 12px; color: #64748b; line-height: 1.5; margin: 0;">
+                    <strong>Next Steps:</strong> Our destination team and chauffeur details will be shared on WhatsApp and email 24 hours prior to your journey date. Please carry a valid government photo ID card.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p style="margin: 0 0 4px 0;">24x7 Customer Support: <strong>' . htmlspecialchars($sitePhone) . '</strong> | <a href="mailto:' . htmlspecialchars($siteEmail) . '" style="color: #3a5c3d; font-weight: bold; text-decoration: none;">' . htmlspecialchars($siteEmail) . '</a></p>
+                <p style="margin: 0;">&copy; ' . date('Y') . ' ' . htmlspecialchars($siteName) . '. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>';
+}
+
+/**
+ * Generate a luxury HTML email for Flight Booking Requests / Inquiries
+ */
+function generateFlightInquiryEmailHtml(array $f) {
+    $siteName = getSetting('site_name', 'GuideFlux');
+    $siteEmail = getSetting('site_email', 'support@guideflux.com');
+    $sitePhone = getSetting('site_phone', '+91 98765 43210');
+    $siteWhatsapp = getSetting('site_whatsapp', '919876543210');
+
+    $bookingCode = htmlspecialchars($f['booking_code'] ?? 'FLT-10001');
+    $customerName = htmlspecialchars($f['customer_name'] ?? 'Traveler');
+    $flightTitle = htmlspecialchars($f['package_title'] ?? 'Flight Booking');
+    $travelDate = !empty($f['travel_date']) ? date('l, d F Y', strtotime($f['travel_date'])) : 'Departure Date';
+    $amount = number_format((float)($f['amount'] ?? 0));
+
+    return '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Flight Inquiry Confirmation - ' . $bookingCode . '</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f6f5ef; margin: 0; padding: 24px 12px; color: #1e293b; }
+            .container { max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e4dc; border-radius: 12px; overflow: hidden; }
+            .header-strip { background: #1e293b; color: #ffffff; padding: 28px 24px; text-align: center; }
+            .badge-code { display: inline-block; background: #ffffff; color: #0f172a; padding: 6px 14px; font-family: monospace; font-size: 14px; font-weight: bold; border-radius: 4px; margin-top: 12px; letter-spacing: 1px; }
+            .body-content { padding: 28px 24px; }
+            .trip-card { background: #fbfbf8; border: 1px solid #e5e4dc; padding: 18px; border-radius: 8px; margin: 20px 0; }
+            .data-grid { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+            .data-grid td { padding: 8px 0; border-bottom: 1px solid #f1f0e9; }
+            .label { color: #64748b; font-weight: 500; }
+            .val { color: #0f172a; font-weight: 700; text-align: right; }
+            .footer { background: #fbfbf8; border-top: 1px solid #e5e4dc; padding: 20px; text-align: center; font-size: 11px; color: #64748b; line-height: 1.6; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header-strip">
+                <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; opacity: 0.9;">Flight Reservation Request</div>
+                <h1 style="margin: 6px 0 0 0; font-size: 24px; font-weight: 800;">' . htmlspecialchars($siteName) . ' Flights</h1>
+                <div class="badge-code">QUERY ID: ' . $bookingCode . '</div>
+            </div>
+
+            <div class="body-content">
+                <p style="font-size: 15px; margin: 0 0 8px 0; color: #0f172a;">Dear <strong>' . $customerName . '</strong>,</p>
+                <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.6;">
+                    We have received your flight reservation request. Our airline ticketing desk is verifying the latest seat availability and best group fare quote.
+                </p>
+
+                <div class="trip-card">
+                    <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #0284c7; letter-spacing: 0.5px;">Selected Airline Schedule</div>
+                    <h2 style="font-size: 16px; margin: 4px 0 12px 0; color: #0f172a; font-weight: 700;">' . $flightTitle . '</h2>
+                    
+                    <table class="data-grid">
+                        <tr>
+                            <td class="label">Lead Passenger:</td>
+                            <td class="val">' . $customerName . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Registered Email:</td>
+                            <td class="val">' . htmlspecialchars($f['customer_email'] ?? '') . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Contact Phone:</td>
+                            <td class="val">' . htmlspecialchars($f['customer_phone'] ?? '') . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Departure Date:</td>
+                            <td class="val" style="color: #0284c7;">' . $travelDate . '</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Estimated Total Fare:</td>
+                            <td class="val" style="color: #0f172a; font-size: 15px;">₹' . $amount . '</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="text-align: center; margin: 24px 0;">
+                    <a href="https://wa.me/' . htmlspecialchars($siteWhatsapp) . '?text=' . urlencode("Hi GuideFlux Flight Desk, I submitted flight query " . $flightTitle . " (ID: " . $bookingCode . ").") . '" style="display: inline-block; background: #0284c7; color: #ffffff; padding: 12px 24px; font-weight: bold; font-size: 13px; text-decoration: none; border-radius: 6px;" target="_blank">
+                        Connect with Flight Ticketing Desk on WhatsApp
+                    </a>
+                </div>
+
+                <p style="font-size: 12px; color: #64748b; line-height: 1.5; margin: 0;">
+                    Our ticketing executive will reach out to you within 15 minutes to confirm passenger names as per Passport/Aadhar and issue official PNR e-tickets.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p style="margin: 0 0 4px 0;">24x7 Flight Helpline: <strong>' . htmlspecialchars($sitePhone) . '</strong> | <a href="mailto:' . htmlspecialchars($siteEmail) . '" style="color: #0284c7; font-weight: bold; text-decoration: none;">' . htmlspecialchars($siteEmail) . '</a></p>
+                <p style="margin: 0;">&copy; ' . date('Y') . ' ' . htmlspecialchars($siteName) . '. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>';
+}
+

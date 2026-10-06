@@ -134,10 +134,30 @@ switch ($action) {
         $_SESSION['user_phone'] = $user['phone'];
         unset($_SESSION['temp_verify_email']);
 
+        // Trigger Real-Time Admin Notification
+        require_once __DIR__ . '/../includes/notifications.php';
+        createAdminNotification(
+            'user_register',
+            'New Traveler Registration',
+            $user['name'] . ' (' . $user['email'] . ') registered a new traveler account.',
+            'users.php',
+            ['user_id' => $user['id'], 'name' => $user['name'], 'email' => $user['email']]
+        );
+
+        $redirect = isset($_POST['redirect']) && !empty(trim($_POST['redirect'])) ? trim($_POST['redirect']) : 'index.php';
+        // Sanitize redirect to prevent open redirect vulnerabilities
+        if (preg_match('/^https?:\/\//i', $redirect)) {
+            $parsed = parse_url($redirect);
+            $currentHost = $_SERVER['HTTP_HOST'] ?? '';
+            if (isset($parsed['host']) && $parsed['host'] !== $currentHost) {
+                $redirect = 'index.php';
+            }
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'Your account has been verified and created successfully!',
-            'redirect' => 'index.php'
+            'redirect' => $redirect
         ]);
         break;
 
@@ -199,10 +219,30 @@ switch ($action) {
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_phone'] = $user['phone'];
 
+        // Trigger Real-Time Admin Notification
+        require_once __DIR__ . '/../includes/notifications.php';
+        createAdminNotification(
+            'user_login',
+            'Traveler Logged In',
+            $user['name'] . ' (' . $user['email'] . ') logged into the portal.',
+            'users.php',
+            ['user_id' => $user['id'], 'name' => $user['name'], 'email' => $user['email']]
+        );
+
+        $redirect = isset($_POST['redirect']) && !empty(trim($_POST['redirect'])) ? trim($_POST['redirect']) : 'index.php';
+        // Sanitize redirect
+        if (preg_match('/^https?:\/\//i', $redirect)) {
+            $parsed = parse_url($redirect);
+            $currentHost = $_SERVER['HTTP_HOST'] ?? '';
+            if (isset($parsed['host']) && $parsed['host'] !== $currentHost) {
+                $redirect = 'index.php';
+            }
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'Welcome back, ' . $user['name'] . '!',
-            'redirect' => 'index.php'
+            'redirect' => $redirect
         ]);
         break;
 

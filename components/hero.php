@@ -67,42 +67,44 @@ $heroAirports = getFlightAirportsDirectory();
     <div class="max-w-6xl mx-auto relative z-30 pt-4 sm:pt-6">
 
         <!-- MAIN SEARCH CARD -->
-        <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xl p-3 sm:p-4 pt-8 sm:pt-9 text-left relative">
+        <div class="bg-white rounded-3xl border border-slate-200 p-3 sm:p-4 pt-8 sm:pt-9 text-left relative">
 
-            <!-- FLOATING TOP BAR -->
-            <div class="absolute -top-5 sm:-top-6 left-2 sm:left-4 md:left-6 right-2 sm:right-4 md:right-6 flex items-center justify-between gap-2 z-40 pointer-events-auto">
+            <!-- FLOATING TOP TABS BAR -->
+            <div class="absolute -top-5 sm:-top-6 left-2 sm:left-4 md:left-6 right-2 sm:right-4 md:right-6 flex items-center justify-between z-40 pointer-events-auto">
                 
-                <!-- Left: Clean Pill Tabs -->
-                <div id="heroTabs" class="inline-flex items-center p-1 bg-white rounded-2xl sm:rounded-full gap-1 overflow-x-auto max-w-[calc(100%-80px)] sm:max-w-none shadow-md border border-slate-200/90 scrollbar-none">
+                <!-- Clean Pill Tabs -->
+                <div id="heroTabs" class="inline-flex items-center p-1 bg-white rounded-2xl sm:rounded-full gap-1 overflow-x-auto border border-slate-200 scrollbar-none">
                     
                     <!-- 1. Domestic Packages -->
-                    <button type="button" data-target="panel-domestic" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-brand-600 text-white transition-all whitespace-nowrap">
+                    <button type="button" data-target="panel-domestic" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-brand-600 text-white transition-all whitespace-nowrap cursor-pointer">
                         <i class="fa-solid fa-map-location-dot text-xs sm:text-sm"></i>
                         <span>Domestic Packages</span>
                     </button>
 
                     <!-- 2. International Packages -->
-                    <button type="button" data-target="panel-international" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 transition-all whitespace-nowrap">
+                    <button type="button" data-target="panel-international" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 transition-all whitespace-nowrap cursor-pointer">
                         <i class="fa-solid fa-globe text-xs sm:text-sm text-brand-600"></i>
                         <span>International Tours</span>
                     </button>
 
                     <!-- 3. Flights -->
-                    <button type="button" data-target="panel-flights" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 transition-all whitespace-nowrap">
+                    <button type="button" data-target="panel-flights" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 transition-all whitespace-nowrap cursor-pointer">
                         <i class="fa-solid fa-plane-departure text-xs sm:text-sm text-brand-600"></i>
                         <span>Flights</span>
                     </button>
 
                     <!-- 4. Hotels -->
-                    <button type="button" data-target="panel-hotels" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 transition-all whitespace-nowrap">
+                    <button type="button" data-target="panel-hotels" class="tab-btn inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-700 hover:bg-slate-100 transition-all whitespace-nowrap cursor-pointer">
                         <i class="fa-solid fa-hotel text-xs sm:text-sm text-brand-600"></i>
                         <span>Hotels</span>
                     </button>
                 </div>
 
-                <!-- Right: Desktop Floating Search Button -->
+                <!-- TOP RIGHT SEARCH TRIGGER BUTTON (Desktop) -->
                 <div class="hidden sm:block shrink-0">
-                    <button type="button" id="topSearchBtn" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm tracking-wide transition-all shadow-md cursor-pointer">
+                    <button type="button" 
+                            id="topSearchBtn"
+                            class="inline-flex items-center gap-2 px-6 py-2 rounded-full text-xs sm:text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                         <span id="topSearchBtnText">Search Domestic Packages</span>
                     </button>
@@ -117,23 +119,21 @@ $heroAirports = getFlightAirportsDirectory();
                     <input type="hidden" name="type" value="domestic">
                     <input type="hidden" name="category" value="domestic">
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-1 lg:gap-0 lg:divide-x lg:divide-slate-100">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 lg:gap-0 lg:divide-x lg:divide-slate-100 items-center">
 
                         <!-- Column 1: Destination Live Typeahead -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none md:col-span-5">
                             <label for="domesticDestInput" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">
                                 Destination
                             </label>
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-location-dot text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-location-dot text-2xl text-teal-600 shrink-0"></i>
                                 <input type="text" 
-                                       name="query"
+                                       name="query" 
                                        id="domesticDestInput"
                                        autocomplete="off"
                                        placeholder="Where in India do you want to go?" 
-                                       value=""
+                                       value="" 
                                        data-category="domestic"
                                        data-type="package"
                                        class="typeahead-input w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 focus:ring-0 truncate">
@@ -155,7 +155,7 @@ $heroAirports = getFlightAirportsDirectory();
                                         ?>
                                             <div class="dropdown-select-item flex items-center justify-between p-2 hover:bg-slate-50 cursor-pointer transition rounded-xl" data-val="<?= htmlspecialchars($cleanLoc) ?>" data-sub="<?= htmlspecialchars($dp['location'] . ' • India') ?>">
                                                 <div class="flex items-center gap-2.5 min-w-0">
-                                                    <div class="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-map-location-dot text-xs"></i></div>
+                                                    <i class="fa-solid fa-map-location-dot text-lg text-teal-600 shrink-0"></i>
                                                     <div class="truncate">
                                                         <span class="block text-xs font-bold text-slate-800"><?= htmlspecialchars($cleanLoc) ?></span>
                                                         <span class="block text-[10px] text-slate-400"><?= htmlspecialchars($dp['location'] . ' • ' . $dp['title']) ?></span>
@@ -171,20 +171,18 @@ $heroAirports = getFlightAirportsDirectory();
                             </div>
                         </div>
 
-                        <!-- Column 3: Travel Date -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <!-- Column 2: Travel Date -->
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none md:col-span-3">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">
                                 Travel Date
                             </label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-regular fa-calendar-days text-sm"></i>
-                                </div>
+                                <i class="fa-regular fa-calendar-days text-2xl text-amber-500 shrink-0"></i>
                                 <input type="text" 
-                                       name="date"
+                                       name="date" 
                                        placeholder="Choose travel date" 
-                                       value=""
-                                       readonly
+                                       value="" 
+                                       readonly 
                                        class="field-val w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 cursor-pointer truncate">
                             </div>
 
@@ -210,20 +208,18 @@ $heroAirports = getFlightAirportsDirectory();
                             </div>
                         </div>
 
-                        <!-- Column 4: Guests & Duration -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <!-- Column 3: Guests & Duration -->
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none md:col-span-4">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">
                                 Travelers &amp; Stay
                             </label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-user-group text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-user-group text-2xl text-emerald-600 shrink-0"></i>
                                 <input type="text" 
-                                       name="guests"
+                                       name="guests" 
                                        placeholder="Guests &amp; duration" 
-                                       value=""
-                                       readonly
+                                       value="" 
+                                       readonly 
                                        class="field-val w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 cursor-pointer truncate">
                             </div>
 
@@ -257,7 +253,7 @@ $heroAirports = getFlightAirportsDirectory();
                                     </div>
                                 </div>
                                 <div class="mt-3 pt-2.5 border-t border-slate-100">
-                                    <button type="button" class="dropdown-apply-btn w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl">
+                                    <button type="button" class="dropdown-apply-btn w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl cursor-pointer">
                                         Apply Selection
                                     </button>
                                 </div>
@@ -266,9 +262,9 @@ $heroAirports = getFlightAirportsDirectory();
 
                     </div>
 
-                    <!-- Bottom Search CTA on Mobile -->
-                    <div class="sm:hidden pt-3">
-                        <button type="submit" class="w-full py-3 px-5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer rounded-xl">
+                    <!-- Mobile Search Button -->
+                    <div class="block sm:hidden mt-3 pt-2 border-t border-slate-100">
+                        <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs tracking-wide rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
                             <i class="fa-solid fa-magnifying-glass text-xs"></i>
                             <span>Search Domestic Packages</span>
                         </button>
@@ -284,23 +280,21 @@ $heroAirports = getFlightAirportsDirectory();
                     <input type="hidden" name="type" value="international">
                     <input type="hidden" name="category" value="international">
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-1 lg:gap-0 lg:divide-x lg:divide-slate-100">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 lg:gap-0 lg:divide-x lg:divide-slate-100 items-center">
                         
                         <!-- Column 1: Destination -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none md:col-span-5">
                             <label for="intlDestInput" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">
                                 Destination
                             </label>
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-globe text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-globe text-2xl text-teal-600 shrink-0"></i>
                                 <input type="text" 
-                                       name="query"
+                                       name="query" 
                                        id="intlDestInput"
                                        autocomplete="off"
                                        placeholder="Where in the world?" 
-                                       value=""
+                                       value="" 
                                        data-category="international"
                                        data-type="package"
                                        class="typeahead-input w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 focus:ring-0 truncate">
@@ -321,7 +315,7 @@ $heroAirports = getFlightAirportsDirectory();
                                         ?>
                                             <div class="dropdown-select-item flex items-center justify-between p-2 hover:bg-slate-50 cursor-pointer transition rounded-xl" data-val="<?= htmlspecialchars($cleanLoc) ?>" data-sub="<?= htmlspecialchars(($ip['state_country'] ?: $ip['location']) . ' • ' . $ip['title']) ?>">
                                                 <div class="flex items-center gap-2.5 min-w-0">
-                                                    <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-globe text-xs"></i></div>
+                                                    <i class="fa-solid fa-globe text-lg text-amber-600 shrink-0"></i>
                                                     <div class="truncate">
                                                         <span class="block text-xs font-bold text-slate-800"><?= htmlspecialchars($cleanLoc) ?></span>
                                                         <span class="block text-[10px] text-slate-400"><?= htmlspecialchars($ip['state_country'] ?: $ip['location']) ?></span>
@@ -337,20 +331,18 @@ $heroAirports = getFlightAirportsDirectory();
                             </div>
                         </div>
 
-                        <!-- Column 3: Date -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <!-- Column 2: Date -->
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none md:col-span-3">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">
                                 Travel Date
                             </label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-regular fa-calendar-days text-sm"></i>
-                                </div>
+                                <i class="fa-regular fa-calendar-days text-2xl text-amber-500 shrink-0"></i>
                                 <input type="text" 
-                                       name="date"
+                                       name="date" 
                                        placeholder="Choose travel date" 
-                                       value=""
-                                       readonly
+                                       value="" 
+                                       readonly 
                                        class="field-val w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 cursor-pointer truncate">
                             </div>
 
@@ -364,20 +356,18 @@ $heroAirports = getFlightAirportsDirectory();
                             </div>
                         </div>
 
-                        <!-- Column 4: Guests -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <!-- Column 3: Guests -->
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none md:col-span-4">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">
                                 Travelers &amp; Stay
                             </label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-user-group text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-user-group text-2xl text-emerald-600 shrink-0"></i>
                                 <input type="text" 
-                                       name="guests"
+                                       name="guests" 
                                        placeholder="Guests &amp; stay" 
-                                       value=""
-                                       readonly
+                                       value="" 
+                                       readonly 
                                        class="field-val w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 cursor-pointer truncate">
                             </div>
 
@@ -393,16 +383,18 @@ $heroAirports = getFlightAirportsDirectory();
                                     </div>
                                 </div>
                                 <div class="mt-3 pt-2.5 border-t border-slate-100">
-                                    <button type="button" class="dropdown-apply-btn w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl">
+                                    <button type="button" class="dropdown-apply-btn w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl cursor-pointer">
                                         Apply Selection
                                     </button>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
-                    <div class="sm:hidden pt-3">
-                        <button type="submit" class="w-full py-3 px-5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer rounded-xl">
+                    <!-- Mobile Search Button -->
+                    <div class="block sm:hidden mt-3 pt-2 border-t border-slate-100">
+                        <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs tracking-wide rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
                             <i class="fa-solid fa-magnifying-glass text-xs"></i>
                             <span>Search International Tours</span>
                         </button>
@@ -434,20 +426,18 @@ $heroAirports = getFlightAirportsDirectory();
                     <!-- Hidden Return Date for Round-Trip Form Submission -->
                     <input type="hidden" name="return_date" id="flightReturnDateHidden" value="">
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 lg:gap-0 lg:divide-x lg:divide-slate-100 relative">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 lg:gap-0 lg:divide-x lg:divide-slate-100 items-center relative">
                         
                         <!-- From Airport -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none lg:col-span-3">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">From Airport</label>
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-plane-departure text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-plane-departure text-2xl text-sky-600 shrink-0"></i>
                                 <input type="text" 
                                        name="from" 
                                        id="flightFromInput"
                                        autocomplete="off"
-                                       placeholder="Search departure airport (e.g. DEL, BOM, Hindon)..." 
+                                       placeholder="Search departure airport (e.g. DEL, BOM)..." 
                                        value="" 
                                        class="flight-airport-typeahead w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 focus:ring-0 truncate">
                             </div>
@@ -469,9 +459,7 @@ $heroAirports = getFlightAirportsDirectory();
                                              data-sub="<?= htmlspecialchars($ap['city'] . ' • ' . $ap['state']) ?>"
                                              data-search="<?= htmlspecialchars($searchKeywords) ?>">
                                             <div class="flex items-center gap-2.5 min-w-0">
-                                                <div class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                                                    <i class="fa-solid fa-plane-departure text-xs"></i>
-                                                </div>
+                                                <i class="fa-solid fa-plane-departure text-base text-sky-600 shrink-0"></i>
                                                 <div class="truncate">
                                                     <span class="block text-xs font-bold text-slate-800 truncate"><?= htmlspecialchars($ap['name']) ?></span>
                                                     <span class="block text-[10px] text-slate-400 truncate"><?= htmlspecialchars($ap['city'] . ' • ' . $ap['state']) ?></span>
@@ -492,17 +480,15 @@ $heroAirports = getFlightAirportsDirectory();
                         </div>
 
                         <!-- To Airport -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none lg:col-span-3">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">To Airport</label>
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-plane-arrival text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-plane-arrival text-2xl text-teal-600 shrink-0"></i>
                                 <input type="text" 
                                        name="to" 
                                        id="flightToInput"
                                        autocomplete="off"
-                                       placeholder="Search destination airport (e.g. BOM, GOX, Manohar)..." 
+                                       placeholder="Search destination airport (e.g. BOM, GOX)..." 
                                        value="" 
                                        class="flight-airport-typeahead w-full text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal bg-transparent outline-none border-none p-0 focus:ring-0 truncate">
                             </div>
@@ -524,9 +510,7 @@ $heroAirports = getFlightAirportsDirectory();
                                              data-sub="<?= htmlspecialchars($ap['city'] . ' • ' . $ap['state']) ?>"
                                              data-search="<?= htmlspecialchars($searchKeywords) ?>">
                                             <div class="flex items-center gap-2.5 min-w-0">
-                                                <div class="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                                                    <i class="fa-solid fa-plane-arrival text-xs"></i>
-                                                </div>
+                                                <i class="fa-solid fa-plane-arrival text-base text-teal-600 shrink-0"></i>
                                                 <div class="truncate">
                                                     <span class="block text-xs font-bold text-slate-800 truncate"><?= htmlspecialchars($ap['name']) ?></span>
                                                     <span class="block text-[10px] text-slate-400 truncate"><?= htmlspecialchars($ap['city'] . ' • ' . $ap['state']) ?></span>
@@ -540,12 +524,10 @@ $heroAirports = getFlightAirportsDirectory();
                         </div>
 
                         <!-- Departure Date -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none lg:col-span-3">
                             <label id="flightDateLabel" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">Departure Date</label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-regular fa-calendar-days text-sm"></i>
-                                </div>
+                                <i class="fa-regular fa-calendar-days text-2xl text-amber-500 shrink-0"></i>
                                 <input type="text" 
                                        name="date" 
                                        id="flightDateInput"
@@ -573,12 +555,10 @@ $heroAirports = getFlightAirportsDirectory();
                         </div>
 
                         <!-- Class & Travelers -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none lg:col-span-3">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">Cabin &amp; Travelers</label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-user-group text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-user-group text-2xl text-purple-600 shrink-0"></i>
                                 <input type="text" 
                                        name="class_label" 
                                        id="flightClassDisplayInput"
@@ -593,29 +573,37 @@ $heroAirports = getFlightAirportsDirectory();
                             <div class="dropdown-menu absolute top-[calc(100%+6px)] left-0 lg:left-auto lg:right-0 w-80 sm:w-96 max-w-[92vw] bg-white shadow-2xl border border-slate-200 p-3.5 z-[100] hidden animate-pop-in rounded-2xl">
                                 <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Cabin Class</div>
                                 <div class="grid grid-cols-2 gap-1.5 text-xs mb-3">
-                                    <button type="button" data-cabin="Economy" class="flight-cabin-chip active py-1.5 px-2 font-bold bg-brand-600 text-white transition text-center rounded-lg">Economy</button>
-                                    <button type="button" data-cabin="Premium Economy" class="flight-cabin-chip py-1.5 px-2 font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-center rounded-lg">Premium</button>
-                                    <button type="button" data-cabin="Business" class="flight-cabin-chip py-1.5 px-2 font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-center rounded-lg">Business</button>
-                                    <button type="button" data-cabin="First Class" class="flight-cabin-chip py-1.5 px-2 font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-center rounded-lg">First Class</button>
+                                    <button type="button" data-cabin="Economy" class="flight-cabin-chip active py-1.5 px-2 font-bold bg-brand-600 text-white transition text-center rounded-lg cursor-pointer">Economy</button>
+                                    <button type="button" data-cabin="Premium Economy" class="flight-cabin-chip py-1.5 px-2 font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-center rounded-lg cursor-pointer">Premium</button>
+                                    <button type="button" data-cabin="Business" class="flight-cabin-chip py-1.5 px-2 font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-center rounded-lg cursor-pointer">Business</button>
+                                    <button type="button" data-cabin="First Class" class="flight-cabin-chip py-1.5 px-2 font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-center rounded-lg cursor-pointer">First Class</button>
                                 </div>
                                 <div class="space-y-2 pt-2 border-t border-slate-100">
                                     <div class="flex items-center justify-between">
                                         <div><span class="block text-xs font-bold text-slate-800">Adults</span><span class="block text-[10px] text-slate-400">12+ years</span></div>
                                         <div class="flex items-center gap-2">
-                                            <button type="button" data-action="minus" data-target="flightAdultsCount" data-min="1" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded">-</button>
+                                            <button type="button" data-action="minus" data-target="flightAdultsCount" data-min="1" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded cursor-pointer">-</button>
                                             <span id="flightAdultsCount" class="w-6 text-center font-bold text-xs text-slate-800">1</span>
-                                            <button type="button" data-action="plus" data-target="flightAdultsCount" data-max="9" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded">+</button>
+                                            <button type="button" data-action="plus" data-target="flightAdultsCount" data-max="9" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded cursor-pointer">+</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-3 pt-2.5 border-t border-slate-100">
-                                    <button type="button" id="flightApplyBtn" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl">
+                                    <button type="button" id="flightApplyBtn" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl cursor-pointer">
                                         Apply Selection
                                     </button>
                                 </div>
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- Mobile Search Button -->
+                    <div class="block sm:hidden mt-3 pt-2 border-t border-slate-100">
+                        <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs tracking-wide rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
+                            <i class="fa-solid fa-plane-departure text-xs"></i>
+                            <span>Search Cheap Flights</span>
+                        </button>
                     </div>
 
                     <!-- Multi-City Extra Leg Container (Shown dynamically when Multi-City is selected) -->
@@ -680,14 +668,6 @@ $heroAirports = getFlightAirportsDirectory();
                             </div>
                         </div>
                     </div>
-
-
-                    <div class="sm:hidden pt-3">
-                        <button type="submit" class="w-full py-3 px-5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer rounded-xl">
-                            <i class="fa-solid fa-plane-departure text-xs"></i>
-                            <span>Search Cheap Flights</span>
-                        </button>
-                    </div>
                 </form>
             </div>
 
@@ -698,15 +678,13 @@ $heroAirports = getFlightAirportsDirectory();
                 <form action="search.php" method="GET" class="w-full">
                     <input type="hidden" name="type" value="hotel">
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 lg:gap-0 lg:divide-x lg:divide-slate-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 lg:gap-0 lg:divide-x lg:divide-slate-100 items-center">
                         
                         <!-- Hotel City / Resort -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors rounded-xl lg:rounded-none lg:col-span-4">
                             <label for="hotelCityInput" class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">City / Location</label>
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-hotel text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-hotel text-2xl text-teal-600 shrink-0"></i>
                                 <input type="text" 
                                        name="query" 
                                        id="hotelCityInput"
@@ -729,7 +707,7 @@ $heroAirports = getFlightAirportsDirectory();
                                         <?php foreach ($heroDbHotels as $hh): ?>
                                             <div class="dropdown-select-item flex items-center justify-between p-2 hover:bg-slate-50 cursor-pointer transition rounded-xl" data-val="<?= htmlspecialchars($hh['city']) ?>" data-sub="<?= htmlspecialchars($hh['name'] . ' • ' . ($hh['country'] ?: 'India')) ?>">
                                                 <div class="flex items-center gap-2.5 min-w-0">
-                                                    <div class="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-hotel text-xs"></i></div>
+                                                    <i class="fa-solid fa-hotel text-base text-teal-600 shrink-0"></i>
                                                     <div class="truncate">
                                                         <span class="block text-xs font-bold text-slate-800"><?= htmlspecialchars($hh['city']) ?></span>
                                                         <span class="block text-[10px] text-slate-400"><?= htmlspecialchars($hh['name'] . ' • ' . ($hh['country'] ?: 'India')) ?></span>
@@ -746,12 +724,10 @@ $heroAirports = getFlightAirportsDirectory();
                         </div>
 
                         <!-- Check-In Date -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none lg:col-span-2">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">Check-In</label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-regular fa-calendar-days text-sm"></i>
-                                </div>
+                                <i class="fa-regular fa-calendar-days text-2xl text-teal-600 shrink-0"></i>
                                 <input type="text" 
                                        name="checkin" 
                                        id="hotelCheckinInput"
@@ -772,12 +748,10 @@ $heroAirports = getFlightAirportsDirectory();
                         </div>
 
                         <!-- Check-Out Date -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none lg:col-span-2">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">Check-Out</label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-regular fa-calendar-days text-sm"></i>
-                                </div>
+                                <i class="fa-regular fa-calendar-days text-2xl text-amber-500 shrink-0"></i>
                                 <input type="text" 
                                        name="checkout" 
                                        id="hotelCheckoutInput"
@@ -798,12 +772,10 @@ $heroAirports = getFlightAirportsDirectory();
                         </div>
 
                         <!-- Guests & Rooms -->
-                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none">
+                        <div class="dropdown-wrapper relative px-3.5 py-2.5 sm:py-3 hover:bg-slate-50 transition-colors cursor-pointer rounded-xl lg:rounded-none lg:col-span-4">
                             <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 cursor-pointer">Guests &amp; Rooms</label>
                             <div class="dropdown-trigger flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-user-group text-sm"></i>
-                                </div>
+                                <i class="fa-solid fa-user-group text-2xl text-indigo-600 shrink-0"></i>
                                 <input type="text" 
                                        name="hotel_guests" 
                                        id="hotelGuestsInput"
@@ -818,22 +790,22 @@ $heroAirports = getFlightAirportsDirectory();
                                     <div class="flex items-center justify-between">
                                         <div><span class="block text-xs font-bold text-slate-800">Rooms</span><span class="block text-[10px] text-slate-400">Total rooms</span></div>
                                         <div class="flex items-center gap-2">
-                                            <button type="button" data-action="minus" data-target="hotelRoomsCount" data-min="1" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded">-</button>
+                                            <button type="button" data-action="minus" data-target="hotelRoomsCount" data-min="1" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded cursor-pointer">-</button>
                                             <span id="hotelRoomsCount" class="w-6 text-center font-bold text-xs text-slate-800">1</span>
-                                            <button type="button" data-action="plus" data-target="hotelRoomsCount" data-max="5" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded">+</button>
+                                            <button type="button" data-action="plus" data-target="hotelRoomsCount" data-max="5" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded cursor-pointer">+</button>
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between">
                                         <div><span class="block text-xs font-bold text-slate-800">Adults</span><span class="block text-[10px] text-slate-400">12+ years</span></div>
                                         <div class="flex items-center gap-2">
-                                            <button type="button" data-action="minus" data-target="hotelAdultsCount" data-min="1" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded">-</button>
+                                            <button type="button" data-action="minus" data-target="hotelAdultsCount" data-min="1" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded cursor-pointer">-</button>
                                             <span id="hotelAdultsCount" class="w-6 text-center font-bold text-xs text-slate-800">2</span>
-                                            <button type="button" data-action="plus" data-target="hotelAdultsCount" data-max="10" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded">+</button>
+                                            <button type="button" data-action="plus" data-target="hotelAdultsCount" data-max="10" class="counter-btn w-7 h-7 border border-slate-200 bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-200 transition rounded cursor-pointer">+</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-3 pt-2.5 border-t border-slate-100">
-                                    <button type="button" id="hotelApplyBtn" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl">
+                                    <button type="button" id="hotelApplyBtn" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition rounded-xl cursor-pointer">
                                         Apply Selection
                                     </button>
                                 </div>
@@ -842,8 +814,9 @@ $heroAirports = getFlightAirportsDirectory();
 
                     </div>
 
-                    <div class="sm:hidden pt-3">
-                        <button type="submit" class="w-full py-3 px-5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer rounded-xl">
+                    <!-- Mobile Search Button -->
+                    <div class="block sm:hidden mt-3 pt-2 border-t border-slate-100">
+                        <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs tracking-wide rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer">
                             <i class="fa-solid fa-hotel text-xs"></i>
                             <span>Search Best Hotels</span>
                         </button>

@@ -4,6 +4,18 @@
  * Clean, Airy, Lightweight & Modern Travel Theme UI with OTP Email Verification
  */
 require_once __DIR__ . '/config/settings.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$redirect = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
+
+// If already logged in, send them straight back
+if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+    header("Location: " . (!empty($redirect) ? $redirect : 'index.php'));
+    exit();
+}
+
 $pageTitle = 'Create Your Travel Account - ' . htmlspecialchars(getSetting('site_name', 'GuideFlux'));
 require_once 'components/header.php';
 require_once 'components/navbar.php';
@@ -230,7 +242,7 @@ require_once 'components/navbar.php';
                     <div class="mt-6 text-center pt-4 border-t border-slate-100">
                         <p class="text-xs text-slate-500 font-medium">
                             Already have an account? 
-                            <a href="login.php" class="text-brand-600 hover:text-brand-700 font-bold ml-1 hover:underline">
+                            <a href="login.php<?php echo !empty($redirect) ? '?redirect=' . urlencode($redirect) : ''; ?>" class="text-brand-600 hover:text-brand-700 font-bold ml-1 hover:underline">
                                 Log In Here
                             </a>
                         </p>
@@ -254,6 +266,7 @@ require_once 'components/navbar.php';
 
                     <form id="verifyOtpForm" class="space-y-4">
                         <input type="hidden" id="verifyEmailHidden" name="email">
+                        <input type="hidden" id="verifyRedirectInput" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
 
                         <div>
                             <div class="flex items-center justify-between mb-1.5">

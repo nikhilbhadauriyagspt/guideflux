@@ -338,6 +338,8 @@ if ($dbHotelId) {
 
             $formattedRooms = [];
             foreach ($fetchedRooms as $fr) {
+                $roomImage = !empty($fr['image_url']) ? $fr['image_url'] : (!empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80');
+                
                 $formattedRooms[] = [
                     'id' => 'room-db-' . $fr['id'],
                     'name' => $fr['room_name'],
@@ -347,7 +349,7 @@ if ($dbHotelId) {
                     'bed' => $fr['bed_type'] ?: '1 King Bed',
                     'view' => $fr['room_type'] ?: 'Deluxe View',
                     'occupancy' => $fr['max_adults'] . ' Adults • ' . $fr['max_children'] . ' Child',
-                    'image' => !empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80',
+                    'image' => $roomImage,
                     'amenities' => array_filter(array_map('trim', explode(',', $fr['meal_plan'] . ', Free Wi-Fi, Air Conditioning, Private Bath'))),
                     'cancellation' => 'Free cancellation until 24 hrs prior to check-in'
                 ];
@@ -370,7 +372,7 @@ if ($dbHotelId) {
             }
 
             // Fetch Gallery Images
-            $gStmt = $pdoDetails->prepare("SELECT `image_url` FROM `hotel_images` WHERE `hotel_id` = ? ORDER BY `sort_order` ASC");
+            $gStmt = $pdoDetails->prepare("SELECT `image_url` FROM `hotel_images` WHERE `hotel_id` = ? ORDER BY `sort_order` ASC, `id` ASC");
             $gStmt->execute([$dbHotelId]);
             $galleryRows = $gStmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -379,10 +381,44 @@ if ($dbHotelId) {
                 $galleryList[] = $fetchedHotel['featured_image'];
             }
             foreach ($galleryRows as $gr) {
-                $galleryList[] = $gr;
+                if (!in_array($gr, $galleryList)) {
+                    $galleryList[] = $gr;
+                }
             }
             while (count($galleryList) < 5) {
                 $galleryList[] = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';
+            }
+
+            // Parse Amenities from DB
+            $parsedAmenities = [];
+            if (!empty($fetchedHotel['amenities'])) {
+                $decAm = json_decode($fetchedHotel['amenities'], true);
+                if (is_array($decAm)) {
+                    foreach ($decAm as $amItem) {
+                        if (is_array($amItem) && !empty($amItem['name'])) {
+                            $parsedAmenities[] = [
+                                'icon' => !empty($amItem['icon']) ? $amItem['icon'] : 'fa-solid fa-circle-check',
+                                'title' => $amItem['name'],
+                                'desc' => 'Complimentary guest amenity included'
+                            ];
+                        } elseif (is_string($amItem)) {
+                            $parsedAmenities[] = [
+                                'icon' => 'fa-solid fa-circle-check',
+                                'title' => $amItem,
+                                'desc' => 'Complimentary guest amenity included'
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if (empty($parsedAmenities)) {
+                $parsedAmenities = [
+                    ['icon' => 'fa-solid fa-person-swimming', 'title' => 'Swimming Pool & Deck', 'desc' => 'Complimentary pool access for all guests'],
+                    ['icon' => 'fa-solid fa-utensils', 'title' => 'Complimentary Breakfast', 'desc' => 'Multi-cuisine daily breakfast included'],
+                    ['icon' => 'fa-solid fa-wifi', 'title' => 'High-Speed Wi-Fi', 'desc' => 'Gigabit wireless throughout the property'],
+                    ['icon' => 'fa-solid fa-bell-concierge', 'title' => '24/7 Front Desk', 'desc' => 'Dedicated concierge & room service support']
+                ];
             }
 
             $hotel = [
@@ -400,12 +436,7 @@ if ($dbHotelId) {
                 'original_price' => (float)($fetchedHotel['original_price'] ?: ($fetchedHotel['starting_price'] * 1.25)),
                 'tax_rate' => 0.12,
                 'gallery' => $galleryList,
-                'key_perks' => [
-                    ['icon' => 'fa-solid fa-person-swimming', 'title' => 'Swimming Pool & Deck', 'desc' => 'Complimentary pool access for all guests'],
-                    ['icon' => 'fa-solid fa-utensils', 'title' => 'Complimentary Breakfast', 'desc' => 'Multi-cuisine daily breakfast included'],
-                    ['icon' => 'fa-solid fa-wifi', 'title' => 'High-Speed Wi-Fi', 'desc' => 'Gigabit wireless throughout the property'],
-                    ['icon' => 'fa-solid fa-bell-concierge', 'title' => '24/7 Front Desk', 'desc' => 'Dedicated concierge & room service support']
-                ],
+                'key_perks' => $parsedAmenities,
                 'rooms' => $formattedRooms,
                 'amenities_categories' => [
                     'Facilities & Services' => [
@@ -1039,14 +1070,16 @@ function submitHotelReservation() {
     const rooms = document.getElementById('roomsCountSelect')?.value || 1;
     const guests = document.getElementById('guestsCountSelect')?.value || 2;
     const totalRaw = document.getElementById('grandTotalDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
+    const hotelId = <?= json_encode($hotel['id'] ?? '') ?>;
 
     const btn = document.querySelector('#hotelReservationForm button[type="submit"]');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Confirming Stay...</span>';
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Securing Reservation...</span>';
     }
 
     const formData = new FormData();
+    formData.append('hotel_id', hotelId);
     formData.append('guest_name', name);
     formData.append('guest_phone', phone);
     formData.append('hotel_name', hotelName);
@@ -1067,8 +1100,13 @@ function submitHotelReservation() {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-calendar-check text-xs"></i> <span>Confirm Reservation</span>';
         }
-        if (data.success) {
-            // Show Success Modal
+        if (data.login_required) {
+            showHotelLoginModal(hotelName + ' (' + room.trim() + ')');
+            return;
+        }
+        if (data.success && data.redirect) {
+            window.location.href = data.redirect;
+        } else if (data.success) {
             showBookingSuccessModal(data.booking_code, hotelName, room.trim(), name, totalRaw);
         } else {
             alert(data.message || 'Booking failed. Please try again.');
@@ -1081,6 +1119,44 @@ function submitHotelReservation() {
         }
         alert('Reservation confirmed! Voucher details sent to your phone.');
     });
+}
+
+function showHotelLoginModal(title) {
+    const existing = document.getElementById('loginRequiredModalOverlay');
+    if (existing) existing.remove();
+
+    const currentUrl = window.location.href;
+    const modalHtml = `
+        <div id="loginRequiredModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
+                <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                        Traveler Account Required
+                    </span>
+                    <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Reserve Room</h3>
+                    <p class="text-xs text-slate-500">Please sign in to your GuideFlux account to complete your hotel booking and receive instant check-in vouchers.</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 truncate">
+                    <span>${title}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <a href="login.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
+                        Log In Now
+                    </a>
+                    <a href="signup.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider text-center transition">
+                        Create Account
+                    </a>
+                </div>
+                <button type="button" onclick="document.getElementById('loginRequiredModalOverlay').remove()" class="text-xs text-slate-400 hover:text-slate-600 font-bold">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
 function showBookingSuccessModal(code, hotel, room, guest, amount) {

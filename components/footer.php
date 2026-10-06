@@ -1,15 +1,18 @@
 <?php
 /**
- * Footer Component - Orion Advent
+ * Footer Component - GuideFlux
  * - Pre-Footer Newsletter & Travel Club Strip
  * - 5-Column Comprehensive Travel Portal Directory
  * - Payment Partner Badges & Official Tourism Accreditations
  * - 100% Flat, Border-First, Zero Shadows
  * - Pure Font Awesome 6 Icons Only (Zero Emojis)
  */
+$fSiteName = getSetting('site_name', 'GuideFlux');
+$fSitePhone = getSetting('site_phone', '+91 98765 43210');
+$fSiteEmail = getSetting('site_email', 'concierge@guideflux.com');
 ?>
 <!-- ==========================================
-     PRE-FOOTER: EXCLUSIVE ORION TRAVEL CLUB
+     PRE-FOOTER: EXCLUSIVE TRAVEL CLUB
 =========================================== -->
 <section class="py-12 md:py-16 px-4 sm:px-8 xl:px-12 bg-white border-t border-b border-slate-200">
     <div class="max-w-7xl mx-auto">
@@ -21,11 +24,11 @@
             <div class="max-w-xl text-center lg:text-left space-y-2 relative z-10">
                 <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
                     <i class="fa-solid fa-tag text-brand-600"></i>
-                    <span>Orion Secret Travel Club</span>
+                    <span><?php echo htmlspecialchars($fSiteName); ?> Travel Club</span>
                 </span>
                 
                 <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                    Get Secret Flight Drops & Weekend Deals
+                    Get Secret Flight Drops &amp; Weekend Deals
                 </h3>
 
                 <p class="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
@@ -35,7 +38,7 @@
 
             <!-- Newsletter Input Form -->
             <div class="w-full lg:w-auto relative z-10">
-                <form class="flex flex-col sm:flex-row items-center gap-2 max-w-md mx-auto lg:mx-0" onsubmit="event.preventDefault(); alert('Welcome to Orion Travel Club! Check your inbox for your ₹1,500 welcome discount code.');">
+                <form class="flex flex-col sm:flex-row items-center gap-2 max-w-md mx-auto lg:mx-0" onsubmit="event.preventDefault(); alert('Welcome to <?php echo htmlspecialchars($fSiteName); ?> Travel Club! Check your inbox for your ₹1,500 welcome discount code.');">
                     <div class="relative w-full sm:w-80">
                         <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input type="email" 
@@ -72,12 +75,12 @@
             
             <!-- Col 1: Brand Info & 24x7 Concierge (4 Cols) -->
             <div class="lg:col-span-4 space-y-5">
-                <a href="#hero" class="flex items-center space-x-2.5 group inline-block">
+                <a href="index.php" class="flex items-center space-x-2.5 group inline-block">
                     <span class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center border border-brand-500 group-hover:bg-brand-500 transition-colors">
                         <i class="fa-solid fa-compass text-lg"></i>
                     </span>
                     <span class="text-2xl font-black text-white tracking-tight">
-                        Orion<span class="text-brand-400">Advent</span>
+                        <?php echo htmlspecialchars($fSiteName); ?>
                     </span>
                 </a>
 
@@ -92,7 +95,7 @@
                             <i class="fa-solid fa-phone text-[11px]"></i>
                         </span>
                         <div>
-                            <span class="block text-white font-bold">+91 98765 43210</span>
+                            <span class="block text-white font-bold"><?php echo htmlspecialchars($fSitePhone); ?></span>
                             <span class="text-[10px] text-slate-400">24x7 Dedicated Trip Helpdesk</span>
                         </div>
                     </div>
@@ -101,8 +104,8 @@
                         <span class="w-7 h-7 rounded-lg bg-slate-800 text-brand-400 flex items-center justify-center shrink-0 border border-slate-700">
                             <i class="fa-solid fa-envelope text-[11px]"></i>
                         </span>
-                        <a href="mailto:concierge@orionadvent.com" class="text-slate-300 hover:text-white transition font-medium">
-                            concierge@orionadvent.com
+                        <a href="mailto:<?php echo htmlspecialchars($fSiteEmail); ?>" class="text-slate-300 hover:text-white transition font-medium">
+                            <?php echo htmlspecialchars($fSiteEmail); ?>
                         </a>
                     </div>
 
@@ -194,17 +197,17 @@
             <div class="lg:col-span-2 space-y-3.5">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-white border-b border-slate-800 pb-2 flex items-center">
                     <i class="fa-solid fa-shield-halved text-brand-400 mr-2"></i>
-                    <span>Trust & Policy</span>
+                    <span>Trust &amp; Policies</span>
                 </h4>
                 <ul class="space-y-2 text-xs font-normal text-slate-400">
-                    <li><a href="#about-section" class="hover:text-white transition flex items-center">About Orion Advent</a></li>
-                    <li><a href="#how-it-works" class="hover:text-white transition flex items-center">3-Step Booking Guarantee</a></li>
-                    <li><a href="#reviews-section" class="hover:text-white transition flex items-center">Verified Traveler Reviews</a></li>
-                    <li><a href="#" class="hover:text-white transition flex items-center">Free Cancellation Policy</a></li>
-                    <li><a href="#" class="hover:text-white transition flex items-center">Price-Lock Guarantee</a></li>
-                    <li><a href="#" class="hover:text-white transition flex items-center">Terms of Service</a></li>
-                    <li><a href="#" class="hover:text-white transition flex items-center">Privacy & Cookie Notice</a></li>
-                    <li><a href="#" class="hover:text-white transition flex items-center">Partner With Us</a></li>
+                    <li><a href="about.php" class="hover:text-white transition flex items-center">About <?php echo htmlspecialchars($fSiteName); ?></a></li>
+                    <li><a href="privacy-policy.php" class="hover:text-white transition flex items-center">Privacy Policy</a></li>
+                    <li><a href="terms.php" class="hover:text-white transition flex items-center">Terms &amp; Conditions</a></li>
+                    <li><a href="cancellation-policy.php" class="hover:text-white transition flex items-center">Cancellation &amp; Refund</a></li>
+                    <li><a href="policies.php?tab=booking" class="hover:text-white transition flex items-center">Token Advance Guarantee</a></li>
+                    <li><a href="contact.php" class="hover:text-white transition flex items-center">24x7 Help Concierge</a></li>
+                    <li><a href="contact.php#faq" class="hover:text-white transition flex items-center">Frequently Asked Questions</a></li>
+                    <li><a href="my-trips.php" class="hover:text-white transition flex items-center">My Trips &amp; Vouchers</a></li>
                 </ul>
             </div>
 
@@ -216,11 +219,11 @@
             <div class="flex flex-wrap items-center gap-3">
                 <span class="text-[11px] font-bold uppercase text-slate-500 tracking-wider">Accepted Payment Modes:</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">UPI</span>
+                <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">Razorpay</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">Visa</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">Mastercard</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">RuPay</span>
                 <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">NetBanking</span>
-                <span class="px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-white font-bold text-[11px]">Zero-Cost EMI</span>
             </div>
 
             <div class="flex flex-wrap items-center gap-5 text-slate-400 font-semibold">
@@ -230,11 +233,11 @@
                 </div>
                 <div class="flex items-center space-x-1.5">
                     <i class="fa-solid fa-shield-halved text-brand-400 text-xs"></i>
-                    <span>IATA Accredited</span>
+                    <span>Verified Travel Partners</span>
                 </div>
                 <div class="flex items-center space-x-1.5">
                     <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-                    <span>Trustpilot 4.9 ★</span>
+                    <span>4.9 ★ Rated Stays</span>
                 </div>
             </div>
 
@@ -242,12 +245,18 @@
 
         <!-- 3. Bottom Legal Disclaimer & Copyright -->
         <div class="pt-6 border-t border-slate-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-            <div>
-                &copy; <?= date('Y') ?> <strong class="text-slate-400">Orion Advent Technologies Pvt. Ltd.</strong> All rights reserved.
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>&copy; <?= date('Y') ?> <strong class="text-slate-400"><?php echo htmlspecialchars($fSiteName); ?> Holidays &amp; Stays Pvt. Ltd.</strong> All rights reserved.</span>
+                <span class="text-slate-700 hidden sm:inline">&bull;</span>
+                <a href="privacy-policy.php" class="hover:text-slate-300 transition">Privacy</a>
+                <span class="text-slate-700">&bull;</span>
+                <a href="terms.php" class="hover:text-slate-300 transition">Terms</a>
+                <span class="text-slate-700">&bull;</span>
+                <a href="cancellation-policy.php" class="hover:text-slate-300 transition">Refunds</a>
             </div>
 
             <div class="text-center md:text-right text-slate-500 font-normal">
-                Fares & inclusions are verified directly with certified airline & hospitality partners. Fares are subject to availability.
+                Fares &amp; inclusions are verified directly with certified airline &amp; hospitality partners. Fares are subject to seasonal availability.
             </div>
         </div>
 

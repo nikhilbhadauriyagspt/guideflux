@@ -102,12 +102,15 @@ if ($pdoSearch) {
             elseif (str_contains($lowerText, 'beach') || str_contains($lowerText, 'coastal') || str_contains($lowerText, 'island') || str_contains($lowerText, 'watersport') || str_contains($lowerText, 'sea') || str_contains($lowerText, 'goa') || str_contains($lowerText, 'bali')) $themeSlug = 'beach';
             elseif (str_contains($lowerText, 'luxury') || str_contains($lowerText, 'resort') || str_contains($lowerText, 'villa') || str_contains($lowerText, 'palace') || str_contains($lowerText, 'houseboat') || str_contains($lowerText, 'dubai')) $themeSlug = 'luxury';
 
-            $tagsStr = strtolower($p['title'] . ' ' . $p['location'] . ' ' . $p['state_country'] . ' ' . $p['category'] . ' ' . $p['circuit_type'] . ' ' . $themeSlug . ' package tour cancellation cab breakfast sightseeing');
+            $travelMode = !empty($p['travel_mode']) ? $p['travel_mode'] : (($p['category'] === 'international') ? 'flight' : 'cab');
+            $tagsStr = strtolower($p['title'] . ' ' . $p['location'] . ' ' . $p['state_country'] . ' ' . $p['category'] . ' ' . $p['circuit_type'] . ' ' . $travelMode . ' ' . $themeSlug . ' package tour flight train bus volvo cab car cancellation breakfast sightseeing');
 
             $searchItems[] = [
                 'id' => 'PKG-DB-' . $p['id'],
                 'type' => 'package',
                 'category' => $p['category'] ?: 'domestic',
+                'travel_mode' => $travelMode,
+                'departure_city' => $p['departure_city'] ?? 'All Major Cities',
                 'theme' => $themeSlug,
                 'sub_type' => ucfirst($p['category'] ?: 'Domestic') . ' Tour',
                 'title' => $p['title'],
@@ -236,6 +239,27 @@ if ($initialType === 'domestic') {
 require_once 'components/header.php';
 require_once 'components/navbar.php';
 ?>
+
+<style>
+/* Sleek custom scrollbar for fixed filter sidebar */
+.filter-sidebar-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+.filter-sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.filter-sidebar-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+.filter-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+.filter-sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+</style>
 
 <!-- ==========================================
      TOP REFINEMENT SEARCH BANNER (100% Flat, No Shadows)
@@ -408,9 +432,9 @@ require_once 'components/navbar.php';
         <div class="flex flex-col lg:flex-row gap-8 items-start">
             
             <!-- ==========================================
-                 LEFT COLUMN: FILTER SIDEBAR (Clean, 100% Flat)
+                 LEFT COLUMN: FILTER SIDEBAR (Fixed / Sticky with Internal Scroll)
             =========================================== -->
-            <aside id="filterSidebar" class="hidden lg:block w-full lg:w-72 shrink-0 space-y-5">
+            <aside id="filterSidebar" class="hidden lg:block w-full lg:w-72 shrink-0 space-y-5 lg:sticky lg:top-36 xl:top-40 lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto overscroll-contain pr-1.5 filter-sidebar-scroll pb-6">
                 
                 <!-- Filter Box 1: Category Radios -->
                 <div class="bg-white rounded-2xl border border-slate-200 p-5">
@@ -522,6 +546,59 @@ require_once 'components/navbar.php';
                             <span class="flex items-center space-x-1.5">
                                 <i class="fa-solid fa-crown text-amber-500 text-xs"></i>
                                 <span>Luxury Escapes</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Filter Box: Travel & Transportation Mode -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-route text-brand-600"></i>
+                            <span>Travel Mode</span>
+                        </h3>
+                        <button type="button" class="reset-filter-group text-[11px] text-brand-600 hover:underline font-semibold" data-group="travelMode">Reset</button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="travelModeFilter" value="all" checked class="accent-teal-600">
+                            <span>All Travel Modes</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="travelModeFilter" value="flight" class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-plane-departure text-sky-500 text-xs"></i>
+                                <span>With Flights (Airfare Included)</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="travelModeFilter" value="train" class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-train text-amber-500 text-xs"></i>
+                                <span>By Train (Rail Tours)</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="travelModeFilter" value="bus" class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-bus text-emerald-500 text-xs"></i>
+                                <span>By Volvo / Luxury Bus</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="travelModeFilter" value="cab" class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-car text-teal-600 text-xs"></i>
+                                <span>By Private Cab / Road</span>
+                            </span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 cursor-pointer p-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700">
+                            <input type="radio" name="travelModeFilter" value="land_only" class="accent-teal-600">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-solid fa-hotel text-indigo-500 text-xs"></i>
+                                <span>Land Only (Stays &amp; Sightseeing)</span>
                             </span>
                         </label>
                     </div>
@@ -694,6 +771,7 @@ require_once 'components/navbar.php';
                                  data-id="<?= htmlspecialchars($item['id']) ?>"
                                  data-type="package"
                                  data-package-category="<?= htmlspecialchars($item['category'] ?? 'domestic') ?>"
+                                 data-travel-mode="<?= htmlspecialchars($item['travel_mode'] ?? 'flight') ?>"
                                  data-price="<?= $item['price'] ?>"
                                  data-rating="<?= $item['rating'] ?>"
                                  data-tags="<?= htmlspecialchars($item['tags']) ?>"
@@ -721,11 +799,27 @@ require_once 'components/navbar.php';
                             <div class="flex-1 p-5 flex flex-col justify-between">
                                 <div>
                                     <!-- Destination Track & Rating -->
-                                    <div class="flex items-center justify-between gap-2 mb-1.5">
-                                        <span class="inline-flex items-center space-x-1.5 text-[11px] font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full">
-                                            <i class="fa-solid fa-map-pin text-[10px]"></i>
-                                            <span><?= htmlspecialchars($item['sub_type']) ?></span>
-                                        </span>
+                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="inline-flex items-center space-x-1.5 text-[11px] font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full">
+                                                <i class="fa-solid fa-map-pin text-[10px]"></i>
+                                                <span><?= htmlspecialchars($item['sub_type']) ?></span>
+                                            </span>
+
+                                            <?php
+                                                $cMode = $item['travel_mode'] ?? 'flight';
+                                                $cModeIcon = 'fa-solid fa-plane-departure text-sky-600';
+                                                $cModeLabel = 'With Flights';
+                                                if ($cMode === 'train') { $cModeIcon = 'fa-solid fa-train text-amber-600'; $cModeLabel = 'By Train'; }
+                                                elseif ($cMode === 'bus') { $cModeIcon = 'fa-solid fa-bus text-emerald-600'; $cModeLabel = 'By Volvo Bus'; }
+                                                elseif ($cMode === 'cab') { $cModeIcon = 'fa-solid fa-car text-teal-600'; $cModeLabel = 'By Private Cab'; }
+                                                elseif ($cMode === 'land_only') { $cModeIcon = 'fa-solid fa-hotel text-indigo-600'; $cModeLabel = 'Land Only'; }
+                                            ?>
+                                            <span class="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                                                <i class="<?= $cModeIcon ?> text-[9px]"></i>
+                                                <span><?= $cModeLabel ?></span>
+                                            </span>
+                                        </div>
 
                                         <div class="flex items-center space-x-1 text-xs">
                                             <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[11px] flex items-center space-x-1">
@@ -1165,6 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryTabs = document.querySelectorAll('.cat-tab-btn');
     const sideCategoryRadios = document.querySelectorAll('input[name="sideCategory"]');
     const themeRadios = document.querySelectorAll('input[name="themeFilter"]');
+    const travelModeRadios = document.querySelectorAll('input[name="travelModeFilter"]');
     const priceRadios = document.querySelectorAll('input[name="priceRange"]');
     const ratingRadios = document.querySelectorAll('input[name="ratingFilter"]');
     const perkCheckboxes = document.querySelectorAll('.perk-checkbox');
@@ -1260,6 +1355,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Filter Listeners
     themeRadios.forEach(r => r.addEventListener('change', runFilters));
+    travelModeRadios.forEach(r => r.addEventListener('change', runFilters));
     priceRadios.forEach(r => r.addEventListener('change', runFilters));
     ratingRadios.forEach(r => r.addEventListener('change', runFilters));
     perkCheckboxes.forEach(cb => cb.addEventListener('change', runFilters));
@@ -1274,6 +1370,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (group === 'theme') {
                 const defaultTheme = document.querySelector('input[name="themeFilter"][value="all"]');
                 if (defaultTheme) defaultTheme.checked = true;
+                runFilters();
+            } else if (group === 'travelMode') {
+                const defaultMode = document.querySelector('input[name="travelModeFilter"][value="all"]');
+                if (defaultMode) defaultMode.checked = true;
                 runFilters();
             } else if (group === 'price') {
                 const defaultPrice = document.querySelector('input[name="priceRange"][value="all"]');
@@ -1297,6 +1397,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setCategory('all');
         const defaultTheme = document.querySelector('input[name="themeFilter"][value="all"]');
         if (defaultTheme) defaultTheme.checked = true;
+        const defaultMode = document.querySelector('input[name="travelModeFilter"][value="all"]');
+        if (defaultMode) defaultMode.checked = true;
         const defaultPrice = document.querySelector('input[name="priceRange"][value="all"]');
         if (defaultPrice) defaultPrice.checked = true;
         const defaultRating = document.querySelector('input[name="ratingFilter"][value="all"]');
@@ -1319,6 +1421,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const cat = activeCatRadio ? activeCatRadio.value : 'all';
         const activeThemeRadio = document.querySelector('input[name="themeFilter"]:checked');
         const selectedTheme = activeThemeRadio ? activeThemeRadio.value : 'all';
+        const activeModeRadio = document.querySelector('input[name="travelModeFilter"]:checked');
+        const selectedMode = activeModeRadio ? activeModeRadio.value : 'all';
         const activePriceRadio = document.querySelector('input[name="priceRange"]:checked');
         const priceRange = activePriceRadio ? activePriceRadio.value : 'all';
         const activeRatingRadio = document.querySelector('input[name="ratingFilter"]:checked');
@@ -1362,7 +1466,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 matchCat = (cardType === 'flight');
             }
 
-            // 2. Query Text Check
+            // 2. Travel Mode Check (By Flight, By Train, By Bus, By Cab, Land Only)
+            let matchTravelMode = true;
+            if (selectedMode !== 'all') {
+                if (cardType === 'package') {
+                    const cardTravelMode = (card.getAttribute('data-travel-mode') || 'flight').toLowerCase();
+                    matchTravelMode = (cardTravelMode === selectedMode);
+                } else {
+                    matchTravelMode = false;
+                }
+            }
+
+            // 3. Query Text Check
             let matchQuery = true;
             if (query.length > 0) {
                 if (cardTitle.includes(query) || cardTags.includes(query)) {
@@ -1378,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 3. Price Budget Check
+            // 4. Price Budget Check
             let matchPrice = true;
             if (priceRange === 'under-10k') {
                 matchPrice = cardPrice < 10000;
@@ -1390,13 +1505,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 matchPrice = cardPrice > 50000;
             }
 
-            // 4. Rating Check
+            // 5. Rating Check
             let matchRating = true;
             if (minRating > 0) {
                 matchRating = cardRating >= minRating;
             }
 
-            // 5. Inclusions Check
+            // 6. Inclusions Check
             let matchPerks = true;
             if (checkedPerks.length > 0) {
                 for (let perk of checkedPerks) {
@@ -1407,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 6. Theme Check
+            // 7. Theme Check
             let matchTheme = true;
             if (selectedTheme !== 'all') {
                 if (cardType === 'package') {
@@ -1419,7 +1534,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Final Decision
-            if (matchCat && matchTheme && matchQuery && matchPrice && matchRating && matchPerks) {
+            if (matchCat && matchTheme && matchTravelMode && matchQuery && matchPrice && matchRating && matchPerks) {
                 card.style.display = '';
                 visibleCount++;
                 visibleCardsArray.push(card);

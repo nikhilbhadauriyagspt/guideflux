@@ -146,6 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postData = [
             'payment_gateway_provider' => trim($_POST['payment_gateway_provider'] ?? 'razorpay'),
             'payment_mode' => trim($_POST['payment_mode'] ?? 'test'),
+            'booking_advance_type' => trim($_POST['booking_advance_type'] ?? 'percentage'),
+            'booking_advance_percent' => (float)($_POST['booking_advance_percent'] ?? 30),
+            'booking_advance_fixed' => (float)($_POST['booking_advance_fixed'] ?? 2500),
             'razorpay_key_id' => trim($_POST['razorpay_key_id'] ?? ''),
             'razorpay_key_secret' => trim($_POST['razorpay_key_secret'] ?? ''),
             'stripe_publishable_key' => trim($_POST['stripe_publishable_key'] ?? ''),
@@ -245,82 +248,87 @@ $pageTitle = "System & API Settings";
 include 'components/head.php';
 ?>
 
-<div class="min-h-screen flex bg-[#f8fafc] antialiased selection:bg-teal-600 selection:text-white">
+<div class="min-h-screen flex bg-cream-100/70 antialiased selection:bg-sage-600 selection:text-white">
     
     <!-- Sidebar -->
     <?php include 'components/sidebar.php'; ?>
 
     <!-- Main Content Area -->
-    <div class="flex-1 lg:pl-64 xl:pl-72 flex flex-col min-w-0 transition-all">
+    <div class="flex-1 lg:pl-64 xl:pl-68 flex flex-col min-w-0 transition-all">
         
         <!-- Header -->
         <?php include 'components/header.php'; ?>
 
         <!-- Content Body -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 w-full space-y-6">
+        <main class="flex-1 p-4 sm:p-6 lg:p-7 w-full space-y-5">
 
-            <!-- Banner -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-slate-900 text-white border border-slate-800">
+            <!-- Top Header Action Strip -->
+            <div class="bg-white border border-[#e5e4dc] p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="space-y-1">
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-teal-300 text-xs font-semibold">
-                        <i class="fa-solid fa-sliders"></i>
-                        <span>Configuration &amp; API Manager</span>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 bg-sage-600"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-sage-800 bg-sage-50 border border-sage-200 px-2 py-0.5">Configuration Desk</span>
+                        <span class="text-xs text-slate-400">• System &amp; API Integrations</span>
                     </div>
-                    <h1 class="text-2xl font-bold font-space">System &amp; API Settings</h1>
-                    <p class="text-xs text-slate-400">Manage Flight API, OpenStreetMap / Google Places, Payment Gateways, SMTP, OAuth, and Branding.</p>
+                    <h1 class="text-xl sm:text-2xl font-bold font-space text-slate-900 tracking-tight">
+                        System &amp; API Settings
+                    </h1>
+                    <p class="text-xs text-slate-500">
+                        Manage website identity, Ignav flight search API, geocoding provider, payment gateways, SMTP mailer, and OAuth logins.
+                    </p>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <span class="text-xs px-3 py-1.5 rounded-xl font-bold <?php echo ($settings['mail_mode'] ?? 'testing') === 'testing' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'; ?>">
-                        <i class="fa-solid <?php echo ($settings['mail_mode'] ?? 'testing') === 'testing' ? 'fa-vial' : 'fa-bolt'; ?> mr-1"></i>
-                        Mail: <?php echo strtoupper($settings['mail_mode'] ?? 'testing'); ?>
-                    </span>
-                    <span class="text-xs px-3 py-1.5 rounded-xl font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
-                        <i class="fa-solid fa-map-pin mr-1"></i>
+                    <span class="text-[11px] px-2.5 py-1 font-bold border border-[#e5e4dc] bg-cream-50 text-slate-700">
+                        <i class="fa-solid fa-map-pin text-sage-700 mr-1"></i>
                         Places: <?php echo strtoupper($settings['location_provider'] ?? 'osm'); ?>
+                    </span>
+                    <span class="text-[11px] px-2.5 py-1 font-bold border border-[#e5e4dc] bg-cream-50 text-slate-700">
+                        <i class="fa-solid fa-envelope text-sage-700 mr-1"></i>
+                        Mail: <?php echo strtoupper($settings['mail_mode'] ?? 'testing'); ?>
                     </span>
                 </div>
             </div>
 
             <?php if (!empty($alertMessage)): ?>
-                <div class="p-4 rounded-2xl text-xs font-bold border flex items-center justify-between <?php echo $alertType === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'; ?>">
+                <div class="p-3.5 border text-xs font-semibold flex items-center justify-between <?php echo $alertType === 'success' ? 'bg-sage-50 text-sage-900 border-sage-200' : 'bg-rose-50 text-rose-800 border-rose-200'; ?>">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid <?php echo $alertType === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'; ?> text-sm"></i>
+                        <i class="fa-solid <?php echo $alertType === 'success' ? 'fa-circle-check text-sage-700' : 'fa-circle-exclamation text-rose-600'; ?> text-sm"></i>
                         <span><?php echo htmlspecialchars($alertMessage); ?></span>
                     </div>
-                    <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 text-xs">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             <?php endif; ?>
 
             <!-- Navigation Tabs -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200">
-                <button type="button" onclick="switchSettingsTab('branding')" id="tabBtn-branding" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'branding' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-[#e5e4dc]">
+                <button type="button" onclick="switchSettingsTab('branding')" id="tabBtn-branding" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'branding' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-paintbrush text-xs"></i>
-                    <span>Website Branding</span>
+                    <span>Branding &amp; Identity</span>
                 </button>
-                <button type="button" onclick="switchSettingsTab('flights')" id="tabBtn-flights" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'flights' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+                <button type="button" onclick="switchSettingsTab('flights')" id="tabBtn-flights" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'flights' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-plane-departure text-xs"></i>
                     <span>Flight Search API</span>
                 </button>
-                <button type="button" onclick="switchSettingsTab('location')" id="tabBtn-location" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'location' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+                <button type="button" onclick="switchSettingsTab('location')" id="tabBtn-location" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'location' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-map-location-dot text-xs"></i>
                     <span>Places &amp; Maps API</span>
                 </button>
-                <button type="button" onclick="switchSettingsTab('payments')" id="tabBtn-payments" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'payments' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+                <button type="button" onclick="switchSettingsTab('payments')" id="tabBtn-payments" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'payments' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-credit-card text-xs"></i>
                     <span>Payment Gateways</span>
                 </button>
-                <button type="button" onclick="switchSettingsTab('email')" id="tabBtn-email" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'email' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+                <button type="button" onclick="switchSettingsTab('email')" id="tabBtn-email" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'email' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-envelope text-xs"></i>
                     <span>SMTP &amp; Email</span>
                 </button>
-                <button type="button" onclick="switchSettingsTab('social_login')" id="tabBtn-social_login" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'social_login' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+                <button type="button" onclick="switchSettingsTab('social_login')" id="tabBtn-social_login" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'social_login' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-users-rectangle text-xs"></i>
                     <span>Social Login OAuth</span>
                 </button>
-                <button type="button" onclick="switchSettingsTab('social_links')" id="tabBtn-social_links" class="settings-tab-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap <?php echo $activeTab === 'social_links' ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'; ?>">
+                <button type="button" onclick="switchSettingsTab('social_links')" id="tabBtn-social_links" class="settings-tab-btn px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap border <?php echo $activeTab === 'social_links' ? 'bg-sage-700 text-white border-sage-800' : 'bg-white text-slate-700 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                     <i class="fa-solid fa-share-nodes text-xs"></i>
                     <span>Social Media Links</span>
                 </button>
@@ -685,41 +693,94 @@ include 'components/head.php';
                     <form action="settings.php?tab=payments" method="POST" class="space-y-5">
                         <input type="hidden" name="action" value="save_payment_settings">
 
+                        <!-- Advance Token Payment Rules (Admin Configurable 30% / 50% / Fixed Token) -->
+                        <div class="p-4 border border-[#e5e4dc] bg-cream-50/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                    <i class="fa-solid fa-coins text-sage-700 mr-1.5"></i>
+                                    <span>Advance / Token Payment Rules (Tour Packages &amp; Stays)</span>
+                                </label>
+                                <span class="text-[10px] font-bold text-sage-800 bg-sage-50 border border-sage-200 px-2 py-0.5">Customer Checkout</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">
+                                Configure the upfront advance payment collected from travelers at booking time. The remaining balance will be payable on arrival.
+                            </p>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <label class="flex items-start gap-2.5 p-3 bg-white border border-[#e5e4dc] cursor-pointer hover:border-sage-600 transition">
+                                    <input type="radio" name="booking_advance_type" value="percentage" <?php echo ($settings['booking_advance_type'] ?? 'percentage') === 'percentage' ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
+                                    <div>
+                                        <span class="block text-xs font-bold text-slate-800">Percentage of Total Cost (%)</span>
+                                        <span class="block text-[10px] text-slate-400">e.g. 30% or 50% of total itinerary price</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-2.5 p-3 bg-white border border-[#e5e4dc] cursor-pointer hover:border-sage-600 transition">
+                                    <input type="radio" name="booking_advance_type" value="fixed" <?php echo ($settings['booking_advance_type'] ?? 'percentage') === 'fixed' ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
+                                    <div>
+                                        <span class="block text-xs font-bold text-slate-800">Fixed Token Amount (₹)</span>
+                                        <span class="block text-[10px] text-slate-400">Fixed token lock (e.g. ₹2,500 / ₹5,000 per booking)</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#e5e4dc]">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Advance Percentage (%)</label>
+                                    <div class="relative">
+                                        <input type="number" step="1" min="5" max="100" name="booking_advance_percent" value="<?php echo htmlspecialchars($settings['booking_advance_percent'] ?? '30'); ?>" placeholder="30"
+                                               class="w-full px-3 py-2 text-xs bg-white border border-[#e5e4dc] font-bold text-slate-800 focus:outline-none focus:border-sage-700">
+                                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 mt-1 block">Standard advance: 30% or 50%</span>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Fixed Token Lock Amount (₹)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₹</span>
+                                        <input type="number" step="100" min="500" name="booking_advance_fixed" value="<?php echo htmlspecialchars($settings['booking_advance_fixed'] ?? '2500'); ?>" placeholder="2500"
+                                               class="w-full pl-7 pr-3 py-2 text-xs bg-white border border-[#e5e4dc] font-bold text-slate-800 focus:outline-none focus:border-sage-700">
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 mt-1 block">Default fallback token: ₹2,500</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Gateway Selection -->
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                        <div class="p-4 border border-[#e5e4dc] bg-cream-50/50 space-y-3">
                             <div class="flex items-center justify-between">
                                 <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">Payment Gateway Provider</label>
                                 <div class="flex items-center gap-3">
                                     <label class="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-                                        <input type="radio" name="payment_mode" value="test" <?php echo ($settings['payment_mode'] ?? 'test') === 'test' ? 'checked' : ''; ?> class="accent-brand-600">
-                                        <span>Test / Sandbox</span>
+                                        <input type="radio" name="payment_mode" value="test" <?php echo ($settings['payment_mode'] ?? 'test') === 'test' ? 'checked' : ''; ?> class="accent-sage-700">
+                                        <span>Test Sandbox</span>
                                     </label>
                                     <label class="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer">
-                                        <input type="radio" name="payment_mode" value="live" <?php echo ($settings['payment_mode'] ?? 'test') === 'live' ? 'checked' : ''; ?> class="accent-brand-600">
+                                        <input type="radio" name="payment_mode" value="live" <?php echo ($settings['payment_mode'] ?? 'test') === 'live' ? 'checked' : ''; ?> class="accent-sage-700">
                                         <span>Live Production</span>
                                     </label>
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <label class="flex items-start gap-2.5 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition">
-                                    <input type="radio" name="payment_gateway_provider" value="razorpay" <?php echo ($settings['payment_gateway_provider'] ?? 'razorpay') === 'razorpay' ? 'checked' : ''; ?> class="mt-0.5 accent-brand-600">
+                                <label class="flex items-start gap-2.5 p-3 bg-white border border-[#e5e4dc] cursor-pointer hover:border-sage-600 transition">
+                                    <input type="radio" name="payment_gateway_provider" value="razorpay" <?php echo ($settings['payment_gateway_provider'] ?? 'razorpay') === 'razorpay' ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
                                     <div>
                                         <span class="block text-xs font-bold text-slate-800">Razorpay (India UPI/Cards)</span>
                                         <span class="block text-[10px] text-slate-400">GPay, PhonePe, Paytm, Cards</span>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-2.5 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition">
-                                    <input type="radio" name="payment_gateway_provider" value="stripe" <?php echo ($settings['payment_gateway_provider'] ?? 'razorpay') === 'stripe' ? 'checked' : ''; ?> class="mt-0.5 accent-brand-600">
+                                <label class="flex items-start gap-2.5 p-3 bg-white border border-[#e5e4dc] cursor-pointer hover:border-sage-600 transition">
+                                    <input type="radio" name="payment_gateway_provider" value="stripe" <?php echo ($settings['payment_gateway_provider'] ?? 'razorpay') === 'stripe' ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
                                     <div>
                                         <span class="block text-xs font-bold text-slate-800">Stripe (Global Cards)</span>
                                         <span class="block text-[10px] text-slate-400">International cards &amp; USD/EUR</span>
                                     </div>
                                 </label>
 
-                                <label class="flex items-start gap-2.5 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-brand-500 transition">
-                                    <input type="radio" name="payment_gateway_provider" value="offline" <?php echo ($settings['payment_gateway_provider'] ?? 'razorpay') === 'offline' ? 'checked' : ''; ?> class="mt-0.5 accent-brand-600">
+                                <label class="flex items-start gap-2.5 p-3 bg-white border border-[#e5e4dc] cursor-pointer hover:border-sage-600 transition">
+                                    <input type="radio" name="payment_gateway_provider" value="offline" <?php echo ($settings['payment_gateway_provider'] ?? 'razorpay') === 'offline' ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
                                     <div>
                                         <span class="block text-xs font-bold text-slate-800">Offline / Pay at Hotel</span>
                                         <span class="block text-[10px] text-slate-400">Book with 0 advance</span>
@@ -1065,15 +1126,15 @@ function switchSettingsTab(tabName) {
 
     // Reset button styles
     document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-        btn.classList.remove('bg-brand-600', 'text-white');
-        btn.classList.add('bg-white', 'text-slate-700', 'hover:bg-slate-100', 'border', 'border-slate-200');
+        btn.classList.remove('bg-sage-700', 'text-white', 'border-sage-800');
+        btn.classList.add('bg-white', 'text-slate-700', 'hover:bg-cream-100', 'border-[#e5e4dc]');
     });
 
     // Highlight active button
     const activeBtn = document.getElementById('tabBtn-' + tabName);
     if (activeBtn) {
-        activeBtn.classList.remove('bg-white', 'text-slate-700', 'hover:bg-slate-100', 'border', 'border-slate-200');
-        activeBtn.classList.add('bg-brand-600', 'text-white');
+        activeBtn.classList.remove('bg-white', 'text-slate-700', 'hover:bg-cream-100', 'border-[#e5e4dc]');
+        activeBtn.classList.add('bg-sage-700', 'text-white', 'border-sage-800');
     }
 
     // Update URL hash/query without reload

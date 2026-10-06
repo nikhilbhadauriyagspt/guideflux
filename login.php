@@ -4,6 +4,18 @@
  * Clean, Airy, Lightweight & Modern Travel Theme UI with Live Authentication
  */
 require_once __DIR__ . '/config/settings.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$redirect = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
+
+// If already logged in, send them straight back
+if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+    header("Location: " . (!empty($redirect) ? $redirect : 'index.php'));
+    exit();
+}
+
 $pageTitle = 'Log In to Your Account - ' . htmlspecialchars(getSetting('site_name', 'GuideFlux'));
 require_once 'components/header.php';
 require_once 'components/navbar.php';
@@ -122,6 +134,7 @@ require_once 'components/navbar.php';
 
                 <!-- Login Form -->
                 <form id="loginForm" class="space-y-4">
+                    <input type="hidden" name="redirect" id="redirectInput" value="<?php echo htmlspecialchars($redirect); ?>">
                     
                     <!-- Email Input -->
                     <div>
@@ -199,7 +212,7 @@ require_once 'components/navbar.php';
                 <div class="mt-7 text-center pt-5 border-t border-slate-100">
                     <p class="text-xs text-slate-500 font-medium">
                         Don't have a GuideFlux account yet? 
-                        <a href="signup.php" class="text-brand-600 hover:text-brand-700 font-bold ml-1 hover:underline">
+                        <a href="signup.php<?php echo !empty($redirect) ? '?redirect=' . urlencode($redirect) : ''; ?>" class="text-brand-600 hover:text-brand-700 font-bold ml-1 hover:underline">
                             Create Account Free
                         </a>
                     </p>

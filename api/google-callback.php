@@ -16,6 +16,9 @@ $redirectUri = $protocol . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF'])
 
 // If called directly without 'code' parameter, redirect user to Google Login Screen
 if (!isset($_GET['code'])) {
+    if (!empty($_GET['redirect'])) {
+        $_SESSION['auth_redirect'] = trim($_GET['redirect']);
+    }
     if (!$isActive || empty($clientId)) {
         header("Location: ../login.php?error=" . urlencode("Google Login is not configured or disabled in Admin Settings."));
         exit();
@@ -120,6 +123,14 @@ if ($existingUser) {
     $_SESSION['user_email'] = $existingUser['email'];
     $_SESSION['user_phone'] = $existingUser['phone'];
 
+    require_once __DIR__ . '/../includes/notifications.php';
+    createAdminNotification(
+        'user_login',
+        'Google Login',
+        $existingUser['name'] . ' (' . $existingUser['email'] . ') logged in via Google OAuth.',
+        'users.php'
+    );
+
 } else {
     // Register new verified Google user
     $insert = $pdo->prepare("INSERT INTO `users` (`name`, `email`, `avatar`, `oauth_provider`, `oauth_uid`, `is_verified`, `status`, `last_login`) VALUES (?, ?, ?, 'google', ?, 1, 'active', NOW())");
@@ -130,8 +141,18 @@ if ($existingUser) {
     $_SESSION['user_name'] = $googleName;
     $_SESSION['user_email'] = $googleEmail;
     $_SESSION['user_phone'] = '';
+
+    require_once __DIR__ . '/../includes/notifications.php';
+    createAdminNotification(
+        'user_register',
+        'New Google User Registered',
+        $googleName . ' (' . $googleEmail . ') registered using Google OAuth.',
+        'users.php'
+    );
 }
 
-// Redirect to Homepage / Dashboard
-header("Location: ../index.php");
+// Redirect to Target Page / Homepage
+$returnTarget = !empty($_SESSION['auth_redirect']) ? $_SESSION['auth_redirect'] : '../index.php';
+unset($_SESSION['auth_redirect']);
+header("Location: " . $returnTarget);
 exit();

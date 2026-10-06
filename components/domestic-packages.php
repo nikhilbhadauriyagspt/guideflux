@@ -220,7 +220,8 @@ if ($pdoDom) {
                 $img = !empty($dbh['featured_image']) ? $dbh['featured_image'] : 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=800&q=80';
 
                 $dynamicDomPackages[] = [
-                    'id' => 'PKG-DB-' . $dbh['id'],
+                    'id' => $dbh['id'],
+                    'slug' => $dbh['slug'] ?? '',
                     'title' => $dbh['title'],
                     'route' => $dbh['location'] ?: 'Incredible India Circuit',
                     'duration' => $dbh['duration_text'] ?: ($dbh['duration_nights'] . 'N / ' . $dbh['duration_days'] . 'D'),
@@ -233,8 +234,8 @@ if ($pdoDom) {
                     'inclusions' => $inclusions
                 ];
             }
-            // Prepend new dynamic domestic packages to the front
-            $domesticPackages = array_merge($dynamicDomPackages, $domesticPackages);
+            // Use 100% dynamic domestic packages from database
+            $domesticPackages = $dynamicDomPackages;
         }
     } catch (Exception $e) {
         // Fallback silently
@@ -385,7 +386,7 @@ if ($pdoDom) {
                                         <i class="fa-solid fa-circle-check text-emerald-500 text-[10px] mr-1"></i>Customizable
                                     </span>
                                 </div>
-                                <a href="package-details.php?id=<?= urlencode($pkg['id'] ?? '') ?>&pkg=<?= urlencode($pkg['title']) ?>" 
+                                <a href="package-details.php?<?= !empty($pkg['slug']) ? 'slug=' . urlencode($pkg['slug']) : 'id=' . urlencode($pkg['id'] ?? '') ?>" 
                                    class="px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition-all transform hover:-translate-y-0.5 active:scale-95 inline-flex items-center space-x-1.5">
                                     <span>View Details</span>
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>

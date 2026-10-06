@@ -16,6 +16,9 @@ $redirectUri = $protocol . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF'])
 
 // If called directly without 'code' parameter, redirect user to Facebook Login Screen
 if (!isset($_GET['code'])) {
+    if (!empty($_GET['redirect'])) {
+        $_SESSION['auth_redirect'] = trim($_GET['redirect']);
+    }
     if (!$isActive || empty($appId)) {
         header("Location: ../login.php?error=" . urlencode("Facebook Login is not configured or disabled in Admin Settings."));
         exit();
@@ -122,6 +125,8 @@ if ($existingUser) {
     $_SESSION['user_phone'] = '';
 }
 
-// Redirect to Homepage / Dashboard
-header("Location: ../index.php");
+// Redirect to Target Page / Homepage
+$returnTarget = !empty($_SESSION['auth_redirect']) ? $_SESSION['auth_redirect'] : '../index.php';
+unset($_SESSION['auth_redirect']);
+header("Location: " . $returnTarget);
 exit();

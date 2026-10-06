@@ -111,13 +111,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         space: ["'Space Grotesk'", 'sans-serif'],
                     },
                     colors: {
-                        brand: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            500: '#0d9488',
-                            600: '#068285',  // GuideFlux Teal
-                            700: '#07696c',
+                        sage: {
+                            50: '#f4f7f4',
+                            100: '#e6ede6',
+                            200: '#cfe0cf',
+                            600: '#48734c',
+                            700: '#3a5c3d',
+                            800: '#304a32',
+                            900: '#283d2a',
+                        },
+                        cream: {
+                            50: '#fbfbf8',
+                            100: '#f6f5ef',
+                            200: '#eeece0',
                         }
                     }
                 }
@@ -125,48 +131,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex items-center justify-center p-4 antialiased">
+<body class="bg-cream-100 font-sans text-slate-800 min-h-screen flex items-center justify-center p-4 antialiased">
 
     <!-- Lightweight Animated Success Modal -->
     <div id="toast-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs hidden transition-all">
-        <div class="bg-white rounded-2xl p-6 max-w-xs w-full border border-slate-200 text-center shadow-md transform scale-95 transition-transform duration-200" id="toast-card">
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-xl mb-3 border border-emerald-100">
+        <div class="bg-white p-6 max-w-xs w-full border border-[#e5e4dc] text-center transform scale-95 transition-transform duration-200" id="toast-card">
+            <div class="w-12 h-12 bg-sage-50 text-sage-700 mx-auto flex items-center justify-center text-xl mb-3 border border-sage-200">
                 <i class="fa-solid fa-check"></i>
             </div>
-            <h3 class="text-base font-bold text-slate-900">Signed In!</h3>
-            <p class="text-xs text-slate-500 mt-1">Loading dashboard...</p>
-            <div class="w-full bg-slate-100 h-1 rounded-full mt-4 overflow-hidden">
-                <div id="toast-progress" class="bg-brand-600 h-full w-0 transition-all duration-[900ms] ease-out"></div>
+            <h3 class="text-base font-bold text-slate-900 font-space">Signed In!</h3>
+            <p class="text-xs text-slate-500 mt-1">Loading control panel...</p>
+            <div class="w-full bg-cream-200 h-1 mt-4 overflow-hidden">
+                <div id="toast-progress" class="bg-sage-700 h-full w-0 transition-all duration-[900ms] ease-out"></div>
             </div>
         </div>
     </div>
 
-    <!-- Clean, Simple, Light Login Box -->
+    <!-- Clean, Box-Type Login Box -->
     <div class="w-full max-w-sm">
         
         <!-- Brand Header -->
         <div class="text-center mb-6">
-            <a href="../index.php" class="inline-flex items-center gap-2.5 mb-3 group">
-                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-base">
+            <a href="../index.php" class="inline-flex items-center gap-2.5 mb-2 group">
+                <div class="w-9 h-9 bg-sage-700 text-white flex items-center justify-center text-sm border border-sage-800">
                     <i class="fa-solid fa-compass"></i>
                 </div>
                 <span class="font-space font-bold text-2xl text-slate-900">
-                    Guide<span class="text-brand-600">Flux</span>
+                    Guide<span class="text-sage-700">Flux</span>
                 </span>
             </a>
-            <p class="text-xs text-slate-500 font-medium">Admin Portal & Management</p>
+            <p class="text-[11px] uppercase font-bold tracking-wider text-slate-400">Admin Control Panel</p>
         </div>
 
-        <!-- Login Form Card (Clean & Flat with minimal border) -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7">
+        <!-- Login Form Card (Clean, Sharp Border, Zero Drop-Shadow) -->
+        <div class="bg-white border border-[#e5e4dc] p-6 sm:p-7">
             
-            <div class="mb-5 pb-3 border-b border-slate-100">
-                <h2 class="text-base font-bold text-slate-900">Sign in to account</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Enter your administrative credentials</p>
+            <div class="mb-5 pb-3 border-b border-[#e5e4dc]">
+                <h2 class="text-base font-bold font-space text-slate-900">Sign in to account</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Enter administrative access credentials</p>
             </div>
 
             <!-- Error Banner -->
-            <div id="error-banner" class="<?php echo !empty($error) ? '' : 'hidden'; ?> mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2 text-rose-700 text-xs font-medium">
+            <div id="error-banner" class="<?php echo !empty($error) ? '' : 'hidden'; ?> mb-4 p-3 bg-rose-50 border border-rose-200 flex items-center gap-2 text-rose-700 text-xs font-medium">
                 <i class="fa-solid fa-circle-exclamation text-rose-500 text-sm shrink-0"></i>
                 <span id="error-text"><?php echo htmlspecialchars($error); ?></span>
             </div>
@@ -176,30 +182,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <!-- Email Field -->
                 <div>
-                    <label for="email" class="block text-xs font-semibold text-slate-700 mb-1.5">Email address</label>
+                    <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">Email address</label>
                     <div class="relative">
-                        <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                         <input type="email" id="email" name="email" required 
                                value="admin@guideflux.com"
                                placeholder="admin@guideflux.com" 
-                               class="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-colors">
+                               class="w-full pl-9 pr-3.5 py-2 bg-cream-50/50 border border-[#e5e4dc] text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:border-sage-700 focus:bg-white transition-colors">
                     </div>
                 </div>
 
                 <!-- Password Field -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
-                        <label for="password" class="block text-xs font-semibold text-slate-700">Password</label>
-                        <button type="button" onclick="fillDemoCredentials()" class="text-[11px] font-semibold text-brand-600 hover:text-brand-700">
+                        <label for="password" class="block text-xs font-bold text-slate-700">Password</label>
+                        <button type="button" onclick="fillDemoCredentials()" class="text-[11px] font-bold text-sage-700 hover:underline">
                             Auto Fill
                         </button>
                     </div>
                     <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                         <input type="password" id="password" name="password" required 
                                value="admin123"
                                placeholder="••••••••" 
-                               class="w-full pl-9 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-colors">
+                               class="w-full pl-9 pr-9 py-2 bg-cream-50/50 border border-[#e5e4dc] text-slate-800 text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:border-sage-700 focus:bg-white transition-colors">
                         <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                             <i id="password-toggle-icon" class="fa-regular fa-eye text-xs"></i>
                         </button>
@@ -209,24 +215,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Remember Me Checkbox -->
                 <div class="flex items-center justify-between pt-0.5">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" checked class="w-3.5 h-3.5 rounded text-brand-600 border-slate-300 focus:ring-brand-500 accent-brand-600">
-                        <span class="text-xs text-slate-600">Remember me</span>
+                        <input type="checkbox" checked class="w-3.5 h-3.5 text-sage-700 border-[#e5e4dc] focus:ring-sage-700 accent-sage-700">
+                        <span class="text-xs text-slate-600 font-medium">Remember me</span>
                     </label>
-                    <span class="text-[11px] text-slate-400">Default: admin123</span>
+                    <span class="text-[11px] text-slate-400 font-mono">Default: admin123</span>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" id="submit-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                    <span id="btn-text">Sign In</span>
-                    <i id="btn-icon" class="fa-solid fa-arrow-right text-[11px]"></i>
+                <button type="submit" id="submit-btn" class="w-full py-2.5 px-4 bg-sage-700 hover:bg-sage-800 text-white font-bold text-xs border border-sage-800 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                    <span id="btn-text">Sign In to Dashboard</span>
+                    <i id="btn-icon" class="fa-solid fa-arrow-right text-[10px]"></i>
                 </button>
             </form>
 
             <!-- Quick DB Setup link -->
-            <div class="mt-4 pt-3 border-t border-slate-100 text-center">
-                <a href="setup.php" class="text-[11px] font-medium text-slate-500 hover:text-brand-600 inline-flex items-center gap-1.5 transition-colors">
+            <div class="mt-4 pt-3 border-t border-[#e5e4dc] text-center">
+                <a href="setup.php" class="text-[11px] font-medium text-slate-500 hover:text-sage-700 inline-flex items-center gap-1.5 transition-colors">
                     <i class="fa-solid fa-database text-[10px]"></i>
-                    <span>Database Installer / Migration</span>
+                    <span>Database Installer / Sync</span>
                 </a>
             </div>
         </div>

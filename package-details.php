@@ -640,6 +640,8 @@ if ($pdoPkg) {
                 'subtitle' => $fetchedPkg['subtitle'] ?: 'Handcrafted holiday tour package with verified stays, chauffeur transfers, and complete travel support.',
                 'destination' => $fetchedPkg['location'],
                 'state' => $fetchedPkg['state_country'] ?: 'India',
+                'travel_mode' => $fetchedPkg['travel_mode'] ?? (($fetchedPkg['category'] === 'international') ? 'flight' : 'cab'),
+                'departure_city' => $fetchedPkg['departure_city'] ?? 'All Major Cities',
                 'duration' => $fetchedPkg['duration_text'] ?: ($fetchedPkg['duration_nights'] . ' Nights / ' . $fetchedPkg['duration_days'] . ' Days'),
                 'type' => ucfirst($fetchedPkg['category']) . ' ' . $fetchedPkg['circuit_type'],
                 'badge' => $fetchedPkg['badge'] ?: 'Bestseller',
@@ -716,6 +718,21 @@ require_once 'components/navbar.php';
                     <span class="px-3 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
                         <i class="fa-regular fa-clock text-[10px] mr-1"></i>
                         <?= htmlspecialchars($package['duration']) ?>
+                    </span>
+                    <?php 
+                        $tMode = $package['travel_mode'] ?? 'flight';
+                        $tBadge = match($tMode) {
+                            'flight' => ['icon' => 'fa-plane-departure', 'label' => 'Return Flights Included', 'class' => 'bg-sky-50 text-sky-800 border-sky-200'],
+                            'train' => ['icon' => 'fa-train', 'label' => 'By Train Included', 'class' => 'bg-amber-50 text-amber-800 border-amber-200'],
+                            'bus' => ['icon' => 'fa-bus', 'label' => 'By Luxury Volvo Bus', 'class' => 'bg-emerald-50 text-emerald-800 border-emerald-200'],
+                            'cab' => ['icon' => 'fa-car', 'label' => 'By Private Cab', 'class' => 'bg-teal-50 text-teal-800 border-teal-200'],
+                            'land_only' => ['icon' => 'fa-hotel', 'label' => 'Land Package Only', 'class' => 'bg-indigo-50 text-indigo-800 border-indigo-200'],
+                            default => ['icon' => 'fa-route', 'label' => 'Transfers Included', 'class' => 'bg-slate-100 text-slate-700 border-slate-200']
+                        };
+                    ?>
+                    <span class="px-3 py-0.5 rounded-full text-xs font-semibold border <?= $tBadge['class'] ?>">
+                        <i class="fa-solid <?= $tBadge['icon'] ?> text-[10px] mr-1"></i>
+                        <?= htmlspecialchars($tBadge['label']) ?>
                     </span>
                     <span class="px-3 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
                         <i class="fa-solid fa-location-dot text-[10px] text-brand-600 mr-1"></i>
@@ -1251,16 +1268,18 @@ function submitBooking() {
     const date = document.getElementById('bookTravelDate')?.value || '';
     const count = document.getElementById('adultCountDisplay')?.textContent || '2';
     const packageTitle = <?= json_encode($package['title']) ?>;
+    const packageId = <?= json_encode($package['id'] ?? '') ?>;
     const tokenRaw = document.getElementById('tokenAdvanceDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
     const totalRaw = document.getElementById('totalPriceDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
 
     const btn = document.querySelector('#bookingSidebar form button[type="submit"]');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Locking Tour...</span>';
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Securing Reservation...</span>';
     }
 
     const formData = new FormData();
+    formData.append('package_id', packageId);
     formData.append('lead_name', name);
     formData.append('lead_phone', phone);
     formData.append('package_title', packageTitle);
@@ -1277,9 +1296,15 @@ function submitBooking() {
     .then(data => {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-300 mr-1.5"></i> <span>Lock Holiday at ₹' + parseInt(tokenRaw).toLocaleString('en-IN') + '</span>';
+            btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Book with Token Advance</span>';
         }
-        if (data.success) {
+        if (data.login_required) {
+            showLoginModalForBooking(packageTitle);
+            return;
+        }
+        if (data.success && data.redirect) {
+            window.location.href = data.redirect;
+        } else if (data.success) {
             showPackageSuccessModal(data.booking_code, packageTitle, name, date, count, tokenRaw);
         } else {
             alert(data.message || 'Booking failed.');
@@ -1288,10 +1313,48 @@ function submitBooking() {
     .catch(err => {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-300 mr-1.5"></i> <span>Lock Holiday at ₹' + parseInt(tokenRaw).toLocaleString('en-IN') + '</span>';
+            btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Book with Token Advance</span>';
         }
         alert('Booking placed successfully! Concierge will call your phone shortly.');
     });
+}
+
+function showLoginModalForBooking(title) {
+    const existing = document.getElementById('loginRequiredModalOverlay');
+    if (existing) existing.remove();
+
+    const currentUrl = window.location.href;
+    const modalHtml = `
+        <div id="loginRequiredModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
+                <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                        Traveler Account Required
+                    </span>
+                    <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Lock Package</h3>
+                    <p class="text-xs text-slate-500">Please sign in to your GuideFlux account to secure your seats and receive instant travel vouchers.</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 truncate">
+                    <span>${title}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <a href="login.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
+                        Log In Now
+                    </a>
+                    <a href="signup.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider text-center transition">
+                        Create Account
+                    </a>
+                </div>
+                <button type="button" onclick="document.getElementById('loginRequiredModalOverlay').remove()" class="text-xs text-slate-400 hover:text-slate-600 font-bold">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
 function showPackageSuccessModal(code, title, name, date, count, token) {

@@ -104,6 +104,8 @@ if (function_exists('getDBConnection')) {
     $pdoIntl = getDBConnection();
 }
 
+$dynamicIntlTabs = [];
+
 if ($pdoIntl) {
     try {
         $dbIntlPackages = $pdoIntl->query("SELECT * FROM `packages` WHERE `category` = 'international' AND `status` = 'active' ORDER BY `id` DESC")->fetchAll();
@@ -138,12 +140,19 @@ if ($pdoIntl) {
                 if (str_contains($locSearch, 'singapore')) $categories[] = 'singapore';
                 if (str_contains($locSearch, 'maldives')) $categories[] = 'maldives';
                 if (str_contains($locSearch, 'vietnam') || str_contains($locSearch, 'hanoi') || str_contains($locSearch, 'halong')) $categories[] = 'vietnam';
+                if (str_contains($locSearch, 'europe') || str_contains($locSearch, 'paris') || str_contains($locSearch, 'swiss')) $categories[] = 'europe';
+                
+                // Also add sanitized location as a filter tag
+                $cleanLoc = preg_replace('/[^a-z0-9]/', '', strtolower($dbh['location'] ?? ''));
+                if (!empty($cleanLoc)) $categories[] = $cleanLoc;
+
                 $catString = implode(' ', array_unique($categories));
 
                 $img = !empty($dbh['featured_image']) ? $dbh['featured_image'] : 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80';
 
                 $dynamicIntlPackages[] = [
-                    'id' => 'PKG-DB-' . $dbh['id'],
+                    'id' => $dbh['id'],
+                    'slug' => $dbh['slug'] ?? '',
                     'title' => $dbh['title'],
                     'country' => $dbh['state_country'] ?: $dbh['location'],
                     'duration' => $dbh['duration_text'] ?: ($dbh['duration_nights'] . 'N / ' . $dbh['duration_days'] . 'D'),
@@ -157,8 +166,8 @@ if ($pdoIntl) {
                     'highlights' => $highlights
                 ];
             }
-            // Prepend new dynamic international packages to the front
-            $internationalPackages = array_merge($dynamicIntlPackages, $internationalPackages);
+            // Use 100% dynamic international packages from database
+            $internationalPackages = $dynamicIntlPackages;
         }
     } catch (Exception $e) {
         // Fallback silently
@@ -289,7 +298,7 @@ if ($pdoIntl) {
                             <span class="text-[11px] font-bold text-emerald-600 flex items-center">
                                 <i class="fa-solid fa-shield-halved text-[10px] mr-1"></i>100% Customizable
                             </span>
-                            <a href="package-details.php?id=<?= urlencode($pkg['id'] ?? '') ?>&pkg=<?= urlencode($pkg['title']) ?>" 
+                            <a href="package-details.php?<?= !empty($pkg['slug']) ? 'slug=' . urlencode($pkg['slug']) : 'id=' . urlencode($pkg['id'] ?? '') ?>" 
                                class="inline-flex items-center space-x-1.5 text-xs font-bold text-brand-600 group-hover:text-brand-700 uppercase tracking-wider group-hover:translate-x-1 transition-all">
                                 <span>Explore Plan</span>
                                 <i class="fa-solid fa-arrow-right text-[11px]"></i>

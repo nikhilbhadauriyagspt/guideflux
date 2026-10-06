@@ -616,6 +616,9 @@ if ($pdoHotels) {
         $dbHotels = $pdoHotels->query("SELECT * FROM `hotels` WHERE `status` = 'active' ORDER BY `id` DESC")->fetchAll();
         if (!empty($dbHotels)) {
             $dynamicHotels = [];
+            $cityCounts = [];
+            $cityImages = [];
+
             foreach ($dbHotels as $dbh) {
                 // Amenities JSON parse
                 $ams = [];
@@ -638,10 +641,19 @@ if ($pdoHotels) {
                     ];
                 }
 
-                $locTag = strtolower(trim(preg_replace('/[^A-Za-z0-9]/', '', $dbh['city'])));
+                $cityName = !empty($dbh['city']) ? trim($dbh['city']) : 'Other';
+                $locTag = strtolower(trim(preg_replace('/[^A-Za-z0-9]/', '', $cityName)));
                 if (empty($locTag)) $locTag = 'all';
 
+                if (!isset($cityCounts[$locTag])) {
+                    $cityCounts[$locTag] = ['name' => $cityName, 'count' => 0];
+                }
+                $cityCounts[$locTag]['count']++;
+
                 $img = !empty($dbh['featured_image']) ? $dbh['featured_image'] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';
+                if (!isset($cityImages[$locTag])) {
+                    $cityImages[$locTag] = $img;
+                }
 
                 $dynamicHotels[] = [
                     'id' => 'HTL-DB-' . $dbh['id'],
@@ -660,8 +672,29 @@ if ($pdoHotels) {
                     'original_price' => (float)$dbh['original_price'] ?: ((float)$dbh['starting_price'] * 1.25),
                 ];
             }
-            // Prepend new dynamic hotels to the top
-            $hotelsList = array_merge($dynamicHotels, $hotelsList);
+            // Use 100% dynamic hotels from database
+            $hotelsList = $dynamicHotels;
+
+            // Dynamically generate destination filter track
+            $newDestinations = [
+                [
+                    'id' => 'all',
+                    'name' => 'All Locations',
+                    'count' => count($hotelsList) . '+ Stays',
+                    'image' => $hotelsList[0]['image'] ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80',
+                    'icon' => 'fa-solid fa-hotel',
+                ]
+            ];
+            foreach ($cityCounts as $tag => $data) {
+                $newDestinations[] = [
+                    'id' => $tag,
+                    'name' => $data['name'],
+                    'count' => $data['count'] . ' Curated Stays',
+                    'image' => $cityImages[$tag] ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80',
+                    'icon' => 'fa-solid fa-map-pin',
+                ];
+            }
+            $hotelDestinations = $newDestinations;
         }
     } catch (Exception $e) {
         // Fallback silently to static list

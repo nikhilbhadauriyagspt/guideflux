@@ -287,6 +287,75 @@ try {
         $results[] = ["step" => "Sample Bookings Data", "status" => "success", "msg" => "Seeded 4 initial live bookings"];
     }
 
+    // 9. Create Reviews / Testimonials Table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `reviews` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(150) NOT NULL,
+            `city` VARCHAR(150) NULL,
+            `avatar` VARCHAR(255) NULL,
+            `category` VARCHAR(100) DEFAULT 'honeymoon',
+            `tour` VARCHAR(200) NOT NULL,
+            `headline` VARCHAR(255) NOT NULL,
+            `quote` TEXT NOT NULL,
+            `rating` TINYINT DEFAULT 5,
+            `status` ENUM('active', 'hidden') DEFAULT 'active',
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+    $results[] = ["step" => "Reviews Table", "status" => "success", "msg" => "Table `reviews` created successfully"];
+
+    // Seed Sample Reviews if empty
+    $checkReviews = $pdo->query("SELECT COUNT(*) as count FROM `reviews`")->fetch();
+    if ($checkReviews['count'] == 0) {
+        $stmtRev = $pdo->prepare("
+            INSERT INTO `reviews` (`name`, `city`, `avatar`, `category`, `tour`, `headline`, `quote`, `rating`, `status`) VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, 'active'),
+            (?, ?, ?, ?, ?, ?, ?, ?, 'active'),
+            (?, ?, ?, ?, ?, ?, ?, ?, 'active'),
+            (?, ?, ?, ?, ?, ?, ?, ?, 'active'),
+            (?, ?, ?, ?, ?, ?, ?, ?, 'active'),
+            (?, ?, ?, ?, ?, ?, ?, ?, 'active')
+        ");
+        $stmtRev->execute([
+            'Sneha & Rohan Sharma', 'New Delhi, India', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', 'honeymoon', 'Maldives 5N/6D Villa', 'The best honeymoon we could have dreamed of!', 'From the private pool villa upgrade to the seamless speedboat transfers in Male, everything was effortless. Our coordinator was on WhatsApp 24/7. Truly a 5-star experience from start to finish.', 5,
+            'Aditya & Varun Rao', 'Bangalore, India', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', 'adventure', 'Ladakh 7N/8D Biking', 'Flawless Enfield bikes and heated Pangong camps!', 'Crossing Khardung La at 18,000 ft was incredible. The backup vehicle with oxygen kits and dedicated mechanic support gave us complete peace of mind through rugged passes.', 5,
+            'Dr. Rajesh & Sunita Mehra', 'Mumbai, India', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', 'family', 'Dubai 4N/5D Atlantis', 'Traveling with elderly parents was 100% stress-free!', 'Our private chauffeur was punctual, polite, and very helpful. Fast-track tickets to Burj Khalifa and Aquaventure saved us from standing in long queues with the kids.', 5,
+            'Vikram & Ananya Sen', 'Kolkata, India', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80', 'honeymoon', 'Kashmir 5N/6D Gulmarg', 'Waking up on a Dal Lake houseboat was pure magic.', 'Our heritage cedarwood houseboat was spotless. Orion arranged Phase 2 Gulmarg Gondola passes when they were completely sold out everywhere else. Unforgettable trip!', 5,
+            'Kavita & Arvind Singhania', 'Ahmedabad, India', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80', 'luxury', 'Rajasthan 5N/6D Palaces', 'Treated like royalty from airport pickup to checkout.', 'The private boat entry at Lake Pichola Udaipur and vintage car ride in Jaipur made our anniversary feel truly majestic. Transparent billing with zero hidden fees.', 5,
+            'Pooja & Sameer Deshmukh', 'Pune, India', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80', 'family', 'Kerala 4N/5D Alleppey', 'The private chef on our backwater houseboat was outstanding.', 'Cruising along the silent palm backwaters while the chef prepared fresh local river fish was the highlight of our vacation. The kids loved every moment!', 5
+        ]);
+        $results[] = ["step" => "Sample Reviews Data", "status" => "success", "msg" => "Seeded 6 initial verified traveler testimonials"];
+    }
+
+    // 10. Create Notifications Table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `notifications` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `type` VARCHAR(50) NOT NULL,
+            `title` VARCHAR(255) NOT NULL,
+            `message` TEXT NOT NULL,
+            `link` VARCHAR(255) NULL,
+            `meta_data` LONGTEXT NULL,
+            `is_read` TINYINT(1) DEFAULT 0,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ");
+    $results[] = ["step" => "Notifications Table", "status" => "success", "msg" => "Table `notifications` created successfully"];
+
+    // Seed Sample Notifications if empty
+    $checkNotifs = $pdo->query("SELECT COUNT(*) as count FROM `notifications`")->fetch();
+    if ($checkNotifs['count'] == 0) {
+        $stmtNotif = $pdo->prepare("
+            INSERT INTO `notifications` (`type`, `title`, `message`, `link`, `is_read`, `created_at`) VALUES
+            ('booking', 'New Tour Booking & Payment', 'Arjun Mehta booked \"Dubai Desert Safari\" - Advance token ₹2,500 received via Razorpay.', 'bookings.php?search=GF-1001', 0, NOW() - INTERVAL 15 MINUTE),
+            ('flight_inquiry', 'New Flight Inquiry', 'Rohan Verma submitted inquiry for DEL → BOM (Air India AI-101) - Est. ₹4,500.', 'bookings.php?filter=flight', 0, NOW() - INTERVAL 45 MINUTE),
+            ('user_login', 'Traveler Logged In', 'Priya Patel (priya.p@example.com) logged into the portal.', 'users.php', 1, NOW() - INTERVAL 2 HOUR)
+        ");
+        $stmtNotif->execute();
+        $results[] = ["step" => "Sample Notifications", "status" => "success", "msg" => "Seeded initial live notifications"];
+    }
+
     $status = 'success';
 
 } catch (Exception $e) {

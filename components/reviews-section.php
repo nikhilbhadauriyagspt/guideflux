@@ -17,85 +17,40 @@ $testimonialCategories = [
     ['id' => 'luxury', 'label' => 'Luxury Getaways', 'icon' => 'fa-solid fa-crown'],
 ];
 
-$testimonialsList = [
-    // 1. HONEYMOON - MALDIVES
-    [
-        'id' => 'test-01',
-        'name' => 'Sneha & Rohan Sharma',
-        'city' => 'New Delhi, India',
-        'avatar' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-        'category' => 'honeymoon luxury',
-        'tour' => 'Maldives 5N/6D Villa',
-        'headline' => 'The best honeymoon we could have dreamed of!',
-        'quote' => 'From the private pool villa upgrade to the seamless speedboat transfers in Male, everything was effortless. Our coordinator was on WhatsApp 24/7. Truly a 5-star experience from start to finish.',
-        'rating' => 5
-    ],
+// Dynamically fetch verified reviews added via Admin Panel
+if (function_exists('getDBConnection')) {
+    $pdoRev = getDBConnection();
+} else {
+    require_once __DIR__ . '/../config/db.php';
+    $pdoRev = getDBConnection();
+}
 
-    // 2. ADVENTURE - LADAKH
-    [
-        'id' => 'test-02',
-        'name' => 'Aditya & Varun Rao',
-        'city' => 'Bangalore, India',
-        'avatar' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-        'category' => 'adventure',
-        'tour' => 'Ladakh 7N/8D Biking',
-        'headline' => 'Flawless Enfield bikes and heated Pangong camps!',
-        'quote' => 'Crossing Khardung La at 18,000 ft was incredible. The backup vehicle with oxygen kits and dedicated mechanic support gave us complete peace of mind through rugged passes.',
-        'rating' => 5
-    ],
-
-    // 3. FAMILY - DUBAI
-    [
-        'id' => 'test-03',
-        'name' => 'Dr. Rajesh & Sunita Mehra',
-        'city' => 'Mumbai, India',
-        'avatar' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-        'category' => 'family luxury',
-        'tour' => 'Dubai 4N/5D Atlantis',
-        'headline' => 'Traveling with elderly parents was 100% stress-free!',
-        'quote' => 'Our private chauffeur was punctual, polite, and very helpful. Fast-track tickets to Burj Khalifa and Aquaventure saved us from standing in long queues with the kids.',
-        'rating' => 5
-    ],
-
-    // 4. HONEYMOON - KASHMIR
-    [
-        'id' => 'test-04',
-        'name' => 'Vikram & Ananya Sen',
-        'city' => 'Kolkata, India',
-        'avatar' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
-        'category' => 'honeymoon',
-        'tour' => 'Kashmir 5N/6D Gulmarg',
-        'headline' => 'Waking up on a Dal Lake houseboat was pure magic.',
-        'quote' => 'Our heritage cedarwood houseboat was spotless. Orion arranged Phase 2 Gulmarg Gondola passes when they were completely sold out everywhere else. Unforgettable trip!',
-        'rating' => 5
-    ],
-
-    // 5. LUXURY - RAJASTHAN
-    [
-        'id' => 'test-05',
-        'name' => 'Kavita & Arvind Singhania',
-        'city' => 'Ahmedabad, India',
-        'avatar' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
-        'category' => 'luxury',
-        'tour' => 'Rajasthan 5N/6D Palaces',
-        'headline' => 'Treated like royalty from airport pickup to checkout.',
-        'quote' => 'The private boat entry at Lake Pichola Udaipur and vintage car ride in Jaipur made our anniversary feel truly majestic. Transparent billing with zero hidden fees.',
-        'rating' => 5
-    ],
-
-    // 6. FAMILY - KERALA
-    [
-        'id' => 'test-06',
-        'name' => 'Pooja & Sameer Deshmukh',
-        'city' => 'Pune, India',
-        'avatar' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-        'category' => 'family',
-        'tour' => 'Kerala 4N/5D Alleppey',
-        'headline' => 'The private chef on our backwater houseboat was outstanding.',
-        'quote' => 'Cruising along the silent palm backwaters while the chef prepared fresh local river fish was the highlight of our vacation. The kids loved every moment!',
-        'rating' => 5
-    ]
-];
+if ($pdoRev) {
+    try {
+        $dbReviews = $pdoRev->query("SELECT * FROM `reviews` WHERE `status` = 'active' ORDER BY `id` DESC")->fetchAll();
+        if (!empty($dbReviews)) {
+            $dynamicReviews = [];
+            foreach ($dbReviews as $dbr) {
+                $avatar = !empty($dbr['avatar']) ? $dbr['avatar'] : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+                $dynamicReviews[] = [
+                    'id' => 'db-rev-' . $dbr['id'],
+                    'name' => $dbr['name'],
+                    'city' => $dbr['city'] ?: 'India',
+                    'avatar' => $avatar,
+                    'category' => strtolower($dbr['category']),
+                    'tour' => $dbr['tour'],
+                    'headline' => $dbr['headline'],
+                    'quote' => $dbr['quote'],
+                    'rating' => (int)($dbr['rating'] ?: 5)
+                ];
+            }
+            // Use 100% dynamic reviews from database
+            $testimonialsList = $dynamicReviews;
+        }
+    } catch (Exception $e) {
+        // Fallback silently
+    }
+}
 ?>
 <!-- ==========================================
      TESTIMONIALS & VERIFIED GUEST REVIEWS
