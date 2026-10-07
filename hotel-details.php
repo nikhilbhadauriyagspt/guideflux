@@ -474,6 +474,31 @@ if ($pdoDetails && !empty($rawHotelSearch)) {
             ];
         }
 
+        // Parse Structured Policies
+        $parsedHotelPolicy = [
+            'summary' => 'Free cancellation up to 48 hours before check-in. Tiered refund structure applies thereafter.',
+            'rules' => [
+                ['timeline' => '15+ Days Before Check-in', 'refund' => '100% Refund', 'deduction' => '0% Deduction (Full Refund)', 'badge_type' => 'full_refund'],
+                ['timeline' => '7 to 14 Days Before Check-in', 'refund' => '70% Refund', 'deduction' => '30% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                ['timeline' => '3 to 6 Days Before Check-in', 'refund' => '30% Refund', 'deduction' => '70% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable', 'badge_type' => 'no_refund']
+            ],
+            'child_policy' => 'Children up to 6 years stay complimentary in existing bedding.',
+            'id_proof' => 'Government-issued photo identification (Aadhar, Passport) required for all adult guests.'
+        ];
+
+        if (!empty($fetchedHotel['policies'])) {
+            $decPol = json_decode($fetchedHotel['policies'], true);
+            if (is_array($decPol)) {
+                if (!empty($decPol['summary'])) $parsedHotelPolicy['summary'] = $decPol['summary'];
+                if (!empty($decPol['rules']) && is_array($decPol['rules'])) $parsedHotelPolicy['rules'] = $decPol['rules'];
+                if (!empty($decPol['child_policy'])) $parsedHotelPolicy['child_policy'] = $decPol['child_policy'];
+                if (!empty($decPol['id_proof'])) $parsedHotelPolicy['id_proof'] = $decPol['id_proof'];
+            } else {
+                $parsedHotelPolicy['summary'] = $fetchedHotel['policies'];
+            }
+        }
+
         $hotel = [
             'id' => 'HTL-DB-' . $fetchedHotel['id'],
             'name' => $fetchedHotel['name'],
@@ -495,9 +520,10 @@ if ($pdoDetails && !empty($rawHotelSearch)) {
             'policies' => [
                 'check_in' => $fetchedHotel['checkin_time'] ?: '02:00 PM',
                 'check_out' => $fetchedHotel['checkout_time'] ?: '11:00 AM',
-                'cancellation' => $fetchedHotel['policies'] ?: 'Free cancellation up to 24 hours prior to check-in.',
-                'child_policy' => 'Children up to 5 years stay complimentary in existing bedding.',
-                'id_proof' => 'Government-issued photo identification required for all guests.'
+                'cancellation' => $parsedHotelPolicy['summary'],
+                'cancellation_rules' => $parsedHotelPolicy['rules'],
+                'child_policy' => $parsedHotelPolicy['child_policy'],
+                'id_proof' => $parsedHotelPolicy['id_proof']
             ]
         ];
     }
@@ -848,9 +874,70 @@ $sideCount = count($sidePhotos);
                             </div>
                         </div>
 
-                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                            <h4 class="font-bold text-slate-900">Cancellation Policy</h4>
-                            <p class="leading-relaxed"><?= htmlspecialchars($hotel['policies']['cancellation']) ?></p>
+                        <!-- Cancellation & Refund Policy Structure -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3.5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-200/80">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                                        <i class="fa-solid fa-clock-rotate-left text-brand-600"></i>
+                                        <span>Cancellation &amp; Refund Policy Schedule</span>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5"><?= htmlspecialchars($hotel['policies']['cancellation']) ?></p>
+                                </div>
+                            </div>
+
+                            <!-- Refund Tiers Timeline Cards / Grid -->
+                            <?php 
+                            $cRules = !empty($hotel['policies']['cancellation_rules']) ? $hotel['policies']['cancellation_rules'] : [
+                                ['timeline' => '15+ Days Before Check-in', 'refund' => '100% Refund', 'deduction' => '0% Cancellation Fee', 'badge_type' => 'full_refund'],
+                                ['timeline' => '7 to 14 Days Before Check-in', 'refund' => '70% Refund', 'deduction' => '30% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                                ['timeline' => '3 to 6 Days Before Check-in', 'refund' => '30% Refund', 'deduction' => '70% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                                ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable', 'badge_type' => 'no_refund']
+                            ];
+                            ?>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                                <?php foreach ($cRules as $rule): ?>
+                                    <?php 
+                                    $bType = $rule['badge_type'] ?? 'partial_refund';
+                                    $cardStyle = 'bg-amber-50/70 border-amber-200 text-amber-900';
+                                    $badgeStyle = 'bg-amber-100 text-amber-800 border-amber-300';
+                                    $icon = 'fa-solid fa-triangle-exclamation';
+
+                                    if ($bType === 'full_refund' || str_contains(strtolower($rule['refund']), '100%')) {
+                                        $cardStyle = 'bg-emerald-50/70 border-emerald-200 text-emerald-950';
+                                        $badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                                        $icon = 'fa-solid fa-circle-check';
+                                    } elseif ($bType === 'no_refund' || str_contains(strtolower($rule['refund']), '0%') || str_contains(strtolower($rule['refund']), 'non-refundable')) {
+                                        $cardStyle = 'bg-rose-50/70 border-rose-200 text-rose-950';
+                                        $badgeStyle = 'bg-rose-100 text-rose-800 border-rose-300';
+                                        $icon = 'fa-solid fa-ban';
+                                    }
+                                    ?>
+                                    <div class="p-3 rounded-xl border <?= $cardStyle ?> flex flex-col justify-between space-y-2">
+                                        <div class="space-y-1">
+                                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Timeline</span>
+                                            <div class="font-black text-xs sm:text-sm text-slate-900 leading-snug">
+                                                <?= htmlspecialchars($rule['timeline']) ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-2 border-t border-slate-200/60 space-y-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[11px] font-bold text-slate-900"><?= htmlspecialchars($rule['refund']) ?></span>
+                                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border <?= $badgeStyle ?> flex items-center gap-1">
+                                                    <i class="<?= $icon ?> text-[8px]"></i>
+                                                    <span><?= ($bType === 'full_refund') ? 'Full Refund' : (($bType === 'no_refund') ? 'Non-Refundable' : 'Partial Refund') ?></span>
+                                                </span>
+                                            </div>
+                                            <?php if (!empty($rule['deduction'])): ?>
+                                                <div class="text-[10px] text-slate-500 font-medium truncate">
+                                                    <?= htmlspecialchars($rule['deduction']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
 
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
