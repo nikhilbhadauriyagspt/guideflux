@@ -519,16 +519,27 @@ $packagesDb = [
     ]
 ];
 
-// Smart Package Resolution from query or id parameter
+// Smart Package Resolution from query, slug, or id parameter
 $lookupKey = 'PKG-KASHMIR-01';
-$rawSearch = isset($_GET['id']) ? trim($_GET['id']) : (isset($_GET['pkg']) ? trim($_GET['pkg']) : 'kashmir');
+$rawSearch = '';
+if (!empty($_GET['slug'])) {
+    $rawSearch = trim($_GET['slug']);
+} elseif (!empty($_GET['id'])) {
+    $rawSearch = trim($_GET['id']);
+} elseif (!empty($_GET['pkg'])) {
+    $rawSearch = trim($_GET['pkg']);
+} elseif (!empty($_GET['query'])) {
+    $rawSearch = trim($_GET['query']);
+}
 
 // Check if querying by dynamic DB ID (e.g. PKG-DB-1 or 1)
 $dbPkgId = null;
-if (strpos($rawSearch, 'PKG-DB-') === 0) {
-    $dbPkgId = (int)str_replace('PKG-DB-', '', $rawSearch);
-} elseif (is_numeric($rawSearch) && (int)$rawSearch > 0) {
-    $dbPkgId = (int)$rawSearch;
+if (!empty($rawSearch)) {
+    if (strpos($rawSearch, 'PKG-DB-') === 0) {
+        $dbPkgId = (int)str_replace('PKG-DB-', '', $rawSearch);
+    } elseif (is_numeric($rawSearch) && (int)$rawSearch > 0) {
+        $dbPkgId = (int)$rawSearch;
+    }
 }
 
 require_once __DIR__ . '/config/db.php';
@@ -539,11 +550,16 @@ if ($pdoPkg) {
         $pkgStmt = $pdoPkg->prepare("SELECT * FROM `packages` WHERE `id` = ?");
         $pkgStmt->execute([$dbPkgId]);
         $fetchedPkg = $pkgStmt->fetch();
-    } else {
+    } elseif (!empty($rawSearch)) {
         $cleanSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $rawSearch)));
-        $pkgStmt = $pdoPkg->prepare("SELECT * FROM `packages` WHERE `slug` = ? OR `title` = ? OR `slug` LIKE ? OR `title` LIKE ? LIMIT 1");
-        $pkgStmt->execute([$cleanSlug, $rawSearch, "%$cleanSlug%", "%$rawSearch%"]);
+        $pkgStmt = $pdoPkg->prepare("SELECT * FROM `packages` WHERE `slug` = ? OR `title` = ? OR `slug` LIKE ? OR `title` LIKE ? OR `location` LIKE ? LIMIT 1");
+        $pkgStmt->execute([$cleanSlug, $rawSearch, "%$cleanSlug%", "%$rawSearch%", "%$rawSearch%"]);
         $fetchedPkg = $pkgStmt->fetch();
+    }
+
+    if (!$fetchedPkg && empty($rawSearch)) {
+        // Default to first active package
+        $fetchedPkg = $pdoPkg->query("SELECT * FROM `packages` WHERE `status` = 'active' ORDER BY `id` ASC LIMIT 1")->fetch();
     }
 
     if ($fetchedPkg) {
@@ -662,14 +678,17 @@ if ($pdoPkg) {
     }
 
 if (!isset($package)) {
-    if (str_contains(strtolower($rawSearch), 'kerala') || str_contains(strtolower($rawSearch), 'munnar') || str_contains(strtolower($rawSearch), 'alleppey')) {
-        $lookupKey = 'PKG-KERALA-02';
-    } elseif (str_contains(strtolower($rawSearch), 'himachal') || str_contains(strtolower($rawSearch), 'manali') || str_contains(strtolower($rawSearch), 'shimla') || str_contains(strtolower($rawSearch), 'solang')) {
-        $lookupKey = 'PKG-HIMACHAL-03';
-    } elseif (str_contains(strtolower($rawSearch), 'goa')) {
-        $lookupKey = 'PKG-GOA-05';
-    } elseif (isset($packagesDb[$packageId])) {
-        $lookupKey = $packageId;
+    $searchLower = strtolower($rawSearch);
+    if (!empty($searchLower)) {
+        if (str_contains($searchLower, 'kerala') || str_contains($searchLower, 'munnar') || str_contains($searchLower, 'alleppey')) {
+            $lookupKey = 'PKG-KERALA-02';
+        } elseif (str_contains($searchLower, 'himachal') || str_contains($searchLower, 'manali') || str_contains($searchLower, 'shimla') || str_contains($searchLower, 'solang')) {
+            $lookupKey = 'PKG-HIMACHAL-03';
+        } elseif (str_contains($searchLower, 'goa') || str_contains($searchLower, 'baga') || str_contains($searchLower, 'calangute')) {
+            $lookupKey = 'PKG-GOA-05';
+        } elseif (isset($packagesDb[$rawSearch])) {
+            $lookupKey = $rawSearch;
+        }
     }
     $package = isset($packagesDb[$lookupKey]) ? $packagesDb[$lookupKey] : $packagesDb['PKG-KASHMIR-01'];
 }

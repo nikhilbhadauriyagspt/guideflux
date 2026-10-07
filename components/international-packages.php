@@ -281,7 +281,9 @@ if ($pdoIntl) {
 
                         <!-- Title -->
                         <h3 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-brand-600 transition leading-snug line-clamp-1">
-                            <?= htmlspecialchars($pkg['title']) ?>
+                            <a href="package-details.php?<?= !empty($pkg['slug']) ? 'slug=' . urlencode($pkg['slug']) : 'id=' . urlencode($pkg['id'] ?? '') ?>">
+                                <?= htmlspecialchars($pkg['title']) ?>
+                            </a>
                         </h3>
 
                         <!-- 3 Sleek Highlight Chips -->

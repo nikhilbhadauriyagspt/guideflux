@@ -351,7 +351,9 @@ if ($pdoDom) {
                                     <span><?= htmlspecialchars($pkg['route']) ?></span>
                                 </div>
                                 <h3 class="text-base font-extrabold text-slate-900 group-hover:text-brand-600 transition line-clamp-1">
-                                    <?= htmlspecialchars($pkg['title']) ?>
+                                    <a href="package-details.php?<?= !empty($pkg['slug']) ? 'slug=' . urlencode($pkg['slug']) : 'id=' . urlencode($pkg['id'] ?? '') ?>">
+                                        <?= htmlspecialchars($pkg['title']) ?>
+                                    </a>
                                 </h3>
                                 <p class="text-xs text-slate-500 mt-1 line-clamp-2">
                                     <?= htmlspecialchars($pkg['description']) ?>
