@@ -1288,6 +1288,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     document.querySelectorAll('.theme-spot-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            const href = btn.getAttribute('href');
+            if (href && href !== '#' && !href.startsWith('#')) {
+                // Allow direct navigation to search page
+                return;
+            }
             e.preventDefault();
             const spotName = btn.getAttribute('data-spot');
             const spotType = btn.getAttribute('data-type'); // 'dom' or 'intl'
@@ -1321,7 +1326,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('.theme-cta-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            const href = btn.getAttribute('href');
+            if (href && href !== '#' && !href.startsWith('#')) {
+                // Allow direct navigation to search page
+                return;
+            }
             const themeName = btn.getAttribute('data-theme');
             const targetTab = document.querySelector('[data-target="panel-domestic"]');
             if (targetTab) {

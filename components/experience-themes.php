@@ -211,9 +211,117 @@ $holidayThemes = [
         'card_bg' => 'bg-gradient-to-br from-orange-50/70 via-white to-amber-50/40 border-orange-200/80 hover:border-orange-400',
         'accent_badge' => 'bg-orange-50 text-orange-800 border-orange-200',
         'tag_color' => 'text-orange-700',
-        'btn_class' => 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600'
+        'btn_class' => 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600',
+        'search_url' => 'search.php?theme=spiritual'
     ]
 ];
+
+// Dynamically enhance experience themes from live database packages
+if (function_exists('getDBConnection')) {
+    $pdoThemes = getDBConnection();
+} else {
+    require_once __DIR__ . '/../config/db.php';
+    $pdoThemes = getDBConnection();
+}
+
+if ($pdoThemes) {
+    try {
+        $allActivePkgs = $pdoThemes->query("SELECT * FROM `packages` WHERE `status` = 'active' ORDER BY `id` DESC")->fetchAll();
+        if (!empty($allActivePkgs)) {
+            $themeRules = [
+                'theme-honeymoon' => [
+                    'keywords' => ['honeymoon', 'romantic', 'couple', 'pool villa', 'shikara', 'houseboat', 'sunset cruise', 'candle'],
+                    'search_filter' => 'honeymoon'
+                ],
+                'theme-mountains' => [
+                    'keywords' => ['mountain', 'snow', 'hill', 'trek', 'peak', 'kashmir', 'manali', 'shimla', 'solang', 'ladakh', 'alpine', 'spiti'],
+                    'search_filter' => 'adventure'
+                ],
+                'theme-beach' => [
+                    'keywords' => ['beach', 'island', 'coastal', 'goa', 'andaman', 'bali', 'phuket', 'maldives', 'ocean', 'scuba', 'water sports'],
+                    'search_filter' => 'beach'
+                ],
+                'theme-heritage' => [
+                    'keywords' => ['heritage', 'royal', 'palace', 'fort', 'rajasthan', 'jaipur', 'udaipur', 'jodhpur', 'jaisalmer', 'haveli', 'culture', 'monument'],
+                    'search_filter' => 'luxury'
+                ],
+                'theme-wildlife' => [
+                    'keywords' => ['wildlife', 'jungle', 'safari', 'forest', 'national park', 'tiger', 'corbett', 'ranthambore', 'thekkady', 'munnar', 'nature'],
+                    'search_filter' => 'adventure'
+                ],
+                'theme-spiritual' => [
+                    'keywords' => ['spiritual', 'temple', 'wellness', 'yoga', 'rishikesh', 'varanasi', 'haridwar', 'ashram', 'pilgrim', 'ghat', 'aarti'],
+                    'search_filter' => 'spiritual'
+                ],
+            ];
+
+            foreach ($holidayThemes as &$theme) {
+                $tId = $theme['id'];
+                if (isset($themeRules[$tId])) {
+                    $rule = $themeRules[$tId];
+                    $matchingPkgs = [];
+                    foreach ($allActivePkgs as $p) {
+                        $pSearchText = strtolower($p['title'] . ' ' . $p['subtitle'] . ' ' . $p['circuit_type'] . ' ' . $p['location'] . ' ' . $p['badge'] . ' ' . $p['state_country']);
+                        foreach ($rule['keywords'] as $kw) {
+                            if (str_contains($pSearchText, $kw)) {
+                                $matchingPkgs[] = $p;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!empty($matchingPkgs)) {
+                        // Dynamic price
+                        $prices = array_column($matchingPkgs, 'price');
+                        $validPrices = array_filter($prices, function($pr) { return (float)$pr > 0; });
+                        if (!empty($validPrices)) {
+                            $theme['price'] = (float)min($validPrices);
+                        }
+
+                        // Dynamic Count
+                        $theme['count'] = count($matchingPkgs) . '+ Active Packages';
+
+                        // Dynamic Spots extracted from matching DB packages
+                        $dynamicSpots = [];
+                        foreach ($matchingPkgs as $mp) {
+                            $locParts = explode(',', $mp['location']);
+                            $spotName = trim($locParts[0] ?? $mp['location']);
+                            if (!empty($spotName) && !in_array($spotName, array_column($dynamicSpots, 'name'))) {
+                                $dynamicSpots[] = [
+                                    'name' => $spotName,
+                                    'type' => ($mp['category'] === 'international') ? 'intl' : 'dom',
+                                    'slug' => $mp['slug'] ?? ''
+                                ];
+                            }
+                            if (count($dynamicSpots) >= 4) break;
+                        }
+                        if (!empty($dynamicSpots)) {
+                            // Merge dynamic spots with defaults
+                            $existingNames = array_column($dynamicSpots, 'name');
+                            foreach ($theme['spots'] as $oldSpot) {
+                                if (!in_array($oldSpot['name'], $existingNames) && count($dynamicSpots) < 4) {
+                                    $dynamicSpots[] = $oldSpot;
+                                }
+                            }
+                            $theme['spots'] = $dynamicSpots;
+                        }
+
+                        // Dynamic Image
+                        if (!empty($matchingPkgs[0]['featured_image'])) {
+                            $theme['image'] = $matchingPkgs[0]['featured_image'];
+                            $theme['alt'] = $matchingPkgs[0]['title'];
+                        }
+
+                        $theme['search_url'] = 'search.php?theme=' . urlencode($rule['search_filter']);
+                    }
+                }
+            }
+            unset($theme);
+        }
+    } catch (Exception $e) {
+        // Fallback silently
+    }
+}
 ?>
 <!-- ==========================================
      CURATED HOLIDAY THEMES / TRAVEL BY EXPERIENCE
@@ -330,13 +438,13 @@ $holidayThemes = [
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider shrink-0">Top Spots:</span>
                                 <?php foreach ($theme['spots'] as $spot): ?>
-                                    <button type="button" 
-                                            class="theme-spot-btn px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-600 transition transform hover:-translate-y-0.5 active:scale-95" 
-                                            data-spot="<?= htmlspecialchars($spot['name']) ?>" 
-                                            data-type="<?= htmlspecialchars($spot['type']) ?>"
-                                            data-theme="<?= htmlspecialchars($theme['hero_theme']) ?>">
+                                    <a href="search.php?query=<?= urlencode($spot['name']) ?>&type=<?= urlencode($spot['type'] === 'intl' ? 'international' : 'domestic') ?>" 
+                                       class="theme-spot-btn px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-600 transition transform hover:-translate-y-0.5 active:scale-95" 
+                                       data-spot="<?= htmlspecialchars($spot['name']) ?>" 
+                                       data-type="<?= htmlspecialchars($spot['type']) ?>"
+                                       data-theme="<?= htmlspecialchars($theme['hero_theme']) ?>">
                                         <?= htmlspecialchars($spot['name']) ?>
-                                    </button>
+                                    </a>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -352,7 +460,7 @@ $holidayThemes = [
                             </div>
                         </div>
 
-                        <a href="#hero" 
+                        <a href="<?= !empty($theme['search_url']) ? htmlspecialchars($theme['search_url']) : 'search.php?theme=' . urlencode($theme['hero_theme']) ?>" 
                            class="theme-cta-btn inline-flex items-center space-x-1.5 px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all transform hover:-translate-y-0.5 active:scale-95 group/btn shrink-0 <?= $theme['btn_class'] ?>"
                            data-theme="<?= htmlspecialchars($theme['hero_theme']) ?>"
                            data-title="<?= htmlspecialchars($theme['title']) ?>">
