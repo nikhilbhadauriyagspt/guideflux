@@ -52,8 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_hotel'])) {
             $description = trim($_POST['description'] ?? '');
             $policies = trim($_POST['policies'] ?? 'Free Cancellation up to 48 hours before check-in.');
 
-            // Process Amenities Array to JSON
-            $amenitiesPost = isset($_POST['amenities']) && is_array($_POST['amenities']) ? array_values($_POST['amenities']) : [];
+            // Process Amenities Array to JSON (Save only valid checked items)
+            $amenitiesPost = [];
+            if (isset($_POST['amenities']) && is_array($_POST['amenities'])) {
+                foreach ($_POST['amenities'] as $amRow) {
+                    $amName = trim($amRow['name'] ?? '');
+                    if (!empty($amName)) {
+                        $amenitiesPost[] = [
+                            'name' => $amName,
+                            'icon' => !empty($amRow['icon']) ? trim($amRow['icon']) : 'fa-solid fa-circle-check',
+                            'desc' => trim($amRow['desc'] ?? 'Complimentary guest inclusion')
+                        ];
+                    }
+                }
+            }
             $amenitiesJson = json_encode($amenitiesPost, JSON_UNESCAPED_UNICODE);
 
             // Handle Featured Cover Image Upload or URL
@@ -270,21 +282,6 @@ if ($isEdit && $pdo) {
     }
 }
 
-// Parse selected amenities
-$selectedAmenities = [];
-if (!empty($hotel['amenities'])) {
-    $dec = json_decode($hotel['amenities'], true);
-    if (is_array($dec)) {
-        foreach ($dec as $item) {
-            if (is_array($item) && isset($item['name'])) {
-                $selectedAmenities[] = $item['name'];
-            } elseif (is_string($item)) {
-                $selectedAmenities[] = $item;
-            }
-        }
-    }
-}
-
 // Standard Available Amenities Catalog
 $standardAmenities = [
     ['name' => 'Free Breakfast', 'icon' => 'fa-solid fa-mug-saucer', 'desc' => 'Daily buffet or continental breakfast'],
@@ -302,6 +299,27 @@ $standardAmenities = [
     ['name' => 'Free Valet Parking', 'icon' => 'fa-solid fa-square-parking', 'desc' => 'Secure on-premise vehicle parking'],
     ['name' => 'Jacuzzi / Bathtub', 'icon' => 'fa-solid fa-hot-tub-person', 'desc' => 'Private in-room jacuzzi or bathtub']
 ];
+
+// Parse selected and custom amenities
+$selectedAmenities = [];
+$customAmenities = [];
+if (!empty($hotel['amenities'])) {
+    $dec = json_decode($hotel['amenities'], true);
+    if (is_array($dec)) {
+        $stdNames = array_column($standardAmenities, 'name');
+        foreach ($dec as $item) {
+            $name = is_array($item) ? ($item['name'] ?? '') : (string)$item;
+            $icon = is_array($item) ? ($item['icon'] ?? 'fa-solid fa-circle-check') : 'fa-solid fa-circle-check';
+            $desc = is_array($item) ? ($item['desc'] ?? 'Complimentary guest inclusion') : 'Complimentary guest inclusion';
+            if (!empty($name)) {
+                $selectedAmenities[] = $name;
+                if (!in_array($name, $stdNames)) {
+                    $customAmenities[] = ['name' => $name, 'icon' => $icon, 'desc' => $desc];
+                }
+            }
+        }
+    }
+}
 
 $pageTitle = $isEdit ? "Edit Hotel: " . htmlspecialchars($hotel['name']) : "Add New Hotel";
 include 'components/head.php';
@@ -375,15 +393,23 @@ include 'components/head.php';
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-800 mb-1">Property Type</label>
-                            <select name="property_type" class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
-                                <option value="5★ Luxury Resort" <?php echo ($hotel['property_type'] === '5★ Luxury Resort') ? 'selected' : ''; ?>>5★ Luxury Resort</option>
-                                <option value="5★ Royal Heritage Palace" <?php echo ($hotel['property_type'] === '5★ Royal Heritage Palace') ? 'selected' : ''; ?>>5★ Royal Heritage Palace</option>
-                                <option value="5★ Beachfront Resort" <?php echo ($hotel['property_type'] === '5★ Beachfront Resort') ? 'selected' : ''; ?>>5★ Beachfront Resort</option>
-                                <option value="5★ Backwater Sanctuary" <?php echo ($hotel['property_type'] === '5★ Backwater Sanctuary') ? 'selected' : ''; ?>>5★ Backwater Sanctuary</option>
-                                <option value="4★ Premium Boutique" <?php echo ($hotel['property_type'] === '4★ Premium Boutique') ? 'selected' : ''; ?>>4★ Premium Boutique</option>
-                                <option value="Alpine Snow Chalet" <?php echo ($hotel['property_type'] === 'Alpine Snow Chalet') ? 'selected' : ''; ?>>Alpine Snow Chalet</option>
-                            </select>
+                            <label class="block text-xs font-bold text-slate-800 mb-1">
+                                Property Type <span class="text-slate-400 font-normal">(Select or Type Custom)</span>
+                            </label>
+                            <input type="text" name="property_type" list="propertyTypeOptions" value="<?php echo htmlspecialchars($hotel['property_type']); ?>" placeholder="e.g. 5★ Luxury Resort / Eco Lodge" class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                            <datalist id="propertyTypeOptions">
+                                <option value="5★ Luxury Resort">
+                                <option value="5★ Royal Heritage Palace">
+                                <option value="5★ Beachfront Resort">
+                                <option value="5★ Backwater Sanctuary">
+                                <option value="4★ Premium Boutique">
+                                <option value="Alpine Snow Chalet">
+                                <option value="Jungle &amp; Safari Lodge">
+                                <option value="Luxury Wellness Retreat">
+                                <option value="Heritage Haveli">
+                                <option value="Private Pool Villa">
+                                <option value="Boutique Homestay">
+                            </datalist>
                         </div>
 
                         <div>
@@ -392,12 +418,28 @@ include 'components/head.php';
                                 <option value="5" <?php echo ((int)$hotel['star_rating'] === 5) ? 'selected' : ''; ?>>★★★★★ (5 Stars Luxury)</option>
                                 <option value="4" <?php echo ((int)$hotel['star_rating'] === 4) ? 'selected' : ''; ?>>★★★★☆ (4 Stars Premium)</option>
                                 <option value="3" <?php echo ((int)$hotel['star_rating'] === 3) ? 'selected' : ''; ?>>★★★☆☆ (3 Stars Standard)</option>
+                                <option value="2" <?php echo ((int)$hotel['star_rating'] === 2) ? 'selected' : ''; ?>>★★☆☆☆ (2 Stars Budget)</option>
+                                <option value="1" <?php echo ((int)$hotel['star_rating'] === 1) ? 'selected' : ''; ?>>★☆☆☆☆ (1 Star Economy)</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-800 mb-1">Marketing Badge Pill</label>
-                            <input type="text" name="badge" value="<?php echo htmlspecialchars($hotel['badge']); ?>" placeholder="e.g. 5★ Luxury Beachfront" class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                            <label class="block text-xs font-bold text-slate-800 mb-1">
+                                Marketing Badge Pill <span class="text-slate-400 font-normal">(Select or Type Custom)</span>
+                            </label>
+                            <input type="text" name="badge" list="badgeOptions" value="<?php echo htmlspecialchars($hotel['badge']); ?>" placeholder="e.g. 5★ Luxury Beachfront" class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                            <datalist id="badgeOptions">
+                                <option value="5★ Luxury">
+                                <option value="5★ Luxury Beachfront">
+                                <option value="Best Seller">
+                                <option value="Beachfront Icon">
+                                <option value="Heritage Palace">
+                                <option value="Orion Verified">
+                                <option value="Top Rated Stay">
+                                <option value="Backwater Icon">
+                                <option value="Romantic Hideaway">
+                                <option value="Mountain Sanctuary">
+                            </datalist>
                         </div>
 
                         <div>
@@ -590,22 +632,78 @@ include 'components/head.php';
                     </div>
                 </div>
 
-                <!-- Section 5: Included Amenities Checklist -->
+                <!-- Section 5: Included Amenities Checklist & Custom Amenity Builder -->
                 <div class="bg-white border border-[#e5e4dc] p-5 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-[#e5e4dc]">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#e5e4dc] gap-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 bg-sage-700"></span>
                             <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">5. Included Stay Amenities</h2>
                         </div>
-                        <span class="text-[10px] text-slate-400">Select all that apply</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="showAddAmenityInline()" class="px-2.5 py-1 text-xs font-bold bg-sage-50 text-sage-800 border border-sage-300 hover:bg-sage-100 flex items-center gap-1.5 transition-colors">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span>Add Custom Amenity</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                        <?php foreach ($standardAmenities as $idx => $am): ?>
-                            <?php $isChecked = in_array($am['name'], $selectedAmenities); ?>
+                    <!-- Inline Custom Amenity Creation Box -->
+                    <div id="addAmenityBox" class="hidden p-3.5 bg-cream-50 border border-sage-300 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-sage-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-sparkles text-sage-700"></i>
+                                <span>Add New Property Amenity</span>
+                            </span>
+                            <button type="button" onclick="hideAddAmenityInline()" class="text-slate-400 hover:text-slate-700 text-xs">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Amenity Name <span class="text-rose-500">*</span></label>
+                                <input type="text" id="newAmenityName" placeholder="e.g. Private Heated Jacuzzi" class="w-full text-xs p-2 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Icon Class</label>
+                                <input type="text" id="newAmenityIcon" list="amenityIconPresets" value="fa-solid fa-circle-check" placeholder="fa-solid fa-hot-tub-person" class="w-full text-xs p-2 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none">
+                                <datalist id="amenityIconPresets">
+                                    <option value="fa-solid fa-hot-tub-person">
+                                    <option value="fa-solid fa-water-ladder">
+                                    <option value="fa-solid fa-water">
+                                    <option value="fa-solid fa-spa">
+                                    <option value="fa-solid fa-utensils">
+                                    <option value="fa-solid fa-mug-saucer">
+                                    <option value="fa-solid fa-martini-glass">
+                                    <option value="fa-solid fa-van-shuttle">
+                                    <option value="fa-solid fa-helicopter">
+                                    <option value="fa-solid fa-fire">
+                                    <option value="fa-solid fa-tree">
+                                    <option value="fa-solid fa-paw">
+                                    <option value="fa-solid fa-shield-halved">
+                                    <option value="fa-solid fa-circle-check">
+                                </datalist>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Short Description</label>
+                                <input type="text" id="newAmenityDesc" placeholder="e.g. 24/7 temperature controlled in-room" class="w-full text-xs p-2 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none">
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2 pt-1">
+                            <button type="button" onclick="hideAddAmenityInline()" class="px-3 py-1 text-xs font-semibold bg-white border border-[#e5e4dc] hover:bg-cream-100">Cancel</button>
+                            <button type="button" onclick="confirmAddAmenity()" class="px-3.5 py-1 text-xs font-bold bg-sage-700 hover:bg-sage-800 text-white">Add Amenity</button>
+                        </div>
+                    </div>
+
+                    <div id="amenitiesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                        <?php 
+                        $curIndex = 0;
+                        foreach ($standardAmenities as $am): 
+                            $isChecked = in_array($am['name'], $selectedAmenities);
+                        ?>
                             <label class="flex items-start gap-2.5 p-2.5 border border-[#e5e4dc] hover:bg-cream-50 cursor-pointer transition-colors select-none">
-                                <input type="checkbox" name="amenities[<?php echo $idx; ?>][name]" value="<?php echo htmlspecialchars($am['name']); ?>" <?php echo $isChecked ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
-                                <input type="hidden" name="amenities[<?php echo $idx; ?>][icon]" value="<?php echo htmlspecialchars($am['icon']); ?>">
+                                <input type="checkbox" name="amenities[<?php echo $curIndex; ?>][name]" value="<?php echo htmlspecialchars($am['name']); ?>" <?php echo $isChecked ? 'checked' : ''; ?> class="mt-0.5 accent-sage-700">
+                                <input type="hidden" name="amenities[<?php echo $curIndex; ?>][icon]" value="<?php echo htmlspecialchars($am['icon']); ?>">
+                                <input type="hidden" name="amenities[<?php echo $curIndex; ?>][desc]" value="<?php echo htmlspecialchars($am['desc']); ?>">
                                 <div class="text-xs">
                                     <div class="font-bold text-slate-800 flex items-center gap-1.5">
                                         <i class="<?php echo htmlspecialchars($am['icon']); ?> text-sage-700 text-[11px]"></i>
@@ -614,7 +712,31 @@ include 'components/head.php';
                                     <div class="text-[10px] text-slate-400"><?php echo htmlspecialchars($am['desc']); ?></div>
                                 </div>
                             </label>
-                        <?php endforeach; ?>
+                        <?php 
+                            $curIndex++;
+                        endforeach; 
+                        ?>
+
+                        <?php if (!empty($customAmenities)): ?>
+                            <?php foreach ($customAmenities as $cam): ?>
+                                <label class="flex items-start gap-2.5 p-2.5 border border-sage-300 bg-sage-50/40 hover:bg-cream-50 cursor-pointer transition-colors select-none">
+                                    <input type="checkbox" name="amenities[<?php echo $curIndex; ?>][name]" value="<?php echo htmlspecialchars($cam['name']); ?>" checked class="mt-0.5 accent-sage-700">
+                                    <input type="hidden" name="amenities[<?php echo $curIndex; ?>][icon]" value="<?php echo htmlspecialchars($cam['icon']); ?>">
+                                    <input type="hidden" name="amenities[<?php echo $curIndex; ?>][desc]" value="<?php echo htmlspecialchars($cam['desc']); ?>">
+                                    <div class="text-xs">
+                                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                                            <i class="<?php echo htmlspecialchars($cam['icon']); ?> text-sage-700 text-[11px]"></i>
+                                            <span><?php echo htmlspecialchars($cam['name']); ?></span>
+                                            <span class="text-[9px] text-sage-800 bg-sage-100 border border-sage-300 px-1 py-0.2 rounded font-bold">Custom</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-400"><?php echo htmlspecialchars($cam['desc']); ?></div>
+                                    </div>
+                                </label>
+                            <?php 
+                                $curIndex++;
+                            endforeach; 
+                            ?>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -740,9 +862,9 @@ include 'components/head.php';
                                     <div class="md:col-span-2">
                                         <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Room Photo (Image URL or Upload)</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="url" name="rooms[0][image_url]" value="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80" placeholder="https://images.unsplash.com/photo-..." class="flex-1 text-xs p-2 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none">
+                                            <input type="url" name="rooms[0][image_url]" value="" placeholder="https://images.unsplash.com/... (or leave blank to use hotel cover)" class="flex-1 text-xs p-2 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none">
                                             <input type="file" name="room_files[0]" accept="image/*" class="w-36 text-[10px] text-slate-500 file:py-1 file:px-2 file:border file:border-[#e5e4dc] file:text-[10px] file:bg-white file:font-semibold">
-                                            <input type="hidden" name="rooms[0][existing_image]" value="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80">
+                                            <input type="hidden" name="rooms[0][existing_image]" value="">
                                         </div>
                                     </div>
                                 </div>
@@ -789,6 +911,62 @@ include 'components/head.php';
 <script>
     let roomIndex = <?php echo max(count($rooms), 1); ?>;
     let galleryIndex = <?php echo max(count($galleryImages), 1); ?>;
+    let amenityIndex = <?php echo max($curIndex ?? 14, 14); ?>;
+
+    function showAddAmenityInline() {
+        const box = document.getElementById('addAmenityBox');
+        if (box) {
+            box.classList.remove('hidden');
+            document.getElementById('newAmenityName')?.focus();
+        }
+    }
+
+    function hideAddAmenityInline() {
+        const box = document.getElementById('addAmenityBox');
+        if (box) box.classList.add('hidden');
+    }
+
+    function confirmAddAmenity() {
+        const nameInput = document.getElementById('newAmenityName');
+        const iconInput = document.getElementById('newAmenityIcon');
+        const descInput = document.getElementById('newAmenityDesc');
+        const container = document.getElementById('amenitiesGridContainer');
+
+        const name = nameInput ? nameInput.value.trim() : '';
+        const icon = (iconInput && iconInput.value.trim()) ? iconInput.value.trim() : 'fa-solid fa-circle-check';
+        const desc = (descInput && descInput.value.trim()) ? descInput.value.trim() : 'Custom property amenity';
+
+        if (!name) {
+            alert('Please enter amenity title/name.');
+            nameInput?.focus();
+            return;
+        }
+
+        amenityIndex++;
+        const label = document.createElement('label');
+        label.className = 'flex items-start gap-2.5 p-2.5 border border-sage-300 bg-sage-50/50 hover:bg-cream-50 cursor-pointer transition-colors select-none';
+        label.innerHTML = `
+            <input type="checkbox" name="amenities[${amenityIndex}][name]" value="${escapeHtml(name)}" checked class="mt-0.5 accent-sage-700">
+            <input type="hidden" name="amenities[${amenityIndex}][icon]" value="${escapeHtml(icon)}">
+            <input type="hidden" name="amenities[${amenityIndex}][desc]" value="${escapeHtml(desc)}">
+            <div class="text-xs">
+                <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                    <i class="${escapeHtml(icon)} text-sage-700 text-[11px]"></i>
+                    <span>${escapeHtml(name)}</span>
+                    <span class="text-[9px] text-sage-800 bg-sage-100 border border-sage-300 px-1 py-0.2 rounded font-bold">New</span>
+                </div>
+                <div class="text-[10px] text-slate-400">${escapeHtml(desc)}</div>
+            </div>
+        `;
+
+        if (container) {
+            container.appendChild(label);
+        }
+
+        if (nameInput) nameInput.value = '';
+        if (descInput) descInput.value = '';
+        hideAddAmenityInline();
+    }
 
     function updateCoverPreview(url) {
         const preview = document.getElementById('coverPreviewImg');
@@ -804,11 +982,12 @@ include 'components/head.php';
         card.className = 'gallery-card bg-white border border-[#e5e4dc] p-2 space-y-2 relative group';
         card.innerHTML = `
             <div class="h-28 bg-cream-50 border border-[#e5e4dc] overflow-hidden flex items-center justify-center">
-                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80" alt="Gallery Preview" class="w-full h-full object-cover gal-prev-img">
+                <img src="" alt="Gallery Preview" class="w-full h-full object-cover gal-prev-img hidden">
+                <i class="fa-solid fa-image text-2xl text-slate-300 gal-prev-placeholder"></i>
             </div>
             <div>
                 <label class="block text-[9px] font-bold text-slate-500 mb-0.5">Image URL</label>
-                <input type="url" name="gallery_urls[${galleryIndex}][url]" required placeholder="https://images.unsplash.com/..." class="w-full text-[11px] p-1.5 bg-white border border-[#e5e4dc]" oninput="this.closest('.gallery-card').querySelector('.gal-prev-img').src = this.value">
+                <input type="url" name="gallery_urls[${galleryIndex}][url]" required placeholder="https://images.unsplash.com/..." class="w-full text-[11px] p-1.5 bg-white border border-[#e5e4dc]" oninput="const img = this.closest('.gallery-card').querySelector('.gal-prev-img'); const ph = this.closest('.gallery-card').querySelector('.gal-prev-placeholder'); if (this.value.trim()) { img.src = this.value; img.classList.remove('hidden'); ph.classList.add('hidden'); } else { img.classList.add('hidden'); ph.classList.remove('hidden'); }">
             </div>
             <div>
                 <label class="block text-[9px] font-bold text-slate-500 mb-0.5">Caption</label>

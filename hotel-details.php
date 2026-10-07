@@ -310,157 +310,196 @@ $hotelsDb = [
     ]
 ];
 
-// Smart Hotel Resolution from query or id parameter
+// Smart Hotel Resolution from query, id or slug parameter
 $lookupHotelKey = 'HTL-GOA-01';
-$rawHotelSearch = isset($_GET['id']) ? trim($_GET['id']) : (isset($_GET['hotel']) ? trim($_GET['hotel']) : 'goa');
+$rawHotelSearch = isset($_GET['id']) ? trim($_GET['id']) : (isset($_GET['slug']) ? trim($_GET['slug']) : (isset($_GET['hotel']) ? trim($_GET['hotel']) : ''));
 
-// Check if querying by dynamic DB ID (e.g. HTL-DB-1 or 1)
-$dbHotelId = null;
-if (strpos($rawHotelSearch, 'HTL-DB-') === 0) {
-    $dbHotelId = (int)str_replace('HTL-DB-', '', $rawHotelSearch);
-} elseif (is_numeric($rawHotelSearch) && (int)$rawHotelSearch > 0) {
-    $dbHotelId = (int)$rawHotelSearch;
-}
+// Attempt Dynamic Database Resolution First
+require_once __DIR__ . '/config/db.php';
+$pdoDetails = getDBConnection();
 
-if ($dbHotelId) {
-    require_once __DIR__ . '/config/db.php';
-    $pdoDetails = getDBConnection();
-    if ($pdoDetails) {
+if ($pdoDetails && !empty($rawHotelSearch)) {
+    $dbHotelId = null;
+    if (strpos($rawHotelSearch, 'HTL-DB-') === 0) {
+        $dbHotelId = (int)str_replace('HTL-DB-', '', $rawHotelSearch);
+    } elseif (is_numeric($rawHotelSearch) && (int)$rawHotelSearch > 0) {
+        $dbHotelId = (int)$rawHotelSearch;
+    }
+
+    $fetchedHotel = null;
+    if ($dbHotelId) {
         $dbStmt = $pdoDetails->prepare("SELECT * FROM `hotels` WHERE `id` = ?");
         $dbStmt->execute([$dbHotelId]);
         $fetchedHotel = $dbStmt->fetch();
+    }
 
+    if (!$fetchedHotel) {
+        // Try searching by slug or name
+        $dbStmt = $pdoDetails->prepare("SELECT * FROM `hotels` WHERE `slug` = ? OR `name` LIKE ? LIMIT 1");
+        $dbStmt->execute([$rawHotelSearch, '%' . $rawHotelSearch . '%']);
+        $fetchedHotel = $dbStmt->fetch();
         if ($fetchedHotel) {
-            // Fetch Rooms
-            $rStmt = $pdoDetails->prepare("SELECT * FROM `hotel_rooms` WHERE `hotel_id` = ? AND `status` = 'available'");
-            $rStmt->execute([$dbHotelId]);
-            $fetchedRooms = $rStmt->fetchAll();
+            $dbHotelId = (int)$fetchedHotel['id'];
+        }
+    }
 
-            $formattedRooms = [];
-            foreach ($fetchedRooms as $fr) {
-                $roomImage = !empty($fr['image_url']) ? $fr['image_url'] : (!empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80');
-                
-                $formattedRooms[] = [
-                    'id' => 'room-db-' . $fr['id'],
-                    'name' => $fr['room_name'],
-                    'price' => (float)$fr['price_per_night'],
-                    'original_price' => (float)($fr['original_price'] ?: ($fr['price_per_night'] * 1.25)),
-                    'size' => $fr['room_size'] ?: '380 sq.ft',
-                    'bed' => $fr['bed_type'] ?: '1 King Bed',
-                    'view' => $fr['room_type'] ?: 'Deluxe View',
-                    'occupancy' => $fr['max_adults'] . ' Adults • ' . $fr['max_children'] . ' Child',
-                    'image' => $roomImage,
-                    'amenities' => array_filter(array_map('trim', explode(',', $fr['meal_plan'] . ', Free Wi-Fi, Air Conditioning, Private Bath'))),
-                    'cancellation' => 'Free cancellation until 24 hrs prior to check-in'
-                ];
-            }
+    if ($fetchedHotel && $dbHotelId) {
+        // Fetch Rooms
+        $rStmt = $pdoDetails->prepare("SELECT * FROM `hotel_rooms` WHERE `hotel_id` = ? AND `status` = 'available'");
+        $rStmt->execute([$dbHotelId]);
+        $fetchedRooms = $rStmt->fetchAll();
 
-            if (empty($formattedRooms)) {
-                $formattedRooms[] = [
-                    'id' => 'room-db-def',
-                    'name' => 'Luxury Deluxe Stay',
-                    'price' => (float)$fetchedHotel['starting_price'],
-                    'original_price' => (float)($fetchedHotel['original_price'] ?: ($fetchedHotel['starting_price'] * 1.25)),
-                    'size' => '380 sq.ft',
-                    'bed' => '1 King Bed',
-                    'view' => 'Scenic View',
-                    'occupancy' => '2 Adults • 1 Child',
-                    'image' => !empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80',
-                    'amenities' => ['Free Breakfast', 'High-Speed Wi-Fi', 'Air Conditioning', 'Bathtub'],
-                    'cancellation' => 'Free cancellation until 24 hrs prior to check-in'
-                ];
-            }
+        $formattedRooms = [];
+        foreach ($fetchedRooms as $fr) {
+            $roomImage = !empty($fr['image_url']) ? $fr['image_url'] : (!empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'assets/images/placeholder-hotel.jpg');
+            
+            $formattedRooms[] = [
+                'id' => 'room-db-' . $fr['id'],
+                'name' => $fr['room_name'],
+                'price' => (float)$fr['price_per_night'],
+                'original_price' => (float)($fr['original_price'] ?: ($fr['price_per_night'] * 1.25)),
+                'size' => $fr['room_size'] ?: '380 sq.ft',
+                'bed' => $fr['bed_type'] ?: '1 King Bed',
+                'view' => $fr['room_type'] ?: 'Deluxe View',
+                'occupancy' => $fr['max_adults'] . ' Adults • ' . $fr['max_children'] . ' Child',
+                'image' => $roomImage,
+                'amenities' => array_filter(array_map('trim', explode(',', $fr['meal_plan'] . ', Free Wi-Fi, Air Conditioning, Private Bath'))),
+                'cancellation' => 'Free cancellation until 24 hrs prior to check-in'
+            ];
+        }
 
-            // Fetch Gallery Images
-            $gStmt = $pdoDetails->prepare("SELECT `image_url` FROM `hotel_images` WHERE `hotel_id` = ? ORDER BY `sort_order` ASC, `id` ASC");
-            $gStmt->execute([$dbHotelId]);
-            $galleryRows = $gStmt->fetchAll(PDO::FETCH_COLUMN);
+        if (empty($formattedRooms)) {
+            $formattedRooms[] = [
+                'id' => 'room-db-def',
+                'name' => 'Luxury Deluxe Stay',
+                'price' => (float)$fetchedHotel['starting_price'],
+                'original_price' => (float)($fetchedHotel['original_price'] ?: ($fetchedHotel['starting_price'] * 1.25)),
+                'size' => '380 sq.ft',
+                'bed' => '1 King Bed',
+                'view' => 'Scenic View',
+                'occupancy' => '2 Adults • 1 Child',
+                'image' => !empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'assets/images/placeholder-hotel.jpg',
+                'amenities' => ['Free Breakfast', 'High-Speed Wi-Fi', 'Air Conditioning', 'Bathtub'],
+                'cancellation' => 'Free cancellation until 24 hrs prior to check-in'
+            ];
+        }
 
-            $galleryList = [];
-            if (!empty($fetchedHotel['featured_image'])) {
-                $galleryList[] = $fetchedHotel['featured_image'];
-            }
-            foreach ($galleryRows as $gr) {
-                if (!in_array($gr, $galleryList)) {
-                    $galleryList[] = $gr;
-                }
-            }
-            while (count($galleryList) < 5) {
-                $galleryList[] = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80';
-            }
+        // Fetch Gallery Images
+        $gStmt = $pdoDetails->prepare("SELECT `image_url` FROM `hotel_images` WHERE `hotel_id` = ? ORDER BY `sort_order` ASC, `id` ASC");
+        $gStmt->execute([$dbHotelId]);
+        $galleryRows = $gStmt->fetchAll(PDO::FETCH_COLUMN);
 
-            // Parse Amenities from DB
-            $parsedAmenities = [];
-            if (!empty($fetchedHotel['amenities'])) {
-                $decAm = json_decode($fetchedHotel['amenities'], true);
-                if (is_array($decAm)) {
-                    foreach ($decAm as $amItem) {
-                        if (is_array($amItem) && !empty($amItem['name'])) {
-                            $parsedAmenities[] = [
-                                'icon' => !empty($amItem['icon']) ? $amItem['icon'] : 'fa-solid fa-circle-check',
-                                'title' => $amItem['name'],
-                                'desc' => 'Complimentary guest amenity included'
-                            ];
-                        } elseif (is_string($amItem)) {
-                            $parsedAmenities[] = [
-                                'icon' => 'fa-solid fa-circle-check',
-                                'title' => $amItem,
-                                'desc' => 'Complimentary guest amenity included'
-                            ];
+        $galleryList = [];
+        if (!empty($fetchedHotel['featured_image'])) {
+            $galleryList[] = $fetchedHotel['featured_image'];
+        }
+        foreach ($galleryRows as $gr) {
+            if (!empty($gr) && !in_array($gr, $galleryList)) {
+                $galleryList[] = $gr;
+            }
+        }
+        // If completely empty, add featured cover
+        if (empty($galleryList)) {
+            $galleryList[] = !empty($fetchedHotel['featured_image']) ? $fetchedHotel['featured_image'] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80';
+        }
+
+        // Dynamic Amenities Parsing and Categorization from DB
+        $parsedAmenities = [];
+        $categorizedAmenities = [
+            'Facilities & Services' => [],
+            'Wellness & Comfort' => [],
+            'Dining & Culinary' => []
+        ];
+
+        if (!empty($fetchedHotel['amenities'])) {
+            $decAm = json_decode($fetchedHotel['amenities'], true);
+            if (is_array($decAm)) {
+                foreach ($decAm as $amItem) {
+                    $amName = '';
+                    $amIcon = 'fa-solid fa-circle-check';
+                    if (is_array($amItem)) {
+                        $amName = trim($amItem['name'] ?? '');
+                        $amIcon = !empty($amItem['icon']) ? $amItem['icon'] : 'fa-solid fa-circle-check';
+                    } elseif (is_string($amItem)) {
+                        $amName = trim($amItem);
+                    }
+
+                    if (!empty($amName)) {
+                        $parsedAmenities[] = [
+                            'icon' => $amIcon,
+                            'title' => $amName,
+                            'desc' => 'Complimentary guest amenity included'
+                        ];
+
+                        $lowName = strtolower($amName);
+                        if (str_contains($lowName, 'spa') || str_contains($lowName, 'gym') || str_contains($lowName, 'fitness') || str_contains($lowName, 'ac') || str_contains($lowName, 'conditioning') || str_contains($lowName, 'security') || str_contains($lowName, 'jacuzzi') || str_contains($lowName, 'bath') || str_contains($lowName, 'wellness') || str_contains($lowName, 'hot-tub')) {
+                            $categorizedAmenities['Wellness & Comfort'][] = ['icon' => $amIcon, 'name' => $amName];
+                        } elseif (str_contains($lowName, 'breakfast') || str_contains($lowName, 'restaurant') || str_contains($lowName, 'dining') || str_contains($lowName, 'bar') || str_contains($lowName, 'lounge') || str_contains($lowName, 'chef') || str_contains($lowName, 'cocktail') || str_contains($lowName, 'food')) {
+                            $categorizedAmenities['Dining & Culinary'][] = ['icon' => $amIcon, 'name' => $amName];
+                        } else {
+                            $categorizedAmenities['Facilities & Services'][] = ['icon' => $amIcon, 'name' => $amName];
                         }
                     }
                 }
             }
+        }
 
-            if (empty($parsedAmenities)) {
-                $parsedAmenities = [
-                    ['icon' => 'fa-solid fa-person-swimming', 'title' => 'Swimming Pool & Deck', 'desc' => 'Complimentary pool access for all guests'],
-                    ['icon' => 'fa-solid fa-utensils', 'title' => 'Complimentary Breakfast', 'desc' => 'Multi-cuisine daily breakfast included'],
-                    ['icon' => 'fa-solid fa-wifi', 'title' => 'High-Speed Wi-Fi', 'desc' => 'Gigabit wireless throughout the property'],
-                    ['icon' => 'fa-solid fa-bell-concierge', 'title' => '24/7 Front Desk', 'desc' => 'Dedicated concierge & room service support']
-                ];
-            }
+        // Clean empty categories
+        $categorizedAmenities = array_filter($categorizedAmenities, function($group) {
+            return !empty($group);
+        });
 
-            $hotel = [
-                'id' => 'HTL-DB-' . $fetchedHotel['id'],
-                'name' => $fetchedHotel['name'],
-                'subtitle' => $fetchedHotel['description'] ?: 'Curated luxury stay with premium rooms, breakfast inclusions, and world-class guest facilities.',
-                'location' => $fetchedHotel['address'] ?: ($fetchedHotel['city'] . ', ' . $fetchedHotel['country']),
-                'city' => $fetchedHotel['city'] . ', ' . $fetchedHotel['country'],
-                'star_rating' => $fetchedHotel['star_rating'] . '-Star ' . $fetchedHotel['property_type'],
-                'badge' => $fetchedHotel['badge'] ?: 'Premier Stay',
-                'badge_class' => 'bg-brand-600 text-white',
-                'rating' => number_format((float)$fetchedHotel['star_rating'], 1),
-                'reviews_count' => 1420,
-                'base_price' => (float)$fetchedHotel['starting_price'],
-                'original_price' => (float)($fetchedHotel['original_price'] ?: ($fetchedHotel['starting_price'] * 1.25)),
-                'tax_rate' => 0.12,
-                'gallery' => $galleryList,
-                'key_perks' => $parsedAmenities,
-                'rooms' => $formattedRooms,
-                'amenities_categories' => [
-                    'Facilities & Services' => [
-                        ['icon' => 'fa-solid fa-person-swimming', 'name' => 'Swimming Pool'],
-                        ['icon' => 'fa-solid fa-utensils', 'name' => 'Multi-Cuisine Dining'],
-                        ['icon' => 'fa-solid fa-wifi', 'name' => 'High-Speed Wi-Fi'],
-                        ['icon' => 'fa-solid fa-square-parking', 'name' => 'Free Parking']
-                    ],
-                    'Wellness & Comfort' => [
-                        ['icon' => 'fa-solid fa-spa', 'name' => 'Spa & Wellness'],
-                        ['icon' => 'fa-solid fa-dumbbell', 'name' => 'Fitness Center'],
-                        ['icon' => 'fa-solid fa-snowflake', 'name' => 'Air Conditioning'],
-                        ['icon' => 'fa-solid fa-shield-halved', 'name' => '24/7 Security']
-                    ]
+        if (empty($categorizedAmenities)) {
+            $categorizedAmenities = [
+                'Facilities & Services' => [
+                    ['icon' => 'fa-solid fa-water-ladder', 'name' => 'Swimming Pool'],
+                    ['icon' => 'fa-solid fa-utensils', 'name' => 'Multi-Cuisine Dining'],
+                    ['icon' => 'fa-solid fa-wifi', 'name' => 'High-Speed Wi-Fi'],
+                    ['icon' => 'fa-solid fa-square-parking', 'name' => 'Free Parking']
                 ],
-                'policies' => [
-                    'check_in' => $fetchedHotel['checkin_time'] ?: '02:00 PM',
-                    'check_out' => $fetchedHotel['checkout_time'] ?: '11:00 AM',
-                    'cancellation' => $fetchedHotel['policies'] ?: 'Free cancellation up to 24 hours prior to check-in.',
-                    'child_policy' => 'Children up to 5 years stay complimentary in existing bedding.',
-                    'id_proof' => 'Government-issued photo identification required for all guests.'
+                'Wellness & Comfort' => [
+                    ['icon' => 'fa-solid fa-spa', 'name' => 'Spa & Wellness'],
+                    ['icon' => 'fa-solid fa-snowflake', 'name' => 'Air Conditioning'],
+                    ['icon' => 'fa-solid fa-shield-halved', 'name' => '24/7 Security']
                 ]
             ];
         }
+
+        if (empty($parsedAmenities)) {
+            $parsedAmenities = [
+                ['icon' => 'fa-solid fa-water-ladder', 'title' => 'Swimming Pool & Deck', 'desc' => 'Complimentary pool access for all guests'],
+                ['icon' => 'fa-solid fa-utensils', 'title' => 'Complimentary Breakfast', 'desc' => 'Multi-cuisine daily breakfast included'],
+                ['icon' => 'fa-solid fa-wifi', 'title' => 'High-Speed Wi-Fi', 'desc' => 'Gigabit wireless throughout the property'],
+                ['icon' => 'fa-solid fa-bell-concierge', 'title' => '24/7 Front Desk', 'desc' => 'Dedicated concierge & room service support']
+            ];
+        }
+
+        $hotel = [
+            'id' => 'HTL-DB-' . $fetchedHotel['id'],
+            'name' => $fetchedHotel['name'],
+            'subtitle' => $fetchedHotel['description'] ?: 'Curated luxury stay with premium rooms, breakfast inclusions, and world-class guest facilities.',
+            'location' => $fetchedHotel['address'] ?: ($fetchedHotel['city'] . ', ' . $fetchedHotel['country']),
+            'city' => $fetchedHotel['city'] . ', ' . $fetchedHotel['country'],
+            'star_rating' => $fetchedHotel['star_rating'] . '-Star ' . $fetchedHotel['property_type'],
+            'badge' => $fetchedHotel['badge'] ?: 'Premier Stay',
+            'badge_class' => 'bg-brand-600 text-white',
+            'rating' => number_format((float)$fetchedHotel['star_rating'], 1),
+            'reviews_count' => 1420,
+            'base_price' => (float)$fetchedHotel['starting_price'],
+            'original_price' => (float)($fetchedHotel['original_price'] ?: ($fetchedHotel['starting_price'] * 1.25)),
+            'tax_rate' => 0.12,
+            'gallery' => $galleryList,
+            'key_perks' => $parsedAmenities,
+            'rooms' => $formattedRooms,
+            'amenities_categories' => $categorizedAmenities,
+            'policies' => [
+                'check_in' => $fetchedHotel['checkin_time'] ?: '02:00 PM',
+                'check_out' => $fetchedHotel['checkout_time'] ?: '11:00 AM',
+                'cancellation' => $fetchedHotel['policies'] ?: 'Free cancellation up to 24 hours prior to check-in.',
+                'child_policy' => 'Children up to 5 years stay complimentary in existing bedding.',
+                'id_proof' => 'Government-issued photo identification required for all guests.'
+            ]
+        ];
     }
 }
 
@@ -469,8 +508,8 @@ if (!isset($hotel)) {
         $lookupHotelKey = 'HTL-SHM-02';
     } elseif (str_contains(strtolower($rawHotelSearch), 'kerala') || str_contains(strtolower($rawHotelSearch), 'ker') || str_contains(strtolower($rawHotelSearch), 'kumarakom')) {
         $lookupHotelKey = 'HTL-KER-04';
-    } elseif (isset($hotelsDb[$hotelId])) {
-        $lookupHotelKey = $hotelId;
+    } elseif (!empty($rawHotelSearch) && isset($hotelsDb[$rawHotelSearch])) {
+        $lookupHotelKey = $rawHotelSearch;
     }
     $hotel = isset($hotelsDb[$lookupHotelKey]) ? $hotelsDb[$lookupHotelKey] : $hotelsDb['HTL-GOA-01'];
 }
@@ -558,32 +597,40 @@ require_once 'components/navbar.php';
 </section>
 
 <!-- ==========================================
-     MAGAZINE PHOTO GALLERY (1 Big Left + 4 Right)
+     MAGAZINE PHOTO GALLERY (Dynamic Real Photos Only)
 =========================================== -->
+<?php 
+$galCount = count($hotel['gallery']);
+$mainPhoto = !empty($hotel['gallery'][0]) ? $hotel['gallery'][0] : 'assets/images/placeholder-hotel.jpg';
+$sidePhotos = array_slice($hotel['gallery'], 1, 4);
+$sideCount = count($sidePhotos);
+?>
 <section class="w-full bg-white pb-8 px-4 sm:px-8 xl:px-12">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 h-[260px] sm:h-[340px] md:h-[480px]">
+        <div class="grid grid-cols-1 <?= $sideCount > 0 ? 'md:grid-cols-4' : '' ?> gap-3 rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 h-[260px] sm:h-[340px] md:h-[480px]">
             
-            <!-- Large Main Photo (Cols 1 & 2) -->
-            <div class="md:col-span-2 h-full relative overflow-hidden group">
-                <img src="<?= htmlspecialchars($hotel['gallery'][0]) ?>" 
+            <!-- Large Main Photo -->
+            <div class="<?= $sideCount > 0 ? 'md:col-span-2' : 'col-span-full' ?> h-full relative overflow-hidden group">
+                <img src="<?= htmlspecialchars($mainPhoto) ?>" 
                      alt="<?= htmlspecialchars($hotel['name']) ?>" 
                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                 <span class="absolute bottom-4 left-4 px-3 py-1 rounded-full text-xs font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20">
-                    <i class="fa-solid fa-umbrella-beach mr-1 text-teal-300"></i> Ocean Infinity Pool &amp; Beachfront
+                    <i class="fa-solid fa-umbrella-beach mr-1 text-teal-300"></i> <?= htmlspecialchars($hotel['badge'] ?: 'Featured Property') ?>
                 </span>
             </div>
 
-            <!-- Right 4 Photos (Cols 3 & 4) -->
-            <div class="hidden md:grid md:col-span-2 grid-cols-2 gap-3 h-full">
-                <?php for ($i = 1; $i < 5; $i++): ?>
-                    <div class="h-[233px] relative overflow-hidden group">
-                        <img src="<?= htmlspecialchars($hotel['gallery'][$i]) ?>" 
-                             alt="Hotel Photo <?= $i ?>" 
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                    </div>
-                <?php endfor; ?>
-            </div>
+            <!-- Additional Gallery Photos -->
+            <?php if ($sideCount > 0): ?>
+                <div class="hidden md:grid md:col-span-2 <?= $sideCount === 1 ? 'grid-cols-1' : ($sideCount <= 2 ? 'grid-cols-1' : 'grid-cols-2') ?> gap-3 h-full">
+                    <?php foreach ($sidePhotos as $sIdx => $photoUrl): ?>
+                        <div class="<?= $sideCount === 1 ? 'h-full' : 'h-[233px]' ?> relative overflow-hidden group">
+                            <img src="<?= htmlspecialchars($photoUrl) ?>" 
+                                 alt="<?= htmlspecialchars($hotel['name']) ?> Photo <?= $sIdx + 2 ?>" 
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
 
         </div>
     </div>
