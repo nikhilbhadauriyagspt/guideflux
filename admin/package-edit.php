@@ -59,7 +59,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_package'])) {
             $rating = (float)($_POST['rating'] ?? 4.9);
             $reviewsCount = (int)($_POST['reviews_count'] ?? 350);
             $status = trim($_POST['status'] ?? 'active');
-            $policies = trim($_POST['policies'] ?? 'Free Cancellation up to 7 days before tour departure. 100% token refund on emergency medical cancellations.');
+
+            // Process Cancellation & Refund Policies Structure
+            $policySummary = trim($_POST['policy_summary'] ?? ($_POST['policies'] ?? 'Free cancellation and date reschedule options available before departure.'));
+            $reschedulePolicy = trim($_POST['reschedule_policy'] ?? 'Flexible date reschedule permitted up to 7 days before tour departure without penalty.');
+            $medicalPolicy = trim($_POST['medical_policy'] ?? '100% token refund on medical emergencies with verified certificate.');
+
+            $cancellationTiers = [];
+            if (isset($_POST['cancellation_tiers']) && is_array($_POST['cancellation_tiers'])) {
+                foreach ($_POST['cancellation_tiers'] as $tier) {
+                    $timeline = trim($tier['timeline'] ?? '');
+                    $refund = trim($tier['refund'] ?? '');
+                    $deduction = trim($tier['deduction'] ?? '');
+                    $badgeType = trim($tier['badge_type'] ?? 'partial_refund');
+                    if (!empty($timeline) && !empty($refund)) {
+                        $cancellationTiers[] = [
+                            'timeline' => $timeline,
+                            'refund' => $refund,
+                            'deduction' => $deduction,
+                            'badge_type' => $badgeType
+                        ];
+                    }
+                }
+            }
+
+            if (empty($cancellationTiers)) {
+                $cancellationTiers = [
+                    ['timeline' => '15+ Days Before Tour Departure', 'refund' => '100% Refund', 'deduction' => '0% Deduction (Full Token Refund)', 'badge_type' => 'full_refund'],
+                    ['timeline' => '7 to 14 Days Before Departure', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
+                    ['timeline' => '3 to 6 Days Before Departure', 'refund' => '50% Refund', 'deduction' => '50% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                    ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable Cutoff', 'badge_type' => 'no_refund']
+                ];
+            }
+
+            $policyData = [
+                'summary' => $policySummary,
+                'rules' => $cancellationTiers,
+                'reschedule_policy' => $reschedulePolicy,
+                'medical_policy' => $medicalPolicy
+            ];
+            $policies = json_encode($policyData, JSON_UNESCAPED_UNICODE);
 
             if (empty($title)) {
                 throw new Exception("Tour Package Title is required.");
@@ -262,6 +301,34 @@ if ($pdo) {
 
 // Default standard inclusions checklist if empty
 $inclusionsText = !empty($inclusions) ? implode("\n", $inclusions) : "Pick-up and drop from Airport / Station in private dedicated AC vehicle\nLuxury hotel stays in verified 4-Star / 5-Star properties\nDaily buffet breakfast and chef-curated dinner included\nAll destination sightseeing excursions as per itinerary\nAll interstate toll taxes, state parking charges, fuel, and driver night allowances\n24/7 on-ground tour manager support";
+
+// Default exclusions checklist if empty
+$exclusionsText = !empty($exclusions) ? implode("\n", $exclusions) : "Personal expenses, laundry, tips, and portage charges\nOptional adventure activities, safari tickets, cable cars not mentioned in itinerary\nEntry fees to monuments, camera/drone permissions\nAny meals not specified in the inclusions";
+
+// Parse structured tour cancellation and reschedule policies
+$parsedPolicy = [
+    'summary' => 'Free cancellation and flexible date change available before departure. Tiered refund structure applies thereafter.',
+    'rules' => [
+        ['timeline' => '15+ Days Before Tour Departure', 'refund' => '100% Refund', 'deduction' => '0% Deduction (Full Token Refund)', 'badge_type' => 'full_refund'],
+        ['timeline' => '7 to 14 Days Before Departure', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
+        ['timeline' => '3 to 6 Days Before Departure', 'refund' => '50% Refund', 'deduction' => '50% Cancellation Fee', 'badge_type' => 'partial_refund'],
+        ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable Cutoff', 'badge_type' => 'no_refund']
+    ],
+    'reschedule_policy' => 'Flexible date reschedule permitted up to 7 days before tour departure without penalty.',
+    'medical_policy' => '100% token refund on medical emergencies with verified certificate.'
+];
+
+if (!empty($pkg['policies'])) {
+    $decPol = json_decode($pkg['policies'], true);
+    if (is_array($decPol)) {
+        if (!empty($decPol['summary'])) $parsedPolicy['summary'] = $decPol['summary'];
+        if (!empty($decPol['rules']) && is_array($decPol['rules'])) $parsedPolicy['rules'] = $decPol['rules'];
+        if (!empty($decPol['reschedule_policy'])) $parsedPolicy['reschedule_policy'] = $decPol['reschedule_policy'];
+        if (!empty($decPol['medical_policy'])) $parsedPolicy['medical_policy'] = $decPol['medical_policy'];
+    } else {
+        $parsedPolicy['summary'] = $pkg['policies'];
+    }
+}
 
 $exclusionsText = !empty($exclusions) ? implode("\n", $exclusions) : "Personal expenses, laundry, and telephone calls\nOptional adventure activity charges (e.g. Paragliding, Scuba, Cable car)\nMonument entry tickets not mentioned in inclusions";
 
@@ -724,16 +791,77 @@ include 'components/head.php';
                     </div>
                 </div>
 
-                <!-- Section 9: Policies & Booking Terms -->
-                <div class="bg-white border border-[#e5e4dc] p-5 space-y-4">
-                    <div class="flex items-center gap-2 pb-3 border-b border-[#e5e4dc]">
-                        <span class="w-2 h-2 bg-sage-700"></span>
-                        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">9. Cancellation &amp; Booking Policies</h2>
+                <!-- Section 9: Tiered Cancellation & Date Reschedule Policy -->
+                <div class="bg-white border border-[#e5e4dc] p-5 space-y-6">
+                    <div class="flex items-center justify-between pb-3 border-b border-[#e5e4dc]">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-sage-700"></span>
+                            <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">9. Cancellation &amp; Date Reschedule Policy</h2>
+                        </div>
                     </div>
 
+                    <!-- Policy Summary Headline -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-800 mb-1">Cancellation Policy &amp; Terms</label>
-                        <textarea name="policies" rows="3" placeholder="Specify token refund rules, cancellation deadlines, and payment schedules..." class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium"><?php echo htmlspecialchars($pkg['policies']); ?></textarea>
+                        <label class="block text-xs font-bold text-slate-800 mb-1">Cancellation Headline / Short Summary</label>
+                        <input type="text" name="policy_summary" value="<?php echo htmlspecialchars($parsedPolicy['summary']); ?>" placeholder="e.g. Free cancellation and date reschedule options available before departure." class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-semibold">
+                    </div>
+
+                    <!-- Tiered Refund & Cancellation Schedule Table -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clock-rotate-left text-sage-700"></i>
+                                    <span>Tour Cancellation &amp; Refund Schedule (Days vs Refund %)</span>
+                                </h3>
+                                <p class="text-[10px] text-slate-400">Specify exact refund percentage and deduction fees for each cancellation window.</p>
+                            </div>
+                            <button type="button" onclick="addPkgPolicyTierRow()" class="px-2.5 py-1 text-xs font-bold bg-sage-50 text-sage-800 border border-sage-300 hover:bg-sage-100 flex items-center gap-1.5 transition-colors self-start sm:self-auto">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span>Add Policy Tier</span>
+                            </button>
+                        </div>
+
+                        <div id="pkgPolicyTiersContainer" class="space-y-2.5">
+                            <?php foreach ($parsedPolicy['rules'] as $ti => $tier): ?>
+                                <div class="pkg-policy-tier-row grid grid-cols-1 sm:grid-cols-12 gap-2.5 p-3 bg-cream-50 border border-[#e5e4dc] items-center relative group">
+                                    <div class="sm:col-span-4">
+                                        <label class="block text-[9px] font-bold text-slate-600 mb-0.5">Cancellation Window</label>
+                                        <input type="text" name="cancellation_tiers[<?php echo $ti; ?>][timeline]" value="<?php echo htmlspecialchars($tier['timeline']); ?>" required placeholder="e.g. 15+ Days Before Tour Departure" class="w-full text-xs p-1.5 bg-white border border-[#e5e4dc] font-semibold focus:border-sage-700 outline-none">
+                                    </div>
+                                    <div class="sm:col-span-3">
+                                        <label class="block text-[9px] font-bold text-slate-600 mb-0.5">Refund Return</label>
+                                        <input type="text" name="cancellation_tiers[<?php echo $ti; ?>][refund]" value="<?php echo htmlspecialchars($tier['refund']); ?>" required placeholder="e.g. 100% Refund" class="w-full text-xs p-1.5 bg-white border border-[#e5e4dc] font-bold text-sage-900 focus:border-sage-700 outline-none">
+                                    </div>
+                                    <div class="sm:col-span-3">
+                                        <label class="block text-[9px] font-bold text-slate-600 mb-0.5">Deduction / Fee</label>
+                                        <input type="text" name="cancellation_tiers[<?php echo $ti; ?>][deduction]" value="<?php echo htmlspecialchars($tier['deduction']); ?>" placeholder="e.g. 0% Deduction" class="w-full text-xs p-1.5 bg-white border border-[#e5e4dc] text-slate-600 focus:border-sage-700 outline-none">
+                                    </div>
+                                    <div class="sm:col-span-2 flex items-center justify-between gap-1.5 pt-3 sm:pt-0">
+                                        <select name="cancellation_tiers[<?php echo $ti; ?>][badge_type]" class="w-full text-[11px] p-1.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                                            <option value="full_refund" <?php echo (($tier['badge_type'] ?? '') === 'full_refund') ? 'selected' : ''; ?>>Full Refund</option>
+                                            <option value="partial_refund" <?php echo (($tier['badge_type'] ?? '') === 'partial_refund') ? 'selected' : ''; ?>>Partial Refund</option>
+                                            <option value="no_refund" <?php echo (($tier['badge_type'] ?? '') === 'no_refund') ? 'selected' : ''; ?>>Non-Refundable</option>
+                                        </select>
+                                        <button type="button" onclick="this.closest('.pkg-policy-tier-row').remove()" class="w-7 h-7 bg-white hover:bg-rose-50 text-rose-600 border border-[#e5e4dc] hover:border-rose-300 flex items-center justify-center text-xs shrink-0 transition-colors" title="Delete Tier">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Additional Terms: Reschedule & Emergency Medical Policies -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#e5e4dc]">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 mb-1">Date Reschedule / Change Terms</label>
+                            <input type="text" name="reschedule_policy" value="<?php echo htmlspecialchars($parsedPolicy['reschedule_policy']); ?>" placeholder="e.g. Flexible date reschedule permitted up to 7 days before tour departure without penalty." class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 mb-1">Emergency Medical / Force Majeure Terms</label>
+                            <input type="text" name="medical_policy" value="<?php echo htmlspecialchars($parsedPolicy['medical_policy']); ?>" placeholder="e.g. 100% token refund on medical emergencies with verified certificate." class="w-full text-xs p-2.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                        </div>
                     </div>
                 </div>
 
@@ -757,6 +885,41 @@ include 'components/head.php';
 <script>
     let dayIndex = <?php echo max(count($itinerary), 1); ?>;
     let galIndex = <?php echo max(count($gallery), 1); ?>;
+    let pkgPolicyTierIndex = <?php echo max(count($parsedPolicy['rules']), 1); ?>;
+
+    function addPkgPolicyTierRow() {
+        pkgPolicyTierIndex++;
+        const container = document.getElementById('pkgPolicyTiersContainer');
+        const div = document.createElement('div');
+        div.className = 'pkg-policy-tier-row grid grid-cols-1 sm:grid-cols-12 gap-2.5 p-3 bg-cream-50 border border-[#e5e4dc] items-center relative group';
+        div.innerHTML = `
+            <div class="sm:col-span-4">
+                <label class="block text-[9px] font-bold text-slate-600 mb-0.5">Cancellation Window</label>
+                <input type="text" name="cancellation_tiers[${pkgPolicyTierIndex}][timeline]" required placeholder="e.g. 10 to 14 Days Before Departure" class="w-full text-xs p-1.5 bg-white border border-[#e5e4dc] font-semibold focus:border-sage-700 outline-none">
+            </div>
+            <div class="sm:col-span-3">
+                <label class="block text-[9px] font-bold text-slate-600 mb-0.5">Refund Return</label>
+                <input type="text" name="cancellation_tiers[${pkgPolicyTierIndex}][refund]" required placeholder="e.g. 80% Refund" class="w-full text-xs p-1.5 bg-white border border-[#e5e4dc] font-bold text-sage-900 focus:border-sage-700 outline-none">
+            </div>
+            <div class="sm:col-span-3">
+                <label class="block text-[9px] font-bold text-slate-600 mb-0.5">Deduction / Fee</label>
+                <input type="text" name="cancellation_tiers[${pkgPolicyTierIndex}][deduction]" placeholder="e.g. 20% Fee" class="w-full text-xs p-1.5 bg-white border border-[#e5e4dc] text-slate-600 focus:border-sage-700 outline-none">
+            </div>
+            <div class="sm:col-span-2 flex items-center justify-between gap-1.5 pt-3 sm:pt-0">
+                <select name="cancellation_tiers[${pkgPolicyTierIndex}][badge_type]" class="w-full text-[11px] p-1.5 bg-white border border-[#e5e4dc] focus:border-sage-700 outline-none font-medium">
+                    <option value="full_refund">Full Refund</option>
+                    <option value="partial_refund" selected>Partial Refund</option>
+                    <option value="no_refund">Non-Refundable</option>
+                </select>
+                <button type="button" onclick="this.closest('.pkg-policy-tier-row').remove()" class="w-7 h-7 bg-white hover:bg-rose-50 text-rose-600 border border-[#e5e4dc] hover:border-rose-300 flex items-center justify-center text-xs shrink-0 transition-colors" title="Delete Tier">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `;
+        if (container) {
+            container.appendChild(div);
+        }
+    }
 
     function autoSelectTravelMode(cat) {
         if (cat === 'international') {

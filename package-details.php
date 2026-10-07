@@ -650,6 +650,31 @@ if ($pdoPkg) {
                 ];
             }
 
+            // Parse Cancellation & Reschedule Policies Structure
+            $pkgPolicies = [
+                'summary' => 'Free cancellation and flexible date reschedule options available before departure.',
+                'rules' => [
+                    ['timeline' => '15+ Days Before Travel', 'refund' => '100% Refund', 'deduction' => '0% Cancellation Fee', 'badge_type' => 'full_refund'],
+                    ['timeline' => '7 to 14 Days Before Travel', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
+                    ['timeline' => '3 to 6 Days Before Travel', 'refund' => '50% Refund', 'deduction' => '50% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                    ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable Cutoff', 'badge_type' => 'no_refund']
+                ],
+                'reschedule_policy' => 'Flexible date reschedule permitted up to 7 days before tour departure without penalty.',
+                'medical_policy' => '100% token refund on medical emergencies with verified certificate.'
+            ];
+
+            if (!empty($fetchedPkg['policies'])) {
+                $decPol = json_decode($fetchedPkg['policies'], true);
+                if (is_array($decPol)) {
+                    if (!empty($decPol['summary'])) $pkgPolicies['summary'] = $decPol['summary'];
+                    if (!empty($decPol['rules']) && is_array($decPol['rules'])) $pkgPolicies['rules'] = $decPol['rules'];
+                    if (!empty($decPol['reschedule_policy'])) $pkgPolicies['reschedule_policy'] = $decPol['reschedule_policy'];
+                    if (!empty($decPol['medical_policy'])) $pkgPolicies['medical_policy'] = $decPol['medical_policy'];
+                } else {
+                    $pkgPolicies['summary'] = $fetchedPkg['policies'];
+                }
+            }
+
             $package = [
                 'id' => 'PKG-DB-' . $fetchedPkg['id'],
                 'title' => $fetchedPkg['title'],
@@ -672,7 +697,8 @@ if ($pdoPkg) {
                 'itinerary' => $itineraryList,
                 'inclusions' => $inclusionsList,
                 'exclusions' => $exclusionsList,
-                'stays' => $linkedStays
+                'stays' => $linkedStays,
+                'policies' => $pkgPolicies
             ];
         }
     }
@@ -1069,8 +1095,8 @@ require_once 'components/navbar.php';
                     </div>
                 </div>
 
-                <!-- 6. CANCELLATION & RESCHEDULE POLICY -->
-                <div id="policySec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4">
+                <!-- 6. CANCELLATION & RESCHEDULE POLICY (VISUAL TIMELINE) -->
+                <div id="policySec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-5">
                     <div class="space-y-1">
                         <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-shield-halved"></i>
@@ -1081,18 +1107,85 @@ require_once 'components/navbar.php';
                         </h2>
                     </div>
 
-                    <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                            <span class="font-semibold text-slate-800">15+ Days Before Travel</span>
-                            <span class="font-bold text-emerald-700">100% Token Refund or Free Date Change</span>
+                    <!-- Cancellation Headline Summary -->
+                    <?php if (!empty($package['policies']['summary'])): ?>
+                        <p class="text-xs text-slate-500 font-medium">
+                            <?= htmlspecialchars($package['policies']['summary']) ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <!-- Refund Tiers Timeline Cards Grid -->
+                    <?php 
+                    $pkgRules = !empty($package['policies']['rules']) ? $package['policies']['rules'] : [
+                        ['timeline' => '15+ Days Before Travel', 'refund' => '100% Refund', 'deduction' => '0% Cancellation Fee', 'badge_type' => 'full_refund'],
+                        ['timeline' => '7 to 14 Days Before Travel', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
+                        ['timeline' => '3 to 6 Days Before Travel', 'refund' => '50% Refund', 'deduction' => '50% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                        ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable Cutoff', 'badge_type' => 'no_refund']
+                    ];
+                    ?>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                        <?php foreach ($pkgRules as $rule): ?>
+                            <?php 
+                            $bType = $rule['badge_type'] ?? 'partial_refund';
+                            $cardStyle = 'bg-amber-50/70 border-amber-200 text-amber-900';
+                            $badgeStyle = 'bg-amber-100 text-amber-800 border-amber-300';
+                            $icon = 'fa-solid fa-triangle-exclamation';
+
+                            if ($bType === 'full_refund' || str_contains(strtolower($rule['refund']), '100%')) {
+                                $cardStyle = 'bg-emerald-50/70 border-emerald-200 text-emerald-950';
+                                $badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                                $icon = 'fa-solid fa-circle-check';
+                            } elseif ($bType === 'no_refund' || str_contains(strtolower($rule['refund']), '0%') || str_contains(strtolower($rule['refund']), 'non-refundable')) {
+                                $cardStyle = 'bg-rose-50/70 border-rose-200 text-rose-950';
+                                $badgeStyle = 'bg-rose-100 text-rose-800 border-rose-300';
+                                $icon = 'fa-solid fa-ban';
+                            }
+                            ?>
+                            <div class="p-4 rounded-2xl border <?= $cardStyle ?> flex flex-col justify-between space-y-3">
+                                <div class="space-y-1.5">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Timeline Window</span>
+                                    <div class="font-black text-xs sm:text-sm text-slate-900 leading-snug">
+                                        <?= htmlspecialchars($rule['timeline']) ?>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-t border-slate-200/60 space-y-1.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-semibold text-slate-500">Return:</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-black <?= $badgeStyle ?>">
+                                            <i class="<?= $icon ?> text-[9px]"></i>
+                                            <span><?= htmlspecialchars($rule['refund']) ?></span>
+                                        </span>
+                                    </div>
+                                    <?php if (!empty($rule['deduction'])): ?>
+                                        <div class="text-[10px] text-slate-500 font-medium">
+                                            Deduction: <strong class="text-slate-700"><?= htmlspecialchars($rule['deduction']) ?></strong>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Reschedule & Emergency Medical Terms -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-calendar-days text-brand-600"></i>
+                                <span>Flexible Date Reschedule</span>
+                            </span>
+                            <p class="font-semibold text-slate-800 text-[11px]">
+                                <?= htmlspecialchars($package['policies']['reschedule_policy'] ?? 'Flexible date reschedule permitted up to 7 days before tour departure without penalty.') ?>
+                            </p>
                         </div>
-                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                            <span class="font-semibold text-slate-800">7 to 14 Days Before Travel</span>
-                            <span class="font-bold text-amber-700">80% Refund or ₹1,000 Reschedule Fee</span>
-                        </div>
-                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                            <span class="font-semibold text-slate-800">Under 7 Days Before Travel</span>
-                            <span class="font-bold text-slate-700">50% Refund (Hotel Non-Refundable Cutoff)</span>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-heart-pulse text-emerald-600"></i>
+                                <span>Emergency Medical Protection</span>
+                            </span>
+                            <p class="font-semibold text-slate-800 text-[11px]">
+                                <?= htmlspecialchars($package['policies']['medical_policy'] ?? '100% token refund on medical emergencies with verified certificate.') ?>
+                            </p>
                         </div>
                     </div>
                 </div>
