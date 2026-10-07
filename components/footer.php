@@ -139,6 +139,61 @@ $fSiteEmail = getSetting('site_email', 'concierge@guideflux.com');
                 </div>
             </div>
 
+<?php
+// Ensure database connection is present for dynamic footer links
+if (!function_exists('getDBConnection')) {
+    require_once __DIR__ . '/../config/db.php';
+}
+$footerDb = getDBConnection();
+
+// 1. Fetch Dynamic Domestic Packages (up to 8)
+$footerDomPackages = [];
+// 2. Fetch Dynamic International Packages (up to 8)
+$footerIntlPackages = [];
+// 3. Fetch Distinct Themes or Categories
+$footerThemes = [];
+
+if ($footerDb) {
+    try {
+        // Domestic
+        $domStmt = $footerDb->query("SELECT id, title, slug, location FROM `packages` WHERE `category` = 'domestic' AND `status` = 'active' ORDER BY `id` DESC LIMIT 8");
+        $footerDomPackages = $domStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // International
+        $intlStmt = $footerDb->query("SELECT id, title, slug, location, state_country FROM `packages` WHERE `category` = 'international' AND `status` = 'active' ORDER BY `id` DESC LIMIT 8");
+        $footerIntlPackages = $intlStmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        // Silently catch and fallback to defaults
+    }
+}
+
+// Fallback arrays if database has fewer packages
+if (empty($footerDomPackages)) {
+    $footerDomPackages = [
+        ['title' => 'Kashmir Valley & Gulmarg', 'slug' => 'PKG-KASHMIR-01', 'id' => null],
+        ['title' => 'Kerala Backwaters & Munnar', 'slug' => 'PKG-KERALA-02', 'id' => null],
+        ['title' => 'Himachal Magic & Solang', 'slug' => 'PKG-MANALI-03', 'id' => null],
+        ['title' => 'Goa Beachfront Resorts', 'slug' => 'PKG-GOA-04', 'id' => null],
+        ['title' => 'Andaman Islands & Scuba', 'slug' => 'PKG-ANDAMAN-05', 'id' => null],
+        ['title' => 'Royal Rajasthan Palaces', 'slug' => 'PKG-RAJASTHAN-06', 'id' => null],
+        ['title' => 'Leh Ladakh Expedition', 'slug' => 'PKG-LADAKH-07', 'id' => null],
+        ['title' => 'Uttarakhand River Rafting', 'slug' => 'PKG-RISHIKESH-08', 'id' => null],
+    ];
+}
+
+if (empty($footerIntlPackages)) {
+    $footerIntlPackages = [
+        ['title' => 'Dubai & Burj Khalifa', 'slug' => 'INTL-DXB-01', 'id' => null],
+        ['title' => 'Bali Romantic Escapes', 'slug' => 'INTL-BALI-02', 'id' => null],
+        ['title' => 'Thailand Island Explorer', 'slug' => 'INTL-THAI-03', 'id' => null],
+        ['title' => 'Singapore & Sentosa Island', 'slug' => 'INTL-SIN-04', 'id' => null],
+        ['title' => 'Maldives Overwater Villas', 'slug' => 'INTL-MLD-05', 'id' => null],
+        ['title' => 'Vietnam & Halong Cruise', 'slug' => 'INTL-VTN-06', 'id' => null],
+        ['title' => 'Switzerland Alpine Express', 'slug' => '', 'id' => null, 'search' => 'Switzerland'],
+        ['title' => 'Mauritius Luxury Beach', 'slug' => '', 'id' => null, 'search' => 'Mauritius'],
+    ];
+}
+?>
             <!-- Col 2: Top Domestic Circuits (2 Cols) -->
             <div class="lg:col-span-2 space-y-3.5">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-white border-b border-slate-800 pb-2 flex items-center">
@@ -146,14 +201,24 @@ $fSiteEmail = getSetting('site_email', 'concierge@guideflux.com');
                     <span>Domestic Tours</span>
                 </h4>
                 <ul class="space-y-2 text-xs font-normal text-slate-400">
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Kashmir Valley & Gulmarg</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Goa Beachfront Resorts</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Kerala Backwaters & Munnar</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Leh Ladakh Expedition</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Himachal Magic & Kasol</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Royal Rajasthan Palaces</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Andaman Islands & Scuba</a></li>
-                    <li><a href="#domestic-packages" class="hover:text-white transition flex items-center">Uttarakhand River Rafting</a></li>
+                    <?php foreach ($footerDomPackages as $fdp): 
+                        if (!empty($fdp['slug'])) {
+                            $fLink = 'package-details.php?id=' . urlencode($fdp['slug']);
+                        } elseif (!empty($fdp['id'])) {
+                            $fLink = 'package-details.php?id=' . urlencode($fdp['id']);
+                        } elseif (!empty($fdp['search'])) {
+                            $fLink = 'search.php?type=domestic&query=' . urlencode($fdp['search']);
+                        } else {
+                            $fLink = 'search.php?type=domestic&query=' . urlencode($fdp['title']);
+                        }
+                    ?>
+                        <li>
+                            <a href="<?php echo htmlspecialchars($fLink); ?>" class="hover:text-white transition flex items-center group">
+                                <i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i>
+                                <span class="truncate"><?php echo htmlspecialchars($fdp['title']); ?></span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
 
@@ -164,14 +229,24 @@ $fSiteEmail = getSetting('site_email', 'concierge@guideflux.com');
                     <span>International</span>
                 </h4>
                 <ul class="space-y-2 text-xs font-normal text-slate-400">
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Dubai & Burj Khalifa</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Maldives Overwater Villas</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Bali Romantic Escapes</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Singapore & Sentosa Island</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Thailand Island Explorer</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Vietnam & Halong Cruise</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Switzerland Alpine Express</a></li>
-                    <li><a href="#international-packages" class="hover:text-white transition flex items-center">Mauritius Luxury Beach</a></li>
+                    <?php foreach ($footerIntlPackages as $fip): 
+                        if (!empty($fip['slug'])) {
+                            $fLink = 'package-details.php?id=' . urlencode($fip['slug']);
+                        } elseif (!empty($fip['id'])) {
+                            $fLink = 'package-details.php?id=' . urlencode($fip['id']);
+                        } elseif (!empty($fip['search'])) {
+                            $fLink = 'search.php?type=international&query=' . urlencode($fip['search']);
+                        } else {
+                            $fLink = 'search.php?type=international&query=' . urlencode($fip['title']);
+                        }
+                    ?>
+                        <li>
+                            <a href="<?php echo htmlspecialchars($fLink); ?>" class="hover:text-white transition flex items-center group">
+                                <i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i>
+                                <span class="truncate"><?php echo htmlspecialchars($fip['title']); ?></span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
 
@@ -182,14 +257,14 @@ $fSiteEmail = getSetting('site_email', 'concierge@guideflux.com');
                     <span>Travel By Vibe</span>
                 </h4>
                 <ul class="space-y-2 text-xs font-normal text-slate-400">
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Honeymoon Specials</a></li>
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Snow Peaks & Treks</a></li>
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Tropical Beach Vacations</a></li>
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Royal Forts & Havelis</a></li>
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Wildlife & Tiger Safaris</a></li>
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Spiritual & Yoga Retreats</a></li>
-                    <li><a href="#experience-themes" class="hover:text-white transition flex items-center">Weekend Trips Under ₹9,999</a></li>
-                    <li><a href="#hotels-section" class="hover:text-white transition flex items-center">5★ Luxury Resorts</a></li>
+                    <li><a href="search.php?theme=honeymoon" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Honeymoon Specials</span></a></li>
+                    <li><a href="search.php?theme=adventure" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Snow Peaks &amp; Treks</span></a></li>
+                    <li><a href="search.php?theme=beach" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Tropical Beach Vacations</span></a></li>
+                    <li><a href="search.php?query=Heritage" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Royal Forts &amp; Havelis</span></a></li>
+                    <li><a href="search.php?query=Wildlife" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Wildlife &amp; Tiger Safaris</span></a></li>
+                    <li><a href="search.php?theme=spiritual" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Spiritual &amp; Yoga Retreats</span></a></li>
+                    <li><a href="search.php?max_price=9999" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Weekend Trips Under ₹9,999</span></a></li>
+                    <li><a href="search.php?type=hotel" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>5★ Luxury Resorts</span></a></li>
                 </ul>
             </div>
 
@@ -200,14 +275,14 @@ $fSiteEmail = getSetting('site_email', 'concierge@guideflux.com');
                     <span>Trust &amp; Policies</span>
                 </h4>
                 <ul class="space-y-2 text-xs font-normal text-slate-400">
-                    <li><a href="about.php" class="hover:text-white transition flex items-center">About <?php echo htmlspecialchars($fSiteName); ?></a></li>
-                    <li><a href="privacy-policy.php" class="hover:text-white transition flex items-center">Privacy Policy</a></li>
-                    <li><a href="terms.php" class="hover:text-white transition flex items-center">Terms &amp; Conditions</a></li>
-                    <li><a href="cancellation-policy.php" class="hover:text-white transition flex items-center">Cancellation &amp; Refund</a></li>
-                    <li><a href="policies.php?tab=booking" class="hover:text-white transition flex items-center">Token Advance Guarantee</a></li>
-                    <li><a href="contact.php" class="hover:text-white transition flex items-center">24x7 Help Concierge</a></li>
-                    <li><a href="contact.php#faq" class="hover:text-white transition flex items-center">Frequently Asked Questions</a></li>
-                    <li><a href="my-trips.php" class="hover:text-white transition flex items-center">My Trips &amp; Vouchers</a></li>
+                    <li><a href="about.php" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>About <?php echo htmlspecialchars($fSiteName); ?></span></a></li>
+                    <li><a href="privacy-policy.php" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Privacy Policy</span></a></li>
+                    <li><a href="terms.php" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Terms &amp; Conditions</span></a></li>
+                    <li><a href="cancellation-policy.php" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Cancellation &amp; Refund</span></a></li>
+                    <li><a href="policies.php?tab=booking" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Token Advance Guarantee</span></a></li>
+                    <li><a href="contact.php" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>24x7 Help Concierge</span></a></li>
+                    <li><a href="contact.php#faq" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>Frequently Asked Questions</span></a></li>
+                    <li><a href="my-trips.php" class="hover:text-white transition flex items-center group"><i class="fa-solid fa-chevron-right text-[9px] text-slate-600 group-hover:text-brand-400 mr-1.5 transition"></i><span>My Trips &amp; Vouchers</span></a></li>
                 </ul>
             </div>
 
