@@ -23,6 +23,8 @@ if ($initialType === 'domestic' || $initialCategory === 'domestic') {
     $initialType = 'flight';
 } elseif ($initialType === 'hotel' || $initialType === 'hotels') {
     $initialType = 'hotel';
+} elseif ($initialType === 'cruise' || $initialType === 'cruises' || $initialCategory === 'cruise' || $initialCategory === 'cruises') {
+    $initialType = 'cruise';
 } elseif ($initialType === 'package' || $initialType === 'packages') {
     $initialType = 'domestic';
 } else {
@@ -189,6 +191,47 @@ if ($pdoSearch) {
     } catch (Exception $e) {}
 }
 
+// 2.5 Fetch Dynamic Ocean Cruises from MySQL Database
+if ($pdoSearch) {
+    try {
+        $dbCruises = $pdoSearch->query("SELECT * FROM `cruises` WHERE `status` = 'active' ORDER BY `id` DESC")->fetchAll();
+        foreach ($dbCruises as $c) {
+            $img = !empty($c['featured_image']) ? $c['featured_image'] : 'https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=800&q=80';
+            $destStr = ($c['departure_port'] ?: 'Mumbai') . ' • ' . ($c['destination_ports'] ?: 'High Seas');
+            $tagsStr = strtolower($c['title'] . ' ' . $c['ship_name'] . ' ' . $c['cruise_line'] . ' ' . $c['departure_port'] . ' ' . $c['destination_ports'] . ' cruise ocean sailing cordelia empress liner sea');
+
+            $searchItems[] = [
+                'id' => 'CRU-DB-' . $c['id'],
+                'type' => 'cruise',
+                'category' => $c['category'] ?: 'domestic',
+                'departure_city' => $c['departure_port'] ?: 'Mumbai',
+                'sub_type' => ($c['cruise_line'] ?: 'Cordelia') . ' • ' . ($c['ship_name'] ?: 'The Empress'),
+                'title' => $c['title'],
+                'destination' => $destStr,
+                'route' => $c['destination_ports'] ?: 'Ocean Cruising',
+                'duration' => $c['duration_text'] ?: ($c['duration_nights'] . 'N / ' . $c['duration_days'] . 'D'),
+                'badge' => $c['badge'] ?: 'Premier Cruise',
+                'badge_class' => 'bg-indigo-600 text-white',
+                'price' => (float)$c['starting_price'],
+                'original_price' => (float)($c['original_price'] ?: ($c['starting_price'] * 1.3)),
+                'price_unit' => '/ person',
+                'rating' => (float)($c['rating'] ?: 4.9),
+                'reviews' => ((int)($c['reviews_count'] ?: 250)) . '+ reviews',
+                'image' => $img,
+                'inclusions' => [
+                    ['icon' => 'fa-solid fa-utensils', 'label' => 'All Buffet Meals'],
+                    ['icon' => 'fa-solid fa-masks-theater', 'label' => 'Broadway Shows'],
+                    ['icon' => 'fa-solid fa-water-ladder', 'label' => 'Infinity Pools'],
+                    ['icon' => 'fa-solid fa-dice', 'label' => 'Casino & Lounges']
+                ],
+                'perks' => 'All Meals Included • Infinity Pools & Shows • Instant Confirmation',
+                'tags' => $tagsStr,
+                'slug' => $c['slug'] ?: $c['id']
+            ];
+        }
+    } catch (Exception $e) {}
+}
+
 // 3. Dynamic Flights Engine & Aggregator (ONLY triggered if explicitly searching flights)
 $showFlights = ($initialType === 'flight') || (!empty($_GET['from']) && !empty($_GET['to']));
 if ($showFlights) {
@@ -210,7 +253,8 @@ $countDomestic = count(array_filter($searchItems, fn($i) => $i['type'] === 'pack
 $countInternational = count(array_filter($searchItems, fn($i) => $i['type'] === 'package' && ($i['category'] ?? '') === 'international'));
 $countPackages = count(array_filter($searchItems, fn($i) => $i['type'] === 'package'));
 $countHotels = count(array_filter($searchItems, fn($i) => $i['type'] === 'hotel'));
-$countHolidays = $countPackages + $countHotels; // Combined tour packages & hotels (no flights!)
+$countCruises = count(array_filter($searchItems, fn($i) => $i['type'] === 'cruise'));
+$countHolidays = $countPackages + $countHotels + $countCruises; // Combined tour packages, hotels & cruises (no flights!)
 $countFlights = $showFlights ? count(array_filter($searchItems, fn($i) => $i['type'] === 'flight')) : 0;
 $countAll = $countHolidays;
 
@@ -230,6 +274,10 @@ if ($initialType === 'domestic') {
     $initialHeading = 'Hotels & Resorts';
     $initialSubtext = 'Showing verified partner stays, luxury villas and resorts';
     $initialCount = $countHotels;
+} elseif ($initialType === 'cruise') {
+    $initialHeading = 'Ocean Cruises';
+    $initialSubtext = 'Showing verified luxury ocean liners, high seas sailings & island cruises';
+    $initialCount = $countCruises;
 } elseif ($initialType === 'flight') {
     $initialHeading = 'Flight Deals';
     $initialSubtext = 'Showing non-stop flights and verified airline schedules';
@@ -368,6 +416,15 @@ require_once 'components/navbar.php';
                     <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-hotel"><?= $countHotels ?></span>
                 </button>
 
+                <!-- Ocean Cruises Only -->
+                <button type="button" 
+                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'cruise') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        data-type="cruise">
+                    <i class="fa-solid fa-ship text-xs"></i>
+                    <span>Ocean Cruises</span>
+                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-cruise"><?= $countCruises ?></span>
+                </button>
+
                 <?php if ($showFlights): ?>
                 <!-- Flights (Separate - Only when clicked/searched) -->
                 <button type="button" 
@@ -477,6 +534,14 @@ require_once 'components/navbar.php';
                                 <span>Hotels Only</span>
                             </span>
                             <span class="text-[11px] font-mono text-slate-400"><?= $countHotels ?></span>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition">
+                            <span class="flex items-center space-x-2.5 text-xs font-semibold text-slate-700 group-hover:text-brand-700">
+                                <input type="radio" name="sideCategory" value="cruise" class="text-brand-600 focus:ring-brand-500 accent-teal-600" <?= ($initialType === 'cruise') ? 'checked' : '' ?>>
+                                <span>Ocean Cruises</span>
+                            </span>
+                            <span class="text-[11px] font-mono text-slate-400"><?= $countCruises ?></span>
                         </label>
 
                         <?php if ($showFlights): ?>
@@ -1110,6 +1175,124 @@ require_once 'components/navbar.php';
 
                         </article>
 
+                    <?php elseif ($item['type'] === 'cruise'): ?>
+                        <!-- ==========================================
+                             OCEAN CRUISE CARD (Lightweight Minimal)
+                        =========================================== -->
+                        <article class="search-result-card bg-white rounded-2xl border border-slate-200 hover:border-indigo-500 transition flex flex-col md:flex-row overflow-hidden"
+                                 data-id="<?= htmlspecialchars($item['id']) ?>"
+                                 data-type="cruise"
+                                 data-package-category="<?= htmlspecialchars($item['category'] ?? 'domestic') ?>"
+                                 data-city="<?= htmlspecialchars($item['departure_city'] ?? '') ?>"
+                                 data-price="<?= $item['price'] ?>"
+                                 data-rating="<?= $item['rating'] ?>"
+                                 data-tags="<?= htmlspecialchars($item['tags']) ?>"
+                                 data-title="<?= htmlspecialchars($item['title']) ?>">
+
+                            <!-- Cruise Photo with Badge & Duration -->
+                            <div class="w-full md:w-64 h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
+                                <img src="<?= htmlspecialchars($item['image']) ?>" 
+                                     alt="<?= htmlspecialchars($item['title']) ?>" 
+                                     loading="lazy"
+                                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold <?= $item['badge_class'] ?>">
+                                    <?= htmlspecialchars($item['badge']) ?>
+                                </span>
+
+                                <span class="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-slate-800 border border-slate-200">
+                                    <i class="fa-solid fa-anchor text-indigo-600 mr-1"></i>Ex-<?= htmlspecialchars($item['departure_city']) ?>
+                                </span>
+                            </div>
+
+                            <!-- Cruise Content Body -->
+                            <div class="flex-1 p-5 flex flex-col justify-between">
+                                <div>
+                                    <!-- Ship & Rating -->
+                                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                                        <span class="inline-flex items-center space-x-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200/60">
+                                            <i class="fa-solid fa-ship text-[10px]"></i>
+                                            <span><?= htmlspecialchars($item['sub_type']) ?></span>
+                                        </span>
+
+                                        <div class="flex items-center space-x-1 text-xs">
+                                            <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[11px] flex items-center space-x-1">
+                                                <i class="fa-solid fa-star text-[10px] text-amber-500"></i>
+                                                <span><?= $item['rating'] ?></span>
+                                            </span>
+                                            <span class="text-[11px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug hover:text-indigo-600 transition">
+                                        <a href="cruise-details.php?slug=<?= urlencode($item['slug']) ?>">
+                                            <?= htmlspecialchars($item['title']) ?>
+                                        </a>
+                                    </h3>
+
+                                    <!-- Route & Duration -->
+                                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
+                                        <span class="flex items-center space-x-1 text-indigo-700">
+                                            <i class="fa-solid fa-route text-indigo-500 text-xs"></i>
+                                            <span><?= htmlspecialchars($item['route']) ?></span>
+                                        </span>
+                                        <span class="flex items-center space-x-1">
+                                            <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
+                                            <span><?= htmlspecialchars($item['duration']) ?></span>
+                                        </span>
+                                    </div>
+
+                                    <!-- Inclusions Pills -->
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                                        <?php foreach ($item['inclusions'] as $inc): ?>
+                                            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200/60">
+                                                <i class="<?= $inc['icon'] ?> text-indigo-600 text-[10px]"></i>
+                                                <span><?= htmlspecialchars($inc['label']) ?></span>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+
+                                <!-- Perks Note -->
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1">
+                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                        <span><?= htmlspecialchars($item['perks']) ?></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Right CTA & Price Strip -->
+                            <div class="md:w-56 shrink-0 p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
+                                <div>
+                                    <span class="text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
+                                    <div class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none font-space">
+                                        ₹<?= number_format($item['price']) ?>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 block mt-1"><?= $item['price_unit'] ?> &bull; twin stateroom</span>
+                                </div>
+
+                                <div class="space-y-1.5 shrink-0 md:w-full text-right">
+                                    <a href="cruise-details.php?slug=<?= urlencode($item['slug']) ?>" 
+                                       class="w-full px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
+                                        <span>View Staterooms</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="open-inquire-btn w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center justify-center space-x-1"
+                                            data-title="<?= htmlspecialchars($item['title']) ?>"
+                                            data-category="Ocean Cruise"
+                                            data-price="₹<?= number_format($item['price']) ?>"
+                                            data-duration="<?= htmlspecialchars($item['duration']) ?>">
+                                        <i class="fa-solid fa-paper-plane text-[9px] text-indigo-600"></i>
+                                        <span>Quick Inquiry</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </article>
+
                     <?php endif; ?>
 
                 <?php endforeach; ?>
@@ -1332,6 +1515,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'packages') type = 'domestic';
         if (type === 'flights') type = 'flight';
         if (type === 'hotels') type = 'hotel';
+        if (type === 'cruises') type = 'cruise';
 
         // Update tabs styling
         categoryTabs.forEach(t => {
@@ -1448,9 +1632,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardPkgCat = (card.getAttribute('data-package-category') || '').toLowerCase();
             let matchCat = false;
             if (cat === 'all') {
-                // Tour packages and hotels are shown together in one place!
+                // Tour packages, hotels and cruises are shown together!
                 // Flights are strictly excluded unless searching flights explicitly!
-                matchCat = (cardType === 'package' || cardType === 'hotel');
+                matchCat = (cardType === 'package' || cardType === 'hotel' || cardType === 'cruise');
             } else if (cat === 'domestic') {
                 // Domestic tour packages only!
                 matchCat = (cardType === 'package' && cardPkgCat === 'domestic');
@@ -1461,6 +1645,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 matchCat = (cardType === 'package');
             } else if (cat === 'hotel') {
                 matchCat = (cardType === 'hotel');
+            } else if (cat === 'cruise') {
+                matchCat = (cardType === 'cruise');
             } else if (cat === 'flight') {
                 // Flights only!
                 matchCat = (cardType === 'flight');
@@ -1586,6 +1772,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cat === 'domestic') resultsTypeTitleEl.textContent = 'Domestic Tours';
             else if (cat === 'international') resultsTypeTitleEl.textContent = 'International Tours';
             else if (cat === 'hotel') resultsTypeTitleEl.textContent = 'Hotels & Resorts';
+            else if (cat === 'cruise') resultsTypeTitleEl.textContent = 'Ocean Cruises';
             else if (cat === 'flight') resultsTypeTitleEl.textContent = 'Flight Deals';
             else resultsTypeTitleEl.textContent = 'Tours & Hotels';
         }
@@ -1598,6 +1785,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cat === 'domestic') resultsSubtextEl.textContent = 'Showing verified Indian holiday packages';
                 else if (cat === 'international') resultsSubtextEl.textContent = 'Showing world tour packages, luxury getaways & international resorts';
                 else if (cat === 'hotel') resultsSubtextEl.textContent = 'Showing verified partner stays, luxury villas and resorts';
+                else if (cat === 'cruise') resultsSubtextEl.textContent = 'Showing verified luxury ocean liners, high seas sailings & island cruises';
                 else if (cat === 'flight') resultsSubtextEl.textContent = 'Showing non-stop flights and verified airline schedules';
                 else resultsSubtextEl.textContent = 'Showing verified tour packages, boutique resorts, and 5-star handpicked stays';
             }

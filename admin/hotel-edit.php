@@ -631,12 +631,12 @@ include 'components/head.php';
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Or Upload Local Image File</label>
-                                    <input type="file" name="featured_image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:border file:border-[#e5e4dc] file:text-[11px] file:font-semibold file:bg-white hover:file:bg-cream-100 file:cursor-pointer">
+                                    <input type="file" name="featured_image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:border file:border-[#e5e4dc] file:text-[11px] file:font-semibold file:bg-white hover:file:bg-cream-100 file:cursor-pointer" onchange="previewLocalImage(this, 'coverPreviewImg')">
                                     <input type="hidden" name="existing_featured_image" value="<?php echo htmlspecialchars($hotel['featured_image']); ?>">
                                 </div>
                             </div>
                             <div class="h-28 bg-white border border-[#e5e4dc] flex items-center justify-center overflow-hidden relative group">
-                                <img id="coverPreviewImg" src="<?php echo !empty($hotel['featured_image']) ? htmlspecialchars($hotel['featured_image']) : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'; ?>" alt="Cover" class="w-full h-full object-cover">
+                                <img id="coverPreviewImg" src="<?php echo htmlspecialchars(getAdminImageUrl($hotel['featured_image'] ?? '')); ?>" alt="Cover" class="w-full h-full object-cover">
                                 <span class="absolute bottom-1 right-1 bg-slate-900/80 text-white text-[9px] px-1.5 py-0.5 font-bold">Cover Preview</span>
                             </div>
                         </div>
@@ -679,7 +679,7 @@ include 'components/head.php';
                                 <?php foreach ($galleryImages as $gi => $gImg): ?>
                                     <div class="gallery-card bg-white border border-[#e5e4dc] p-2 space-y-2 relative group">
                                         <div class="h-28 bg-cream-50 border border-[#e5e4dc] overflow-hidden">
-                                            <img src="<?php echo htmlspecialchars($gImg['image_url']); ?>" alt="Gallery" class="w-full h-full object-cover">
+                                            <img src="<?php echo htmlspecialchars(getAdminImageUrl($gImg['image_url'])); ?>" alt="Gallery" class="w-full h-full object-cover">
                                         </div>
                                         <input type="hidden" name="gallery_existing[<?php echo $gi; ?>][url]" value="<?php echo htmlspecialchars($gImg['image_url']); ?>">
                                         <div>
@@ -1092,6 +1092,17 @@ include 'components/head.php';
         if (nameInput) nameInput.value = '';
         if (descInput) descInput.value = '';
         hideAddAmenityInline();
+    }
+
+    function previewLocalImage(input, targetId) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(targetId);
+                if (img) img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
     function updateCoverPreview(url) {

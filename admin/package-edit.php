@@ -594,12 +594,12 @@ include 'components/head.php';
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Or Upload Local Image File</label>
-                                <input type="file" name="featured_image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:border file:border-[#e5e4dc] file:text-[11px] file:font-semibold file:bg-white hover:file:bg-cream-100 file:cursor-pointer">
+                                <input type="file" name="featured_image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:border file:border-[#e5e4dc] file:text-[11px] file:font-semibold file:bg-white hover:file:bg-cream-100 file:cursor-pointer" onchange="previewLocalImage(this, 'pkgCoverPreview')">
                                 <input type="hidden" name="existing_featured_image" value="<?php echo htmlspecialchars($pkg['featured_image']); ?>">
                             </div>
                         </div>
                         <div class="h-28 bg-white border border-[#e5e4dc] flex items-center justify-center overflow-hidden relative">
-                            <img id="pkgCoverPreview" src="<?php echo !empty($pkg['featured_image']) ? htmlspecialchars($pkg['featured_image']) : 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80'; ?>" alt="Cover" class="w-full h-full object-cover">
+                            <img id="pkgCoverPreview" src="<?php echo htmlspecialchars(getAdminImageUrl($pkg['featured_image'] ?? '', 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80')); ?>" alt="Cover" class="w-full h-full object-cover">
                             <span class="absolute bottom-1 right-1 bg-slate-900/80 text-white text-[9px] px-1.5 py-0.5 font-bold">Cover Preview</span>
                         </div>
                     </div>
@@ -638,7 +638,7 @@ include 'components/head.php';
                                 <?php foreach ($gallery as $gi => $gUrl): ?>
                                     <div class="pkg-gal-card bg-white border border-[#e5e4dc] p-2 space-y-2 relative group">
                                         <div class="h-28 bg-cream-50 border border-[#e5e4dc] overflow-hidden">
-                                            <img src="<?php echo htmlspecialchars($gUrl); ?>" alt="Gallery" class="w-full h-full object-cover">
+                                            <img src="<?php echo htmlspecialchars(getAdminImageUrl($gUrl)); ?>" alt="Gallery" class="w-full h-full object-cover">
                                         </div>
                                         <input type="hidden" name="gallery_existing[]" value="<?php echo htmlspecialchars($gUrl); ?>">
                                         <div class="text-[10px] text-slate-500 truncate"><?php echo htmlspecialchars($gUrl); ?></div>
@@ -934,6 +934,17 @@ include 'components/head.php';
         const txt = document.getElementById('durationText');
         if (txt) {
             txt.value = `${n} Nights / ${d} Days`;
+        }
+    }
+
+    function previewLocalImage(input, targetId) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(targetId);
+                if (img) img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     }
 

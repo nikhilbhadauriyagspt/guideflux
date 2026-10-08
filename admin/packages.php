@@ -246,7 +246,7 @@ include 'components/head.php';
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <?php foreach ($packages as $pkg): ?>
                         <?php
-                            $coverImg = !empty($pkg['featured_image']) ? $pkg['featured_image'] : 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80';
+                            $coverImg = getAdminImageUrl($pkg['featured_image'] ?? '', 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=600&q=80');
                             $itDays = json_decode($pkg['itinerary'] ?? '[]', true) ?: [];
                             $itCount = count($itDays);
                             $htlIds = json_decode($pkg['hotel_ids'] ?? '[]', true) ?: [];

@@ -73,6 +73,15 @@ if ($pdo) {
             }
         } catch (Exception $pe) {}
 
+        // Load all cruises for fast lookup & enrichment
+        $cruisesMap = [];
+        try {
+            $cruStmt = $pdo->query("SELECT id, title, slug, departure_port, ship_name, duration_days, duration_nights, badge, featured_image FROM `cruises`");
+            while ($c = $cruStmt->fetch(PDO::FETCH_ASSOC)) {
+                $cruisesMap['id_' . $c['id']] = $c;
+            }
+        } catch (Exception $ce) {}
+
         $sql = "SELECT b.*, 
                        u.name AS user_account_name, u.email AS user_account_email, u.phone AS user_account_phone, u.status AS user_account_status
                 FROM `bookings` b
@@ -126,13 +135,31 @@ if ($pdo) {
                 }
             }
 
-            $rb['pkg_image'] = $matchedPkg['image'] ?? ($meta['hotel_image'] ?? null);
-            $rb['pkg_location'] = $matchedPkg['location'] ?? ($meta['destination'] ?? ($meta['city'] ?? ''));
-            $rb['pkg_days'] = $matchedPkg['duration_days'] ?? null;
-            $rb['pkg_nights'] = $matchedPkg['duration_nights'] ?? null;
-            $rb['pkg_slug'] = $matchedPkg['slug'] ?? null;
-            $rb['pkg_tag'] = $matchedPkg['badge'] ?? null;
-            $rb['package_id'] = $matchedPkg['id'] ?? null;
+            if ($rb['booking_type'] === 'cruise') {
+                $matchedCruise = null;
+                if (!empty($meta['cruise_id']) && isset($cruisesMap['id_' . $meta['cruise_id']])) {
+                    $matchedCruise = $cruisesMap['id_' . $meta['cruise_id']];
+                }
+                if ($matchedCruise) {
+                    $rb['pkg_image'] = $matchedCruise['featured_image'];
+                    $rb['pkg_location'] = 'Port: ' . $matchedCruise['departure_port'];
+                    $rb['pkg_days'] = $matchedCruise['duration_days'];
+                    $rb['pkg_nights'] = $matchedCruise['duration_nights'];
+                    $rb['pkg_slug'] = $matchedCruise['slug'];
+                    $rb['pkg_tag'] = $matchedCruise['badge'];
+                } else {
+                    $rb['pkg_image'] = $meta['cruise_image'] ?? null;
+                    $rb['pkg_location'] = !empty($meta['ship_name']) ? ('Ship: ' . $meta['ship_name']) : 'Ocean Cruise';
+                }
+            } else {
+                $rb['pkg_image'] = $matchedPkg['image'] ?? ($meta['hotel_image'] ?? null);
+                $rb['pkg_location'] = $matchedPkg['location'] ?? ($meta['destination'] ?? ($meta['city'] ?? ''));
+                $rb['pkg_days'] = $matchedPkg['duration_days'] ?? null;
+                $rb['pkg_nights'] = $matchedPkg['duration_nights'] ?? null;
+                $rb['pkg_slug'] = $matchedPkg['slug'] ?? null;
+                $rb['pkg_tag'] = $matchedPkg['badge'] ?? null;
+                $rb['package_id'] = $matchedPkg['id'] ?? null;
+            }
 
             $bookings[] = $rb;
         }
@@ -260,6 +287,9 @@ include 'components/head.php';
                     <a href="bookings.php?type=hotel" class="px-3 py-1.5 text-xs font-bold transition-all border <?php echo $filterType === 'hotel' ? 'bg-sage-700 text-white border-sage-800' : 'bg-cream-50 text-slate-600 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                         <i class="fa-solid fa-hotel text-[10px] mr-1"></i> Hotels
                     </a>
+                    <a href="bookings.php?type=cruise" class="px-3 py-1.5 text-xs font-bold transition-all border <?php echo $filterType === 'cruise' ? 'bg-sage-700 text-white border-sage-800' : 'bg-cream-50 text-slate-600 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
+                        <i class="fa-solid fa-ship text-[10px] mr-1"></i> Cruises
+                    </a>
                     <a href="bookings.php?type=flight_inquiry" class="px-3 py-1.5 text-xs font-bold transition-all border <?php echo $filterType === 'flight_inquiry' ? 'bg-sage-700 text-white border-sage-800' : 'bg-cream-50 text-slate-600 hover:bg-cream-100 border-[#e5e4dc]'; ?>">
                         <i class="fa-solid fa-plane-departure text-[10px] mr-1"></i> Flights
                     </a>
@@ -340,6 +370,8 @@ include 'components/head.php';
                                             <div class="flex items-center gap-1.5 mb-0.5">
                                                 <?php if ($bType === 'hotel'): ?>
                                                     <span class="text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.2">Hotel Stay</span>
+                                                <?php elseif ($bType === 'cruise'): ?>
+                                                    <span class="text-[9px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 px-1.5 py-0.2">Ocean Cruise</span>
                                                 <?php elseif ($bType === 'flight_inquiry'): ?>
                                                     <span class="text-[9px] font-bold bg-sky-50 text-sky-800 border border-sky-200 px-1.5 py-0.2">Flight Query</span>
                                                 <?php else: ?>

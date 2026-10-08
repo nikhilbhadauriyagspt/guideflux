@@ -115,6 +115,12 @@ $isAboutActive    = ($activeNav === 'about');
                     <span>Hotels</span>
                 </a>
 
+                <!-- Cruises -->
+                <a href="cruises.php" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= (isset($activeNav) && $activeNav === 'cruises') ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
+                    <i class="fa-solid fa-ship text-xs <?= (isset($activeNav) && $activeNav === 'cruises') ? 'text-brand-600' : 'text-slate-400' ?>"></i>
+                    <span>Cruises</span>
+                </a>
+
                 <!-- Holidays -->
                 <a href="search.php?type=package" class="flex items-center space-x-1.5 px-4 py-2 rounded-full text-sm transition-all <?= $isHolidaysActive ? 'bg-white text-brand-700 border border-brand-200 font-bold shadow-xs' : 'text-slate-600 hover:text-brand-700 hover:bg-white border border-transparent font-medium' ?>">
                     <i class="fa-solid fa-umbrella-beach text-xs <?= $isHolidaysActive ? 'text-brand-600' : 'text-slate-400' ?>"></i>
@@ -231,6 +237,10 @@ $isAboutActive    = ($activeNav === 'about');
             <a href="search.php?type=hotel" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isHotelsActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
                 <i class="fa-solid fa-hotel text-sm <?= $isHotelsActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>
                 <span>Hotels</span>
+            </a>
+            <a href="cruises.php" class="flex items-center space-x-2 p-3 rounded-2xl <?= (isset($activeNav) && $activeNav === 'cruises') ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
+                <i class="fa-solid fa-ship text-sm <?= (isset($activeNav) && $activeNav === 'cruises') ? 'text-brand-600' : 'text-slate-500' ?>"></i>
+                <span>Cruises</span>
             </a>
             <a href="search.php?type=package" class="flex items-center space-x-2 p-3 rounded-2xl <?= $isHolidaysActive ? 'bg-brand-50 text-brand-700 font-bold border border-brand-200/80' : 'bg-slate-50 text-slate-700 font-medium border border-slate-200 hover:bg-slate-100 hover:text-brand-700' ?> text-xs justify-center transition">
                 <i class="fa-solid fa-umbrella-beach text-sm <?= $isHolidaysActive ? 'text-brand-600' : 'text-slate-500' ?>"></i>

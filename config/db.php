@@ -45,3 +45,19 @@ function getServerConnection() {
         return null;
     }
 }
+
+/**
+ * Resolves an image path correctly for admin views (prepending ../ if relative to root uploads)
+ */
+function getAdminImageUrl($path, $fallback = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80') {
+    if (empty($path)) return $fallback;
+    $path = trim($path);
+    if (preg_match('/^https?:\/\//i', $path) || str_starts_with($path, 'data:')) {
+        return $path;
+    }
+    $clean = ltrim($path, '/');
+    if (str_starts_with($clean, '../')) {
+        return $clean;
+    }
+    return '../' . $clean;
+}

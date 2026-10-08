@@ -80,6 +80,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </a>
                 </li>
                 <li>
+                    <a href="cruises.php" class="flex items-center justify-between px-5 py-2.5 text-xs font-semibold transition-all <?php echo ($currentPage == 'cruises.php' || $currentPage == 'cruise-edit.php') ? 'bg-cream-200/90 text-sage-900 border-l-4 border-sage-700 font-bold pl-[16px]' : 'text-slate-600 hover:bg-cream-100 hover:text-slate-900 border-l-4 border-transparent'; ?>">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-ship w-4 text-center text-xs <?php echo ($currentPage == 'cruises.php' || $currentPage == 'cruise-edit.php') ? 'text-sage-700' : 'text-slate-400'; ?>"></i>
+                            <span>Ocean Cruises</span>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 border border-[#e5e4dc] text-slate-600 bg-white">Sail</span>
+                    </a>
+                </li>
+                <li>
                     <a href="reviews.php" class="flex items-center justify-between px-5 py-2.5 text-xs font-semibold transition-all <?php echo $currentPage == 'reviews.php' ? 'bg-cream-200/90 text-sage-900 border-l-4 border-sage-700 font-bold pl-[16px]' : 'text-slate-600 hover:bg-cream-100 hover:text-slate-900 border-l-4 border-transparent'; ?>">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-star w-4 text-center text-xs <?php echo $currentPage == 'reviews.php' ? 'text-sage-700' : 'text-slate-400'; ?>"></i>

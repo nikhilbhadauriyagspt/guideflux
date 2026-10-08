@@ -197,7 +197,7 @@ include 'components/head.php';
                                 }
                             }
                         }
-                        $img = !empty($h['featured_image']) ? $h['featured_image'] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80';
+                        $img = getAdminImageUrl($h['featured_image'] ?? '');
                         ?>
                         <div class="bg-white border border-[#e5e4dc] hover:border-slate-400 transition-all flex flex-col justify-between group">
                             <div>
