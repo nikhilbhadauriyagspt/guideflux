@@ -1,5 +1,5 @@
 -- GuideFlux Database Dump
--- Generated on: 2026-10-08 04:21:28
+-- Generated on: 2026-10-08 04:31:30
 -- Compatible with cPanel, Localhost & Cloud Servers
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -43,12 +43,19 @@ DROP TABLE IF EXISTS `bookings`;
 CREATE TABLE `bookings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `booking_code` varchar(50) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `booking_type` varchar(50) NOT NULL DEFAULT 'package',
   `customer_name` varchar(100) NOT NULL,
   `customer_email` varchar(150) NOT NULL,
   `customer_phone` varchar(30) NOT NULL,
   `package_title` varchar(255) NOT NULL,
   `travel_date` date NOT NULL,
   `amount` decimal(10,2) NOT NULL,
+  `advance_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `balance_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `payment_gateway` varchar(50) DEFAULT 'razorpay',
+  `payment_id` varchar(100) DEFAULT NULL,
+  `booking_details` longtext DEFAULT NULL,
   `status` enum('confirmed','pending','completed','cancelled') DEFAULT 'pending',
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
@@ -56,11 +63,11 @@ CREATE TABLE `bookings` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table `bookings` (4 rows)
-INSERT INTO `bookings` (`id`, `booking_code`, `customer_name`, `customer_email`, `customer_phone`, `package_title`, `travel_date`, `amount`, `status`, `created_at`) VALUES
-('1', 'GF-1001', 'Arjun Mehta', 'arjun.m@example.com', '+91 9876543210', 'Dubai Desert Safari & Burj Khalifa Experience', '2026-10-18', '1450.00', 'confirmed', '2026-10-05 23:47:32'),
-('2', 'GF-1002', 'Sophia Martinez', 'sophia.m@gmail.com', '+1 555-0199', 'Bali Luxury Villa 7D/6N Tropical Getaway', '2026-11-02', '2100.00', 'pending', '2026-10-05 23:47:32'),
-('3', 'GF-1003', 'David Wilson', 'david.w@corp.org', '+44 20 7946 0912', 'Swiss Alps Ski & Scenic Train Tour', '2026-12-15', '3850.00', 'confirmed', '2026-10-05 23:47:32'),
-('4', 'GF-1004', 'Ananya Verma', 'ananya.v@yahoo.com', '+91 9123456780', 'Goa Beachside Sunset Resort & Watersports', '2026-10-25', '780.00', 'completed', '2026-10-05 23:47:32');
+INSERT INTO `bookings` (`id`, `booking_code`, `user_id`, `booking_type`, `customer_name`, `customer_email`, `customer_phone`, `package_title`, `travel_date`, `amount`, `advance_amount`, `balance_amount`, `payment_gateway`, `payment_id`, `booking_details`, `status`, `created_at`) VALUES
+('1', 'GF-1001', NULL, 'package', 'Arjun Mehta', 'arjun.m@example.com', '+91 9876543210', 'Dubai Desert Safari & Burj Khalifa Experience', '2026-10-18', '1450.00', '0.00', '0.00', 'razorpay', NULL, NULL, 'confirmed', '2026-10-05 23:47:32'),
+('2', 'GF-1002', NULL, 'package', 'Sophia Martinez', 'sophia.m@gmail.com', '+1 555-0199', 'Bali Luxury Villa 7D/6N Tropical Getaway', '2026-11-02', '2100.00', '0.00', '0.00', 'razorpay', NULL, NULL, 'pending', '2026-10-05 23:47:32'),
+('3', 'GF-1003', NULL, 'package', 'David Wilson', 'david.w@corp.org', '+44 20 7946 0912', 'Swiss Alps Ski & Scenic Train Tour', '2026-12-15', '3850.00', '0.00', '0.00', 'razorpay', NULL, NULL, 'confirmed', '2026-10-05 23:47:32'),
+('4', 'GF-1004', NULL, 'package', 'Ananya Verma', 'ananya.v@yahoo.com', '+91 9123456780', 'Goa Beachside Sunset Resort & Watersports', '2026-10-25', '780.00', '0.00', '0.00', 'razorpay', NULL, NULL, 'completed', '2026-10-05 23:47:32');
 
 
 -- --------------------------------------------------------
