@@ -540,7 +540,11 @@ if (!isset($hotel)) {
     $hotel = isset($hotelsDb[$lookupHotelKey]) ? $hotelsDb[$lookupHotelKey] : $hotelsDb['HTL-GOA-01'];
 }
 
-$pageTitle = $hotel['name'] . ' | GuideFlux Travel Portal';
+require_once __DIR__ . '/config/settings.php';
+$siteName = getSetting('site_name', 'GuideFlux');
+$siteWhatsapp = getSetting('site_whatsapp', '919876543210');
+
+$pageTitle = $hotel['name'] . ' | ' . htmlspecialchars($siteName);
 require_once 'components/header.php';
 require_once 'components/navbar.php';
 ?>
@@ -548,22 +552,22 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      BREADCRUMB & BACK NAVIGATION
 =========================================== -->
-<section class="w-full bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8 xl:px-12">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center space-x-2 text-slate-500">
-            <a href="index.php" class="hover:text-brand-700 transition flex items-center space-x-1">
-                <i class="fa-solid fa-house text-[11px]"></i>
-                <span>Home</span>
+<section class="w-full bg-white border-b border-slate-200 py-2 sm:py-3 px-3 sm:px-8 xl:px-12">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 text-[11px] sm:text-xs">
+        <nav class="flex items-center space-x-1.5 sm:space-x-2 text-slate-500 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5">
+            <a href="index.php" class="hover:text-brand-700 transition flex items-center space-x-1 shrink-0 font-medium">
+                <i class="fa-solid fa-house text-[10px] sm:text-[11px]"></i>
+                <span class="hidden sm:inline">Home</span>
             </a>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
-            <a href="search.php?type=hotel" class="hover:text-brand-700 transition">Hotels &amp; Resorts</a>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
-            <span class="text-brand-700 font-bold truncate max-w-xs sm:max-w-md"><?= htmlspecialchars($hotel['name']) ?></span>
-        </div>
+            <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] text-slate-400 shrink-0"></i>
+            <a href="search.php?type=hotel" class="hover:text-brand-700 transition shrink-0 font-medium">Hotels &amp; Resorts</a>
+            <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] text-slate-400 shrink-0"></i>
+            <span class="text-brand-700 font-bold truncate max-w-[150px] sm:max-w-xs md:max-w-md"><?= htmlspecialchars($hotel['name']) ?></span>
+        </nav>
 
-        <a href="search.php?type=hotel" class="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-brand-700 transition">
+        <a href="search.php?type=hotel" class="hidden sm:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-brand-700 transition shrink-0">
             <i class="fa-solid fa-arrow-left text-[11px]"></i>
-            <span>Back to All Stays</span>
+            <span>Back to Stays</span>
         </a>
     </div>
 </section>
@@ -571,49 +575,49 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      HOTEL TITLE & LOCATION STRIP
 =========================================== -->
-<section class="w-full bg-white pt-6 pb-4 px-4 sm:px-8 xl:px-12">
+<section class="w-full bg-white pt-4 sm:pt-6 pb-3 sm:pb-4 px-3 sm:px-8 xl:px-12">
     <div class="max-w-7xl mx-auto">
         
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div class="space-y-2">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+            <div class="space-y-1.5 sm:space-y-2">
                 <!-- Badges Strip -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-3 py-0.5 rounded-full text-xs font-bold <?= $hotel['badge_class'] ?>">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span class="px-2.5 sm:px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-bold <?= $hotel['badge_class'] ?>">
                         <?= htmlspecialchars($hotel['badge']) ?>
                     </span>
-                    <span class="px-3 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
-                        <i class="fa-solid fa-crown text-[10px] mr-1"></i>
+                    <span class="px-2.5 sm:px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
+                        <i class="fa-solid fa-crown text-[9px] sm:text-[10px] mr-1"></i>
                         <?= htmlspecialchars($hotel['star_rating']) ?>
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center space-x-1">
-                        <i class="fa-solid fa-star text-amber-500 text-[10px]"></i>
+                    <span class="px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center space-x-1">
+                        <i class="fa-solid fa-star text-amber-500 text-[9px] sm:text-[10px]"></i>
                         <span><?= $hotel['rating'] ?></span>
-                        <span class="text-slate-400 font-normal">(<?= number_format($hotel['reviews_count']) ?> verified reviews)</span>
+                        <span class="text-slate-400 font-normal">(<?= number_format($hotel['reviews_count']) ?> reviews)</span>
                     </span>
                 </div>
 
                 <!-- Main Hotel Heading -->
-                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                <h1 class="text-xl sm:text-3xl lg:text-4xl font-extrabold sm:font-black text-slate-900 tracking-tight leading-tight">
                     <?= htmlspecialchars($hotel['name']) ?>
                 </h1>
 
                 <!-- Exact Address / Map Pin -->
-                <p class="text-xs sm:text-sm text-slate-500 flex items-center space-x-2 font-medium">
-                    <i class="fa-solid fa-location-dot text-brand-600"></i>
+                <p class="text-[11px] sm:text-sm text-slate-500 flex items-center space-x-1.5 font-medium">
+                    <i class="fa-solid fa-location-dot text-brand-600 text-xs"></i>
                     <span><?= htmlspecialchars($hotel['location']) ?></span>
                 </p>
             </div>
 
             <!-- Price on Mobile / Tablet -->
-            <div class="flex items-center space-x-4 shrink-0 lg:text-right">
+            <div class="flex items-center justify-between lg:justify-end space-x-4 shrink-0 lg:text-right pt-2 lg:pt-0 border-t border-slate-100 lg:border-t-0">
                 <div>
-                    <span class="text-xs text-slate-400 block line-through">₹<?= number_format($hotel['original_price']) ?></span>
-                    <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                    <span class="text-[10px] sm:text-xs text-slate-400 block line-through">₹<?= number_format($hotel['original_price']) ?></span>
+                    <div class="text-xl sm:text-3xl font-extrabold sm:font-black text-slate-900 tracking-tight leading-none">
                         ₹<?= number_format($hotel['base_price']) ?>
                     </div>
-                    <span class="text-[11px] text-slate-500 block">per night &bull; plus taxes</span>
+                    <span class="text-[10px] sm:text-[11px] text-slate-500 block mt-0.5">per night &bull; plus taxes</span>
                 </div>
-                <a href="#roomSelectionSec" class="lg:hidden px-5 py-2.5 rounded-full bg-brand-600 text-white font-bold text-xs uppercase tracking-wider">
+                <a href="#roomSelectionSec" class="lg:hidden px-4 py-2 rounded-full bg-brand-600 text-white font-bold text-xs uppercase tracking-wider active:scale-95 transition">
                     Select Room
                 </a>
             </div>
@@ -630,10 +634,12 @@ $galCount = count($hotel['gallery']);
 $mainPhoto = !empty($hotel['gallery'][0]) ? $hotel['gallery'][0] : 'assets/images/placeholder-hotel.jpg';
 $sidePhotos = array_slice($hotel['gallery'], 1, 4);
 $sideCount = count($sidePhotos);
+$allGallery = !empty($hotel['gallery']) ? $hotel['gallery'] : [$mainPhoto];
 ?>
-<section class="w-full bg-white pb-8 px-4 sm:px-8 xl:px-12">
+<section class="w-full bg-white pb-4 sm:pb-8 px-3 sm:px-8 xl:px-12">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 <?= $sideCount > 0 ? 'md:grid-cols-4' : '' ?> gap-3 rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 h-[260px] sm:h-[340px] md:h-[480px]">
+        <!-- Desktop & Tablet Magazine Grid Layout -->
+        <div class="hidden md:grid grid-cols-1 <?= $sideCount > 0 ? 'md:grid-cols-4' : '' ?> gap-3 rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 h-[340px] md:h-[480px]">
             
             <!-- Large Main Photo -->
             <div class="<?= $sideCount > 0 ? 'md:col-span-2' : 'col-span-full' ?> h-full relative overflow-hidden group">
@@ -659,15 +665,56 @@ $sideCount = count($sidePhotos);
             <?php endif; ?>
 
         </div>
+
+        <!-- Mobile Auto-Scrolling Carousel with swipe & touch support -->
+        <div class="block md:hidden relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[16/10] max-h-[280px]">
+            <div id="mobileHotelCarousel" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-full">
+                <?php foreach ($allGallery as $gIdx => $gPhoto): ?>
+                    <div class="w-full shrink-0 snap-center h-full relative" data-carousel-slide="<?= $gIdx ?>">
+                        <img src="<?= htmlspecialchars($gPhoto) ?>" 
+                             alt="<?= htmlspecialchars($hotel['name']) ?> Photo <?= $gIdx + 1 ?>" 
+                             class="w-full h-full object-cover">
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Mobile Badge Overlay -->
+            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20 shadow-xs">
+                <i class="fa-solid fa-umbrella-beach mr-1 text-teal-300"></i> <?= htmlspecialchars($hotel['badge'] ?: 'Featured') ?>
+            </span>
+
+            <!-- Counter Pill -->
+            <div class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20 flex items-center space-x-1 pointer-events-none">
+                <i class="fa-solid fa-images text-[9px] text-teal-300"></i>
+                <span id="mobileGalleryCounter">1 / <?= count($allGallery) ?></span>
+            </div>
+
+            <!-- Left & Right Arrow controls -->
+            <?php if (count($allGallery) > 1): ?>
+                <button type="button" id="prevSlideBtn" aria-label="Previous image" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-xs flex items-center justify-center border border-white/20 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+                <button type="button" id="nextSlideBtn" aria-label="Next image" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-xs flex items-center justify-center border border-white/20 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                
+                <!-- Dot indicators -->
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1.5 pointer-events-none" id="mobileCarouselDots">
+                    <?php foreach ($allGallery as $dIdx => $dP): ?>
+                        <span class="h-1.5 rounded-full transition-all duration-300 <?= $dIdx === 0 ? 'bg-white w-4' : 'bg-white/50 w-1.5' ?>" data-dot-index="<?= $dIdx ?>"></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </section>
 
 <!-- ==========================================
      IN-PAGE TAB NAVIGATION STRIP (Smooth Scroll)
 =========================================== -->
-<div class="w-full bg-white border-y border-slate-200 sticky top-20 md:top-24 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 xl:px-12">
-        <nav class="flex items-center space-x-6 overflow-x-auto no-scrollbar py-3 text-xs font-bold text-slate-600">
+<div class="w-full bg-white border-y border-slate-200 sticky top-14 md:top-24 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-8 xl:px-12">
+        <nav class="flex items-center space-x-4 sm:space-x-6 overflow-x-auto no-scrollbar py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold text-slate-600">
             <a href="#aboutHotelSec" class="hover:text-brand-600 transition shrink-0">About Resort</a>
             <a href="#roomSelectionSec" class="hover:text-brand-600 transition shrink-0">Available Rooms</a>
             <a href="#amenitiesSec" class="hover:text-brand-600 transition shrink-0">Amenities &amp; Services</a>
@@ -679,23 +726,23 @@ $sideCount = count($sidePhotos);
 <!-- ==========================================
      MAIN TWO-COLUMN DETAILS & RESERVATION SECTION
 =========================================== -->
-<main class="w-full py-10 px-4 sm:px-8 xl:px-12 bg-slate-50">
+<main class="w-full py-6 sm:py-10 px-3 sm:px-8 xl:px-12 bg-slate-50">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row gap-8 items-start">
+        <div class="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
             
             <!-- ==========================================
                  LEFT COLUMN: EXTENSIVE HOTEL CONTENT
             =========================================== -->
-            <div class="flex-1 w-full space-y-8">
+            <div class="flex-1 w-full space-y-5 sm:space-y-8">
 
                 <!-- 1. ABOUT PROPERTY & HIGHLIGHTS -->
-                <div id="aboutHotelSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-5">
-                    <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="aboutHotelSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-3.5 sm:space-y-5">
+                    <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                         <i class="fa-solid fa-hotel"></i>
                         <span>Property Overview</span>
                     </div>
 
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
                         A Grand Coastal Sanctuary by the Arabian Sea
                     </h2>
 
@@ -704,15 +751,15 @@ $sideCount = count($sidePhotos);
                     </p>
 
                     <!-- Key Perks Badges -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5 pt-1 sm:pt-2">
                         <?php foreach ($hotel['key_perks'] as $perk): ?>
-                            <div class="flex items-start space-x-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                                <span class="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 text-xs">
+                            <div class="flex items-start space-x-2.5 sm:space-x-3 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80">
+                                <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 text-xs">
                                     <i class="<?= $perk['icon'] ?>"></i>
                                 </span>
                                 <div>
                                     <h4 class="text-xs font-bold text-slate-900"><?= htmlspecialchars($perk['title']) ?></h4>
-                                    <p class="text-[11px] text-slate-500 mt-0.5 leading-snug"><?= htmlspecialchars($perk['desc']) ?></p>
+                                    <p class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 leading-snug"><?= htmlspecialchars($perk['desc']) ?></p>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -720,63 +767,63 @@ $sideCount = count($sidePhotos);
                 </div>
 
                 <!-- 2. ROOM CATEGORIES (Minimal & Lightweight Cards) -->
-                <div id="roomSelectionSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="roomSelectionSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-6">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-bed"></i>
                             <span>Room Options</span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                             Select Your Room &amp; Suite Category
                         </h2>
-                        <p class="text-xs text-slate-500">All room rates include complimentary daily buffet breakfast and free Wi-Fi.</p>
+                        <p class="text-[11px] sm:text-xs text-slate-500">All room rates include complimentary daily buffet breakfast and free Wi-Fi.</p>
                     </div>
 
                     <!-- Room Cards List -->
-                    <div class="space-y-4">
+                    <div class="space-y-3.5 sm:space-y-4">
                         <?php foreach ($hotel['rooms'] as $idx => $room): ?>
-                            <div class="room-option-card rounded-2xl border border-slate-200 hover:border-brand-500 transition overflow-hidden bg-slate-50/40 flex flex-col md:flex-row <?= $idx === 0 ? 'border-brand-500 ring-1 ring-brand-500/20' : '' ?>"
+                            <div class="room-option-card rounded-2xl border border-slate-200 hover:border-brand-500 transition overflow-hidden bg-white sm:bg-slate-50/40 flex flex-col md:flex-row <?= $idx === 0 ? 'border-brand-500 ring-1 ring-brand-500/20' : '' ?>"
                                  data-room-id="<?= htmlspecialchars($room['id']) ?>"
                                  data-room-name="<?= htmlspecialchars($room['name']) ?>"
                                  data-room-price="<?= $room['price'] ?>">
-                                
+                                 
                                 <!-- Room Photo Thumbnail -->
-                                <div class="w-full md:w-60 h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-200">
+                                <div class="w-full md:w-60 h-44 sm:h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-200">
                                     <img src="<?= htmlspecialchars($room['image']) ?>" alt="<?= htmlspecialchars($room['name']) ?>" class="w-full h-full object-cover">
-                                    <span class="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 text-white">
+                                    <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 text-white">
                                         <?= htmlspecialchars($room['size']) ?>
                                     </span>
                                 </div>
 
                                 <!-- Room Specs & Inclusions -->
-                                <div class="flex-1 p-5 flex flex-col justify-between space-y-3">
+                                <div class="flex-1 p-3.5 sm:p-5 flex flex-col justify-between space-y-2.5 sm:space-y-3">
                                     <div>
-                                        <div class="flex items-center justify-between text-xs mb-1">
+                                        <div class="flex items-center justify-between text-[11px] sm:text-xs mb-1">
                                             <span class="text-brand-700 font-bold"><?= htmlspecialchars($room['view']) ?></span>
                                             <span class="text-slate-500 font-medium"><?= htmlspecialchars($room['occupancy']) ?></span>
                                         </div>
 
-                                        <h3 class="text-base sm:text-lg font-bold text-slate-900">
+                                        <h3 class="text-sm sm:text-lg font-bold text-slate-900">
                                             <?= htmlspecialchars($room['name']) ?>
                                         </h3>
 
-                                        <p class="text-xs text-slate-500 mt-1 flex items-center space-x-1.5 font-medium">
+                                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 flex items-center space-x-1.5 font-medium">
                                             <i class="fa-solid fa-bed text-slate-400 text-xs"></i>
                                             <span><?= htmlspecialchars($room['bed']) ?></span>
                                         </p>
 
                                         <!-- Amenities Chips -->
-                                        <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                                        <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-2.5">
                                             <?php foreach ($room['amenities'] as $am): ?>
-                                                <span class="inline-flex items-center space-x-1 text-[11px] font-semibold bg-white text-slate-700 px-2.5 py-1 rounded-full border border-slate-200">
-                                                    <i class="fa-solid fa-check text-brand-600 text-[9px]"></i>
+                                                <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-semibold bg-slate-50 sm:bg-white text-slate-700 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200">
+                                                    <i class="fa-solid fa-check text-brand-600 text-[8px] sm:text-[9px]"></i>
                                                     <span><?= htmlspecialchars($am) ?></span>
                                                 </span>
                                             <?php endforeach; ?>
                                         </div>
                                     </div>
 
-                                    <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-emerald-700 font-semibold">
+                                    <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] sm:text-[11px] text-emerald-700 font-semibold">
                                         <span class="flex items-center space-x-1">
                                             <i class="fa-solid fa-shield-check text-[10px]"></i>
                                             <span><?= htmlspecialchars($room['cancellation']) ?></span>
@@ -785,17 +832,17 @@ $sideCount = count($sidePhotos);
                                 </div>
 
                                 <!-- Room Price & Select CTA -->
-                                <div class="md:w-52 shrink-0 p-5 bg-white border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
+                                <div class="md:w-52 shrink-0 p-3.5 sm:p-5 bg-slate-50/60 sm:bg-white border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
                                     <div>
-                                        <span class="text-[11px] text-slate-400 block line-through">₹<?= number_format($room['original_price']) ?></span>
-                                        <div class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                                        <span class="text-[10px] sm:text-[11px] text-slate-400 block line-through">₹<?= number_format($room['original_price']) ?></span>
+                                        <div class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
                                             ₹<?= number_format($room['price']) ?>
                                         </div>
-                                        <span class="text-[10px] text-slate-500 block mt-1">per night &bull; + taxes</span>
+                                        <span class="text-[10px] text-slate-500 block mt-0.5">per night &bull; + taxes</span>
                                     </div>
 
                                     <button type="button" 
-                                            class="select-room-btn px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition active:scale-95 <?= $idx === 0 ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-brand-600 hover:text-white' ?>"
+                                            class="select-room-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition active:scale-95 <?= $idx === 0 ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-brand-600 hover:text-white' ?>"
                                             data-room-id="<?= htmlspecialchars($room['id']) ?>"
                                             data-room-name="<?= htmlspecialchars($room['name']) ?>"
                                             data-room-price="<?= $room['price'] ?>">
@@ -809,28 +856,28 @@ $sideCount = count($sidePhotos);
                 </div>
 
                 <!-- 3. RESORT AMENITIES & FACILITIES GRID -->
-                <div id="amenitiesSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="amenitiesSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-6">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-sparkles"></i>
                             <span>Resort Facilities</span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                             World-Class Amenities &amp; Services
                         </h2>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <?php foreach ($hotel['amenities_categories'] as $catName => $items): ?>
-                            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-200">
+                            <div class="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 sm:space-y-3">
+                                <h3 class="text-[11px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-200">
                                     <?= htmlspecialchars($catName) ?>
                                 </h3>
-                                <div class="grid grid-cols-2 gap-2.5">
+                                <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
                                     <?php foreach ($items as $it): ?>
-                                        <div class="flex items-center space-x-2 text-xs text-slate-700 font-semibold">
+                                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs text-slate-700 font-semibold">
                                             <i class="<?= $it['icon'] ?> text-brand-600 text-xs shrink-0"></i>
-                                            <span><?= htmlspecialchars($it['name']) ?></span>
+                                            <span class="truncate"><?= htmlspecialchars($it['name']) ?></span>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -840,13 +887,13 @@ $sideCount = count($sidePhotos);
                 </div>
 
                 <!-- 4. PROPERTY POLICIES & HOUSE RULES -->
-                <div id="policiesSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-5">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="policiesSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-5">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-scale-balanced"></i>
                             <span>House Rules</span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                             Property Policies &amp; Guidelines
                         </h2>
                     </div>
@@ -1070,7 +1117,7 @@ $sideCount = count($sidePhotos);
                                 <span>Confirm Reservation</span>
                             </button>
 
-                            <a href="https://wa.me/919876543210?text=<?= urlencode('Hi Orion Advent, I want to reserve a room at ' . $hotel['name'] . '. Please share availability.') ?>" 
+                            <a href="https://wa.me/<?= htmlspecialchars($siteWhatsapp) ?>?text=<?= urlencode('Hi ' . $siteName . ', I want to reserve a room at ' . $hotel['name'] . '. Please share availability.') ?>" 
                                target="_blank" 
                                class="w-full py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-2">
                                 <i class="fa-brands fa-whatsapp text-sm"></i>
@@ -1271,7 +1318,7 @@ function showHotelLoginModal(title) {
                         Traveler Account Required
                     </span>
                     <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Reserve Room</h3>
-                    <p class="text-xs text-slate-500">Please sign in to your GuideFlux account to complete your hotel booking and receive instant check-in vouchers.</p>
+                    <p class="text-xs text-slate-500">Please sign in to your <?php echo htmlspecialchars($siteName); ?> account to complete your hotel booking and receive instant check-in vouchers.</p>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 truncate">
                     <span>${title}</span>
@@ -1329,6 +1376,101 @@ function showBookingSuccessModal(code, hotel, room, guest, amount) {
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
+
+// Mobile Hotel Photo Gallery Auto-Scroll
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.getElementById('mobileHotelCarousel');
+    if (!carousel) return;
+    const slides = carousel.querySelectorAll('[data-carousel-slide]');
+    const totalSlides = slides.length;
+    if (totalSlides <= 1) return;
+
+    const counter = document.getElementById('mobileGalleryCounter');
+    const dots = document.querySelectorAll('#mobileCarouselDots [data-dot-index]');
+    const prevBtn = document.getElementById('prevSlideBtn');
+    const nextBtn = document.getElementById('nextSlideBtn');
+    let currentIndex = 0;
+    let autoScrollTimer = null;
+    let userPauseTimeout = null;
+
+    function goToSlide(idx) {
+        currentIndex = (idx + totalSlides) % totalSlides;
+        const width = carousel.clientWidth;
+        carousel.scrollTo({
+            left: currentIndex * width,
+            behavior: 'smooth'
+        });
+        updateIndicators();
+    }
+
+    function updateIndicators() {
+        if (counter) {
+            counter.textContent = `${currentIndex + 1} / ${totalSlides}`;
+        }
+        dots.forEach((dot, dIdx) => {
+            if (dIdx === currentIndex) {
+                dot.className = 'h-1.5 rounded-full transition-all duration-300 bg-white w-4';
+            } else {
+                dot.className = 'h-1.5 rounded-full transition-all duration-300 bg-white/50 w-1.5';
+            }
+        });
+    }
+
+    function startAutoScroll() {
+        stopAutoScroll();
+        autoScrollTimer = setInterval(() => {
+            goToSlide(currentIndex + 1);
+        }, 3200);
+    }
+
+    function stopAutoScroll() {
+        if (autoScrollTimer) {
+            clearInterval(autoScrollTimer);
+            autoScrollTimer = null;
+        }
+    }
+
+    function handleUserInteraction() {
+        stopAutoScroll();
+        if (userPauseTimeout) clearTimeout(userPauseTimeout);
+        userPauseTimeout = setTimeout(() => {
+            startAutoScroll();
+        }, 4500);
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleUserInteraction();
+            goToSlide(currentIndex - 1);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleUserInteraction();
+            goToSlide(currentIndex + 1);
+        });
+    }
+
+    carousel.addEventListener('scroll', function() {
+        const width = carousel.clientWidth;
+        if (width > 0) {
+            const detectedIdx = Math.round(carousel.scrollLeft / width);
+            if (detectedIdx !== currentIndex && detectedIdx >= 0 && detectedIdx < totalSlides) {
+                currentIndex = detectedIdx;
+                updateIndicators();
+            }
+        }
+    }, { passive: true });
+
+    carousel.addEventListener('touchstart', handleUserInteraction, { passive: true });
+    carousel.addEventListener('mouseenter', stopAutoScroll);
+    carousel.addEventListener('mouseleave', startAutoScroll);
+
+    startAutoScroll();
+});
 </script>
 
 <!-- Mobile Sticky Floating Bottom Reservation Bar (Hidden on desktop, flat border, zero shadows) -->

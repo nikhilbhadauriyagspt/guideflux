@@ -39,34 +39,35 @@ $isAboutActive    = ($activeNav === 'about');
 <!-- Dynamic Navbar Header - Full Width, 100% Flat Border-First (No Shadows, Icon Library Only) -->
 <header class="w-full sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
     <!-- Top Utility Bar (Logo Brand Color Background: bg-brand-600) -->
-    <div class="w-full bg-brand-600 text-white text-xs py-2 px-3 sm:px-8 xl:px-12 border-b border-brand-700/50">
-        <div class="w-full flex flex-wrap justify-between items-center gap-2 sm:gap-3">
+    <div class="w-full bg-brand-600 text-white text-[11px] sm:text-xs py-1 sm:py-2 px-3 sm:px-8 xl:px-12 border-b border-brand-700/50">
+        <div class="w-full flex items-center justify-between gap-2 overflow-hidden">
             <!-- Left: Minimal Offer Pill -->
-            <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                <span class="inline-flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-white/20 text-white border border-white/30 shrink-0">
-                    <span class="relative flex h-2 w-2">
+            <div class="flex items-center space-x-1.5 sm:space-x-3 min-w-0 truncate">
+                <span class="inline-flex items-center space-x-1 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[11px] font-bold bg-white/20 text-white border border-white/30 shrink-0">
+                    <span class="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-white"></span>
                     </span>
-                    <span>Summer Deals</span>
+                    <span class="hidden xs:inline">Summer Deals</span>
+                    <span class="xs:hidden">Deals</span>
                 </span>
-                <span class="text-teal-50 font-medium text-[11px] sm:text-xs truncate">
+                <span class="text-teal-50 font-medium text-[10px] sm:text-xs truncate">
                     <span class="hidden sm:inline">Flat 25% Off on Tour Packages &bull; Use: </span>
                     <span class="sm:hidden">25% Off: </span>
-                    <strong class="text-amber-300 font-mono bg-brand-800/40 px-1.5 py-0.5 rounded border border-amber-300/40">EXPLORE25</strong>
+                    <strong class="text-amber-300 font-mono bg-brand-800/50 px-1 py-0.5 rounded border border-amber-300/30">EXPLORE25</strong>
                 </span>
             </div>
 
             <!-- Right: WhatsApp, Helpline & Currency -->
-            <div class="flex items-center space-x-2.5 sm:space-x-4 ml-auto shrink-0">
-                <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>" target="_blank" class="inline-flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/15 text-white border border-white/25 hover:bg-white/25 transition text-[11px] sm:text-xs font-semibold">
-                    <i class="fa-brands fa-whatsapp text-xs sm:text-sm"></i>
+            <div class="flex items-center space-x-2 sm:space-x-4 shrink-0">
+                <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>" target="_blank" class="inline-flex items-center space-x-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/15 text-white border border-white/25 hover:bg-white/25 transition text-[10px] sm:text-xs font-semibold">
+                    <i class="fa-brands fa-whatsapp text-[11px] sm:text-sm text-emerald-300"></i>
                     <span class="hidden xs:inline">WhatsApp</span>
                 </a>
 
-                <a href="tel:<?php echo htmlspecialchars($sitePhone); ?>" class="flex items-center space-x-1.5 hover:text-teal-100 transition text-[11px] sm:text-xs text-white">
-                    <i class="fa-solid fa-phone text-[10px] sm:text-xs text-teal-200"></i>
-                    <span class="hidden sm:inline text-teal-100">24x7:</span> <strong class="text-white font-medium"><?php echo htmlspecialchars($sitePhone); ?></strong>
+                <a href="tel:<?php echo htmlspecialchars($sitePhone); ?>" class="flex items-center space-x-1 hover:text-teal-100 transition text-[10px] sm:text-xs text-white">
+                    <i class="fa-solid fa-phone text-[9px] sm:text-xs text-teal-200"></i>
+                    <span class="hidden md:inline text-teal-100">24x7:</span> <strong class="text-white font-medium text-[10px] sm:text-xs"><?php echo htmlspecialchars($sitePhone); ?></strong>
                 </a>
 
                 <span class="text-teal-400 hidden md:inline">|</span>
@@ -79,17 +80,17 @@ $isAboutActive    = ($activeNav === 'about');
         </div>
     </div>
 
-    <!-- Main Navigation Bar (Full Width, Flat, Bada Logo Size) -->
-    <div class="w-full px-4 sm:px-8 xl:px-12">
-        <div class="flex items-center justify-between h-16 sm:h-20 md:h-24">
+    <!-- Main Navigation Bar (Compact on Mobile, Full-Size on Desktop) -->
+    <div class="w-full px-3 sm:px-8 xl:px-12">
+        <div class="flex items-center justify-between h-14 sm:h-20 md:h-24">
             <!-- Brand Logo -->
-            <a href="index.php" class="flex items-center py-2 shrink-0 group focus:outline-none">
+            <a href="index.php" class="flex items-center py-1 sm:py-2 shrink-0 group focus:outline-none">
                 <img src="<?php echo htmlspecialchars($siteLogo); ?>" 
                      alt="<?php echo htmlspecialchars($siteName); ?> - Your Passport to Adventure" 
-                     class="h-12 sm:h-16 md:h-18 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+                     class="h-9 sm:h-16 md:h-18 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <span class="hidden items-center gap-2 font-space font-extrabold text-2xl text-slate-900 tracking-tight">
-                    <span class="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center text-base"><i class="fa-solid fa-compass"></i></span>
+                <span class="hidden items-center gap-2 font-space font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight">
+                    <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs sm:text-base"><i class="fa-solid fa-compass"></i></span>
                     <span><?php echo htmlspecialchars($siteName); ?></span>
                 </span>
             </a>

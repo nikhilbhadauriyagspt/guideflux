@@ -45,10 +45,10 @@ body {
 /* Hotels 2-Row Slider Track (Both rows slide horizontally) */
 .hotels-slider-track {
   display: grid;
-  grid-template-rows: repeat(2, 204px);
+  grid-template-rows: repeat(2, 196px);
   grid-auto-flow: column;
-  grid-auto-columns: calc(100% - 12px);
-  gap: 12px;
+  grid-auto-columns: calc(100% - 8px);
+  gap: 10px;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -56,6 +56,13 @@ body {
 }
 .hotels-slider-track::-webkit-scrollbar {
   display: none;
+}
+
+@media (min-width: 480px) {
+  .hotels-slider-track {
+    grid-auto-columns: calc((100% - 12px) / 1.25);
+    gap: 12px;
+  }
 }
 
 @media (min-width: 640px) {
@@ -174,7 +181,7 @@ body {
 /* Testimonials Carousel Track & Lightweight Cards */
 .testimonials-slider-track {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -185,13 +192,16 @@ body {
 }
 
 .testimonial-card-item {
-  width: 86%;
-  min-width: 280px;
+  width: 88%;
+  min-width: 275px;
   max-width: 340px;
   flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
+  .testimonials-slider-track {
+    gap: 1.5rem;
+  }
   .testimonial-card-item {
     max-width: none;
     width: calc((100% - 24px) / 2);

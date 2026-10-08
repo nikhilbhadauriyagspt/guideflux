@@ -248,7 +248,7 @@ require_once 'components/navbar.php';
                     </h3>
 
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        If you are currently traveling on an active GuideFlux itinerary and require immediate driver coordination, hotel check-in support, or emergency itinerary adjustment:
+                        If you are currently traveling on an active <?php echo htmlspecialchars($siteName); ?> itinerary and require immediate driver coordination, hotel check-in support, or emergency itinerary adjustment:
                     </p>
 
                     <div class="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-2">
@@ -256,7 +256,7 @@ require_once 'components/navbar.php';
                             <span class="text-xs font-bold text-amber-300 uppercase">Emergency Helpline:</span>
                             <span class="text-xs font-mono font-bold text-white"><?php echo htmlspecialchars($sitePhone); ?></span>
                         </div>
-                        <p class="text-[11px] text-slate-300">Keep your Booking Reference (e.g. #GF-XXXX) handy for instant verification.</p>
+                        <p class="text-[11px] text-slate-300">Keep your Booking Reference handy for instant verification.</p>
                     </div>
 
                     <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>?text=<?php echo urlencode('EMERGENCY: I am currently traveling and need immediate on-trip support.'); ?>" target="_blank" class="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider text-center block transition">
@@ -268,7 +268,7 @@ require_once 'components/navbar.php';
                 <div class="p-6 rounded-3xl bg-white border border-slate-200 space-y-3">
                     <h4 class="text-sm font-bold text-slate-900 font-space flex items-center gap-2">
                         <i class="fa-solid fa-circle-check text-teal-600"></i>
-                        <span>The GuideFlux Service Promise</span>
+                        <span>The <?php echo htmlspecialchars($siteName); ?> Service Promise</span>
                     </h4>
                     
                     <ul class="space-y-2.5 text-xs text-slate-600">

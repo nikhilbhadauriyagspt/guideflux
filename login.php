@@ -1,6 +1,6 @@
 <?php
 /**
- * User Login Page - GuideFlux
+ * User Login Page
  * Clean, Airy, Lightweight & Modern Travel Theme UI with Live Authentication
  */
 require_once __DIR__ . '/config/settings.php';
@@ -8,6 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$siteName = getSetting('site_name', 'GuideFlux');
 $redirect = isset($_GET['redirect']) ? trim($_GET['redirect']) : '';
 
 // If already logged in, send them straight back
@@ -16,7 +17,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     exit();
 }
 
-$pageTitle = 'Log In to Your Account - ' . htmlspecialchars(getSetting('site_name', 'GuideFlux'));
+$pageTitle = 'Log In to Your Account - ' . htmlspecialchars($siteName);
 require_once 'components/header.php';
 require_once 'components/navbar.php';
 ?>
@@ -81,7 +82,7 @@ require_once 'components/navbar.php';
                             </div>
                         </div>
                         <p class="text-[11px] text-slate-100 font-medium italic line-clamp-2">
-                            "Booking our honeymoon through GuideFlux was completely hassle-free. Got 20% off member rate!"
+                            "Booking our honeymoon through <?php echo htmlspecialchars($siteName); ?> was completely hassle-free. Got 20% off member rate!"
                         </p>
                     </div>
 
@@ -211,7 +212,7 @@ require_once 'components/navbar.php';
                 <!-- Footer Link to Sign Up -->
                 <div class="mt-7 text-center pt-5 border-t border-slate-100">
                     <p class="text-xs text-slate-500 font-medium">
-                        Don't have a GuideFlux account yet? 
+                        Don't have a <?php echo htmlspecialchars($siteName); ?> account yet? 
                         <a href="signup.php<?php echo !empty($redirect) ? '?redirect=' . urlencode($redirect) : ''; ?>" class="text-brand-600 hover:text-brand-700 font-bold ml-1 hover:underline">
                             Create Account Free
                         </a>

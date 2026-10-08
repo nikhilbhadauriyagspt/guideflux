@@ -1,19 +1,25 @@
 <?php
 /**
- * About Us Component - Orion Advent
+ * About Us Component
  * - Clean, Lightweight Brand Story & Impact Showcase
  * - Human-First Travel Philosophy & 3 Core Promises
  * - 100% Flat, Border-First, Zero Shadows
  * - Pure Font Awesome 6 Icons Only (Zero Emojis)
  */
+if (function_exists('getSetting')) {
+    $aboutSiteName = getSetting('site_name', 'GuideFlux');
+} else {
+    require_once __DIR__ . '/../config/settings.php';
+    $aboutSiteName = getSetting('site_name', 'GuideFlux');
+}
 ?>
 <!-- ==========================================
-     ABOUT US & WHY ORION ADVENT COMPONENT
+     ABOUT US & WHY CHOOSE US COMPONENT
      - Elegant, lightweight, airy brand story
      - 100% Flat, Border-First (Zero Shadows)
      - Font Awesome 6 Icons Only (Zero Emojis)
 =========================================== -->
-<section id="about-section" class="py-16 md:py-24 px-4 sm:px-8 xl:px-12 bg-slate-50/60 border-b border-slate-200 relative overflow-hidden">
+<section id="about-section" class="py-12 sm:py-16 md:py-24 px-4 sm:px-8 xl:px-12 bg-slate-50/60 border-b border-slate-200 relative overflow-hidden">
     
     <!-- Ambient Background Accents -->
     <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-brand-100/30 blur-3xl pointer-events-none"></div>
@@ -25,21 +31,21 @@
         <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 sm:mb-16">
             <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
                 <i class="fa-solid fa-compass text-brand-600"></i>
-                <span>About Orion Advent</span>
+                <span>About <?= htmlspecialchars($aboutSiteName) ?></span>
             </div>
 
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
                 <span>Crafting Holidays That</span>
                 <span class="inline-block align-middle mx-1.5 sm:mx-2.5">
                     <img src="assets/images/banner/heading-about-01.jpg" 
-                         alt="Orion Advent Travel Concierge Team" 
-                         class="h-8 sm:h-11 md:h-12 w-auto rounded-full object-cover border border-slate-200 hover:scale-105 transition-transform duration-300 select-none">
+                         alt="<?= htmlspecialchars($aboutSiteName) ?> Travel Concierge Team" 
+                         class="h-7 sm:h-11 md:h-12 w-auto rounded-full object-cover border border-slate-200 hover:scale-105 transition-transform duration-300 select-none">
                 </span>
                 <span class="text-brand-600">Become Lifelong Memories</span>
             </h2>
 
             <p class="text-xs sm:text-sm text-slate-500 font-normal max-w-xl mx-auto">
-                We started Orion Advent with a simple belief: holiday planning shouldn't feel like stressful work. It should feel like the exciting first chapter of your adventure.
+                We started <?= htmlspecialchars($aboutSiteName) ?> with a simple belief: holiday planning shouldn't feel like stressful work. It should feel like the exciting first chapter of your adventure.
             </p>
         </div>
 
@@ -63,7 +69,7 @@
                 </p>
 
                 <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
-                    At <strong class="text-slate-900 font-bold">Orion Advent</strong>, our relationship begins when you book. We combine direct wholesale hotel partnerships with a dedicated on-trip human concierge on WhatsApp. We take care of all the logistics so you can simply live in the moment.
+                    At <strong class="text-slate-900 font-bold"><?= htmlspecialchars($aboutSiteName) ?></strong>, our relationship begins when you book. We combine direct wholesale hotel partnerships with a dedicated on-trip human concierge on WhatsApp. We take care of all the logistics so you can simply live in the moment.
                 </p>
 
                 <!-- Clean Inline Impact Metrics (Not Chunky Boxes) -->

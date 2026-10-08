@@ -332,7 +332,7 @@ if ($pdoThemes) {
      - 100% Flat, Border-First (Zero Shadows)
      - Font Awesome 6 Icons Only (Zero Emojis)
 =========================================== -->
-<section id="experience-themes" class="py-16 md:py-24 px-4 sm:px-8 xl:px-12 bg-white border-b border-slate-200 relative overflow-hidden">
+<section id="experience-themes" class="py-10 sm:py-16 md:py-24 px-3 sm:px-8 xl:px-12 bg-white border-b border-slate-200 relative overflow-hidden">
     
     <!-- Ambient Background Accents (Subtle Atmospheric Depth) -->
     <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-teal-100/35 blur-3xl pointer-events-none"></div>
@@ -342,44 +342,44 @@ if ($pdoThemes) {
     <div class="max-w-7xl mx-auto relative z-10">
 
         <!-- 1. Section Header with Generated Inline Capsule Image -->
-        <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 sm:mb-16">
-            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
-                <i class="fa-solid fa-compass text-brand-600"></i>
+        <div class="max-w-3xl mx-auto text-center space-y-2.5 sm:space-y-3 mb-8 sm:mb-16">
+            <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                <i class="fa-solid fa-compass text-brand-600 text-[11px]"></i>
                 <span>Explore By Mood & Travel Vibe</span>
             </div>
 
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
                 <span>Curated Holiday</span>
-                <span class="inline-block align-middle mx-1.5 sm:mx-2.5">
+                <span class="inline-block align-middle mx-1 sm:mx-2.5">
                     <img src="assets/images/banner/heading-experience-01.jpg" 
                          alt="Cappadocia Hot Air Balloons Sunrise" 
-                         class="h-8 sm:h-11 md:h-12 w-auto rounded-full object-cover border border-slate-200 hover:scale-105 transition-transform duration-300 select-none">
+                         class="h-7 sm:h-11 md:h-12 w-auto rounded-full object-cover border border-slate-200 hover:scale-105 transition-transform duration-300 select-none">
                 </span>
                 <span class="text-brand-600">Experiences</span>
             </h2>
 
-            <p class="text-xs sm:text-sm text-slate-500 font-normal max-w-xl mx-auto">
+            <p class="text-xs sm:text-sm text-slate-500 font-normal max-w-xl mx-auto px-2">
                 Don't just pick a destination, pick how you want to feel. Explore handpicked collections crafted around your ideal travel mood.
             </p>
         </div>
 
         <!-- 2. The Experiential Theme Cards Grid (3 Columns x 2 Rows) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 lg:gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7 lg:gap-8">
             <?php foreach ($holidayThemes as $theme): ?>
-                <div class="experience-card relative rounded-3xl p-5 sm:p-6 border transition-all duration-300 overflow-hidden group flex flex-col justify-between select-none <?= $theme['card_bg'] ?>">
+                <div class="experience-card relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 border transition-all duration-300 overflow-hidden group flex flex-col justify-between select-none <?= $theme['card_bg'] ?>">
                     
                     <!-- Atmospheric Background Watermark Icon -->
                     <i class="<?= htmlspecialchars($theme['watermark_icon']) ?> absolute -right-6 -bottom-6 text-9xl select-none opacity-[0.035] pointer-events-none group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 text-slate-900"></i>
 
                     <div>
                         <!-- Card Top Bar: Vibe Tag & Rating -->
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold border <?= $theme['accent_badge'] ?>">
-                                <i class="<?= htmlspecialchars($theme['badge_icon']) ?> text-xs"></i>
+                        <div class="flex items-center justify-between mb-3.5 sm:mb-4">
+                            <span class="inline-flex items-center space-x-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold border <?= $theme['accent_badge'] ?>">
+                                <i class="<?= htmlspecialchars($theme['badge_icon']) ?> text-[10px] sm:text-xs"></i>
                                 <span><?= htmlspecialchars($theme['badge_label']) ?></span>
                             </span>
 
-                            <div class="flex items-center space-x-1 text-xs font-bold text-slate-700 bg-white/90 px-2.5 py-0.5 rounded-full border border-slate-200/80">
+                            <div class="flex items-center space-x-1 text-xs font-bold text-slate-700 bg-white/90 px-2 sm:px-2.5 py-0.5 rounded-full border border-slate-200/80">
                                 <i class="fa-solid fa-star text-amber-500 text-[11px]"></i>
                                 <span><?= htmlspecialchars($theme['rating']) ?></span>
                                 <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">(<?= htmlspecialchars($theme['reviews']) ?>)</span>
@@ -387,27 +387,27 @@ if ($pdoThemes) {
                         </div>
 
                         <!-- Center Stage: Multi-Layered Photo Frame with Offset Decorative Geometry Behind Image -->
-                        <div class="relative mb-5 pt-1">
+                        <div class="relative mb-4 sm:mb-5 pt-1">
                             <!-- Background Offset Element 1: Angled Colored Backdrop Layer -->
-                            <div class="absolute inset-0 rounded-2xl bg-slate-900/5 translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform duration-300 -z-10"></div>
+                            <div class="absolute inset-0 rounded-xl sm:rounded-2xl bg-slate-900/5 translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2 group-hover:translate-x-2 sm:group-hover:translate-x-3 group-hover:translate-y-2 sm:group-hover:translate-y-3 transition-transform duration-300 -z-10"></div>
                             
                             <!-- Background Offset Element 2: Decorative Offset Border Frame -->
-                            <div class="absolute -inset-1 rounded-2xl border-2 border-dashed border-slate-300/60 -z-10 group-hover:border-brand-500/50 transition-colors duration-300"></div>
+                            <div class="hidden sm:block absolute -inset-1 rounded-2xl border-2 border-dashed border-slate-300/60 -z-10 group-hover:border-brand-500/50 transition-colors duration-300"></div>
 
                             <!-- Main Photo Frame -->
-                            <div class="h-48 sm:h-52 rounded-2xl overflow-hidden relative border border-slate-200/90 bg-slate-100">
+                            <div class="h-44 sm:h-52 rounded-xl sm:rounded-2xl overflow-hidden relative border border-slate-200/90 bg-slate-100">
                                 <img src="<?= htmlspecialchars($theme['image']) ?>" 
                                      alt="<?= htmlspecialchars($theme['alt']) ?>" 
                                      loading="lazy" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                 
                                 <!-- Floating Count Badge Top-Right -->
-                                <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-900/80 text-white backdrop-blur-xs border border-white/20">
+                                <span class="absolute top-2.5 right-2.5 px-2 sm:px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-900/80 text-white backdrop-blur-xs border border-white/20">
                                     <?= htmlspecialchars($theme['count']) ?>
                                 </span>
 
                                 <!-- Floating Experience Highlight Pills Over Bottom of Image -->
-                                <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center space-x-1.5 overflow-hidden">
+                                <div class="absolute bottom-2 left-2 right-2 sm:bottom-2.5 sm:left-2.5 sm:right-2.5 flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
                                     <?php foreach ($theme['highlights'] as $highlight): ?>
                                         <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/95 text-slate-800 backdrop-blur-sm border border-slate-200/90 shrink-0 max-w-[125px]">
                                             <i class="<?= htmlspecialchars($highlight['icon']) ?> text-[10px] text-brand-600 shrink-0"></i>
@@ -419,12 +419,12 @@ if ($pdoThemes) {
                         </div>
 
                         <!-- Titles & Description -->
-                        <div class="space-y-1.5">
-                            <span class="text-[11px] font-bold uppercase tracking-wider block <?= $theme['tag_color'] ?>">
+                        <div class="space-y-1">
+                            <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider block <?= $theme['tag_color'] ?>">
                                 <?= htmlspecialchars($theme['subtitle']) ?>
                             </span>
 
-                            <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 group-hover:text-brand-600 transition leading-snug">
+                            <h3 class="text-base sm:text-xl font-extrabold text-slate-900 group-hover:text-brand-600 transition leading-snug">
                                 <?= htmlspecialchars($theme['title']) ?>
                             </h3>
 
@@ -434,12 +434,12 @@ if ($pdoThemes) {
                         </div>
 
                         <!-- Interactive Hotspot Destination Pills -->
-                        <div class="mt-4 pt-3 border-t border-slate-200/60">
+                        <div class="mt-3.5 sm:mt-4 pt-3 border-t border-slate-200/60">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider shrink-0">Top Spots:</span>
                                 <?php foreach ($theme['spots'] as $spot): ?>
                                     <a href="search.php?query=<?= urlencode($spot['name']) ?>&type=<?= urlencode($spot['type'] === 'intl' ? 'international' : 'domestic') ?>" 
-                                       class="theme-spot-btn px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-600 transition transform hover:-translate-y-0.5 active:scale-95" 
+                                       class="theme-spot-btn px-2 sm:px-2.5 py-0.5 rounded-md sm:rounded-lg text-[10px] sm:text-[11px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-600 transition transform hover:-translate-y-0.5 active:scale-95" 
                                        data-spot="<?= htmlspecialchars($spot['name']) ?>" 
                                        data-type="<?= htmlspecialchars($spot['type']) ?>"
                                        data-theme="<?= htmlspecialchars($theme['hero_theme']) ?>">
@@ -451,21 +451,21 @@ if ($pdoThemes) {
                     </div>
 
                     <!-- Footer Pricing & CTA Action -->
-                    <div class="mt-5 pt-3.5 border-t border-slate-200/60 flex items-center justify-between gap-2">
+                    <div class="mt-4 sm:mt-5 pt-3 sm:pt-3.5 border-t border-slate-200/60 flex items-center justify-between gap-2">
                         <div>
-                            <span class="text-[10px] uppercase font-bold text-slate-400 block">Starting From</span>
+                            <span class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block leading-tight">Starting From</span>
                             <div class="flex items-baseline space-x-1">
-                                <span class="text-base sm:text-lg font-black text-slate-900">₹<?= number_format($theme['price']) ?></span>
-                                <span class="text-[10px] text-slate-500 font-medium">/ person</span>
+                                <span class="text-sm sm:text-lg font-black text-slate-900">₹<?= number_format($theme['price']) ?></span>
+                                <span class="text-[9px] sm:text-[10px] text-slate-500 font-medium">/ person</span>
                             </div>
                         </div>
 
                         <a href="<?= !empty($theme['search_url']) ? htmlspecialchars($theme['search_url']) : 'search.php?theme=' . urlencode($theme['hero_theme']) ?>" 
-                           class="theme-cta-btn inline-flex items-center space-x-1.5 px-4 py-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all transform hover:-translate-y-0.5 active:scale-95 group/btn shrink-0 <?= $theme['btn_class'] ?>"
+                           class="theme-cta-btn inline-flex items-center space-x-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all transform hover:-translate-y-0.5 active:scale-95 group/btn shrink-0 <?= $theme['btn_class'] ?>"
                            data-theme="<?= htmlspecialchars($theme['hero_theme']) ?>"
                            data-title="<?= htmlspecialchars($theme['title']) ?>">
                             <span>Explore Tours</span>
-                            <i class="fa-solid fa-arrow-right text-[11px] group-hover/btn:translate-x-1 transition-transform"></i>
+                            <i class="fa-solid fa-arrow-right text-[10px] sm:text-[11px] group-hover/btn:translate-x-1 transition-transform"></i>
                         </a>
                     </div>
 

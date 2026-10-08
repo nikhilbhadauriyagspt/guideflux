@@ -49,8 +49,9 @@ if ($pdo) {
 }
 
 $activeTab = trim($_GET['tab'] ?? 'all');
+$siteName = getSetting('site_name', 'Orion Advent');
 $siteWhatsapp = getSetting('site_whatsapp', '919876543210');
-$pageTitle = "My Trips & Bookings - GuideFlux";
+$pageTitle = "My Trips & Bookings - " . htmlspecialchars($siteName);
 
 require_once 'components/header.php';
 require_once 'components/navbar.php';
@@ -242,7 +243,7 @@ require_once 'components/navbar.php';
                                     <i class="fa-solid fa-ticket text-brand-600"></i>
                                     <span>View Travel Voucher</span>
                                 </a>
-                                <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>?text=<?php echo urlencode("Hi GuideFlux Concierge, I need assistance regarding my booking: " . $item['package_title'] . " (Booking ID: " . $item['booking_code'] . ")"); ?>" target="_blank" class="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-xl border border-emerald-200 transition flex items-center gap-1.5">
+                                <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>?text=<?php echo urlencode("Hi " . $siteName . " Concierge, I need assistance regarding my booking: " . $item['package_title'] . " (Booking ID: " . $item['booking_code'] . ")"); ?>" target="_blank" class="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold rounded-xl border border-emerald-200 transition flex items-center gap-1.5">
                                     <i class="fa-brands fa-whatsapp text-emerald-600"></i>
                                     <span>WhatsApp Concierge</span>
                                 </a>

@@ -25,7 +25,7 @@ $lastUpdated = getSetting('policy_last_updated', 'October 2026');
 $policies = [
     'privacy' => [
         'title' => 'Privacy Policy & Data Security',
-        'subtitle' => 'How GuideFlux collects, protects, and handles your personal identification and travel preferences.',
+        'subtitle' => 'How ' . htmlspecialchars($siteName) . ' collects, protects, and handles your personal identification and travel preferences.',
         'icon' => 'fa-solid fa-shield-halved',
         'content' => getSetting('policy_privacy')
     ],

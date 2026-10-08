@@ -784,24 +784,24 @@ if ($pdoHotels) {
             <!-- 2-Row Slider Track (Both Rows Slide Horizontally) -->
             <div class="hotels-slider-track py-2 px-1" id="hotelsSlider">
                 <?php foreach ($hotelsList as $hotel): ?>
-                    <div class="hotel-card bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition-all p-2.5 sm:p-3 flex flex-row gap-2.5 sm:gap-3.5 group relative select-none shrink-0 h-[204px] sm:h-[184px] justify-between" data-location="<?= htmlspecialchars($hotel['location_tag']) ?>">
+                    <div class="hotel-card bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition-all p-2 sm:p-3 flex flex-row gap-2 sm:gap-3.5 group relative select-none shrink-0 h-[196px] sm:h-[184px] justify-between" data-location="<?= htmlspecialchars($hotel['location_tag']) ?>">
                         
                         <!-- Left: Photo Container (Fixed Width) -->
-                        <div class="w-28 sm:w-44 h-full rounded-xl overflow-hidden relative shrink-0 border border-slate-100 bg-slate-100">
+                        <div class="w-24 sm:w-44 h-full rounded-xl overflow-hidden relative shrink-0 border border-slate-100 bg-slate-100">
                             <img src="<?= htmlspecialchars($hotel['image']) ?>" 
                                  alt="<?= htmlspecialchars($hotel['alt']) ?>" 
                                  loading="lazy" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             
-                            <!-- Star Tier Tag -->
-                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold <?= $hotel['star_class'] ?> border backdrop-blur-xs flex items-center space-x-1">
+                            <!-- Star Tier Tag (Hidden on Mobile, Visible on Desktop) -->
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold <?= $hotel['star_class'] ?> border backdrop-blur-xs hidden sm:flex items-center space-x-1">
                                 <i class="fa-solid fa-crown text-[9px]"></i>
                                 <span><?= htmlspecialchars($hotel['star_badge']) ?></span>
                             </span>
 
                             <!-- Wishlist Heart Button -->
-                            <button type="button" aria-label="Save to Wishlist" class="wishlist-btn absolute bottom-2 right-2 w-7 h-7 rounded-full bg-white/95 text-slate-600 hover:text-rose-500 hover:bg-white flex items-center justify-center transition border border-slate-200">
-                                <i class="fa-regular fa-heart text-xs"></i>
+                            <button type="button" aria-label="Save to Wishlist" class="wishlist-btn absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/95 text-slate-600 hover:text-rose-500 hover:bg-white flex items-center justify-center transition border border-slate-200">
+                                <i class="fa-regular fa-heart text-[10px] sm:text-xs"></i>
                             </button>
                         </div>
 
@@ -809,36 +809,36 @@ if ($pdoHotels) {
                         <div class="flex-1 flex flex-col justify-between min-w-0 py-0.5">
                             
                             <!-- Row 1: Location & Rating -->
-                            <div class="flex items-center justify-between gap-1.5">
-                                <div class="text-[11px] font-bold text-brand-600 flex items-center space-x-1 truncate">
-                                    <i class="fa-solid fa-location-dot text-[10px] shrink-0"></i>
+                            <div class="flex items-center justify-between gap-1">
+                                <div class="text-[10px] sm:text-[11px] font-bold text-brand-600 flex items-center space-x-1 truncate min-w-0">
+                                    <i class="fa-solid fa-location-dot text-[9px] sm:text-[10px] shrink-0"></i>
                                     <span class="truncate"><?= htmlspecialchars($hotel['location_text']) ?></span>
                                 </div>
-                                <span class="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-black shrink-0">
-                                    <i class="fa-solid fa-star text-[10px] text-amber-500"></i>
+                                <span class="inline-flex items-center space-x-1 px-1 sm:px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] sm:text-[11px] font-black shrink-0">
+                                    <i class="fa-solid fa-star text-[9px] sm:text-[10px] text-amber-500"></i>
                                     <span><?= htmlspecialchars($hotel['rating']) ?></span>
                                 </span>
                             </div>
 
                             <!-- Row 2: Hotel Name -->
-                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-brand-600 transition truncate leading-snug" title="<?= htmlspecialchars($hotel['name']) ?>">
+                            <h3 class="text-xs sm:text-base font-extrabold text-slate-900 group-hover:text-brand-600 transition truncate leading-tight" title="<?= htmlspecialchars($hotel['name']) ?>">
                                 <?= htmlspecialchars($hotel['name']) ?>
                             </h3>
 
                             <!-- Row 3: Amenities Continuous Marquee Slider (Seamless Loop) -->
-                            <div class="hotel-amenities-slider py-1 px-1.5 bg-slate-50/80 border border-slate-100 rounded-lg">
+                            <div class="hotel-amenities-slider py-0.5 sm:py-1 px-1 sm:px-1.5 bg-slate-50/80 border border-slate-100 rounded-lg">
                                 <div class="hotel-amenities-track">
                                     <!-- Set 1 -->
                                     <?php foreach ($hotel['amenities'] as $amenity): ?>
-                                        <span class="inline-flex items-center space-x-1 text-[10.5px] font-semibold text-slate-700 whitespace-nowrap shrink-0">
-                                            <i class="<?= htmlspecialchars($amenity['icon']) ?> text-brand-600 text-[11px] shrink-0"></i>
+                                        <span class="inline-flex items-center space-x-1 text-[9.5px] sm:text-[10.5px] font-semibold text-slate-700 whitespace-nowrap shrink-0">
+                                            <i class="<?= htmlspecialchars($amenity['icon']) ?> text-brand-600 text-[10px] sm:text-[11px] shrink-0"></i>
                                             <span><?= htmlspecialchars($amenity['name']) ?></span>
                                         </span>
                                     <?php endforeach; ?>
                                     <!-- Set 2 (Seamless loop) -->
                                     <?php foreach ($hotel['amenities'] as $amenity): ?>
-                                        <span class="inline-flex items-center space-x-1 text-[10.5px] font-semibold text-slate-700 whitespace-nowrap shrink-0">
-                                            <i class="<?= htmlspecialchars($amenity['icon']) ?> text-brand-600 text-[11px] shrink-0"></i>
+                                        <span class="inline-flex items-center space-x-1 text-[9.5px] sm:text-[10.5px] font-semibold text-slate-700 whitespace-nowrap shrink-0">
+                                            <i class="<?= htmlspecialchars($amenity['icon']) ?> text-brand-600 text-[10px] sm:text-[11px] shrink-0"></i>
                                             <span><?= htmlspecialchars($amenity['name']) ?></span>
                                         </span>
                                     <?php endforeach; ?>
@@ -846,26 +846,28 @@ if ($pdoHotels) {
                             </div>
 
                             <!-- Row 4: Free Cancellation Assurance -->
-                            <div class="text-[10px] font-bold text-emerald-600 flex items-center space-x-1 truncate">
-                                <i class="fa-solid fa-shield-halved text-[9px] shrink-0"></i>
+                            <div class="text-[9.5px] sm:text-[10px] font-bold text-emerald-600 flex items-center space-x-1 truncate">
+                                <i class="fa-solid fa-shield-halved text-[8.5px] sm:text-[9px] shrink-0"></i>
                                 <span class="truncate"><?= htmlspecialchars($hotel['cancellation']) ?></span>
                             </div>
 
                             <!-- Row 5: Price & CTA Action -->
-                            <div class="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
-                                <div class="flex items-baseline space-x-1.5">
-                                    <span class="text-base sm:text-lg font-black text-slate-900 leading-none">₹<?= number_format($hotel['price']) ?></span>
-                                    <span class="text-[11px] text-slate-400 line-through">₹<?= number_format($hotel['original_price']) ?></span>
-                                    <span class="text-[10px] text-slate-400 font-medium">/ night</span>
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-100 gap-1.5 min-w-0">
+                                <div class="flex flex-col sm:flex-row sm:items-baseline min-w-0 leading-tight">
+                                    <div class="flex items-baseline space-x-1">
+                                        <span class="text-sm sm:text-base font-black text-slate-900 leading-none">₹<?= number_format($hotel['price']) ?></span>
+                                        <span class="text-[10px] sm:text-[11px] text-slate-400 line-through">₹<?= number_format($hotel['original_price']) ?></span>
+                                    </div>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-400 font-medium sm:ml-1">/ night</span>
                                 </div>
 
                                 <a href="hotel-details.php?id=<?= urlencode($hotel['id']) ?>" 
-                                   class="book-hotel-btn inline-flex items-center space-x-1 px-3 py-1.5 rounded-full bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white border border-brand-200 hover:border-brand-600 text-xs font-bold transition-all group/btn shrink-0"
+                                   class="book-hotel-btn inline-flex items-center space-x-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white border border-brand-200 hover:border-brand-600 text-[11px] sm:text-xs font-bold transition-all group/btn shrink-0"
                                    data-hotel-id="<?= htmlspecialchars($hotel['id']) ?>"
                                    data-hotel-name="<?= htmlspecialchars($hotel['name']) ?>"
                                    data-location="<?= htmlspecialchars($hotel['location_tag']) ?>">
                                     <span>View Rooms</span>
-                                    <i class="fa-solid fa-arrow-right text-[10px] group-hover/btn:translate-x-0.5 transition-transform"></i>
+                                    <i class="fa-solid fa-arrow-right text-[9px] sm:text-[10px] group-hover/btn:translate-x-0.5 transition-transform"></i>
                                 </a>
                             </div>
 

@@ -1,5 +1,8 @@
 <?php
-$pageTitle = 'Orion Advent - Your Passport to Adventure | Tour Packages, Flights & Hotels';
+require_once __DIR__ . '/config/settings.php';
+$siteName = getSetting('site_name', 'GuideFlux');
+$siteTagline = getSetting('site_tagline', 'Your Passport to Adventure');
+$pageTitle = htmlspecialchars($siteName) . ' - ' . htmlspecialchars($siteTagline) . ' | Tour Packages, Flights & Hotels';
 require_once 'components/header.php';
 require_once 'components/navbar.php';
 require_once 'components/hero.php';

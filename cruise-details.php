@@ -129,7 +129,8 @@ if (empty($cabins)) {
     ];
 }
 
-$pageTitle = htmlspecialchars($cruise['title']) . ' | Ocean Cruise Booking - Orion Advent';
+$siteName = getSetting('site_name', 'GuideFlux');
+$pageTitle = htmlspecialchars($cruise['title']) . ' | Ocean Cruise Booking - ' . htmlspecialchars($siteName);
 require_once 'components/header.php';
 require_once 'components/navbar.php';
 ?>
@@ -138,74 +139,83 @@ require_once 'components/navbar.php';
      BREADCRUMB & HEADER CONTAINER
 =========================================== -->
 <div class="bg-white border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 xl:px-12 py-4">
+    <div class="max-w-7xl mx-auto px-3 sm:px-8 xl:px-12 py-3 sm:py-4">
         <!-- Breadcrumb -->
-        <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-3 overflow-x-auto whitespace-nowrap">
-            <a href="index.php" class="hover:text-indigo-600 font-medium">Home</a>
-            <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
-            <a href="cruises.php" class="hover:text-indigo-600 font-medium">Ocean Cruises</a>
-            <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
-            <span class="text-slate-800 font-semibold truncate max-w-xs"><?= htmlspecialchars($cruise['title']) ?></span>
+        <nav class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs text-slate-500 mb-2.5 sm:mb-3 overflow-x-auto no-scrollbar whitespace-nowrap">
+            <a href="index.php" class="hover:text-brand-700 font-medium shrink-0 flex items-center space-x-1">
+                <i class="fa-solid fa-house text-[10px] sm:text-[11px]"></i>
+                <span class="hidden sm:inline">Home</span>
+            </a>
+            <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px] text-slate-300 shrink-0"></i>
+            <a href="cruises.php" class="hover:text-brand-700 font-medium shrink-0">Ocean Cruises</a>
+            <i class="fa-solid fa-chevron-right text-[8px] sm:text-[10px] text-slate-300 shrink-0"></i>
+            <span class="text-slate-800 font-semibold truncate max-w-[150px] sm:max-w-xs md:max-w-md"><?= htmlspecialchars($cruise['title']) ?></span>
         </nav>
 
         <!-- Top Title Bar -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div class="space-y-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1.5">
-                        <i class="fa-solid fa-ship text-[11px]"></i>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+            <div class="space-y-1.5 sm:space-y-2">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-ship text-[10px] sm:text-[11px] text-brand-600"></i>
                         <?= htmlspecialchars($cruise['cruise_line'] . ' • ' . $cruise['ship_name']) ?>
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                        <i class="fa-solid fa-anchor text-indigo-600 mr-1"></i>Ex-<?= htmlspecialchars($cruise['departure_port']) ?>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                        <i class="fa-solid fa-anchor text-brand-600 mr-1"></i>Ex-<?= htmlspecialchars($cruise['departure_port']) ?>
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
                         <?= htmlspecialchars($cruise['badge'] ?: 'Bestseller') ?>
                     </span>
-                    <div class="flex items-center space-x-1 text-xs text-slate-700 ml-1 font-semibold">
-                        <i class="fa-solid fa-star text-amber-500 text-xs"></i>
+                    <div class="flex items-center space-x-1 text-[11px] sm:text-xs text-slate-700 ml-0.5 font-semibold">
+                        <i class="fa-solid fa-star text-amber-500 text-[10px] sm:text-xs"></i>
                         <span><?= number_format((float)($cruise['rating'] ?: 4.9), 1) ?></span>
-                        <span class="text-slate-400 font-normal">(<?= (int)($cruise['reviews_count'] ?: 380) ?> verified reviews)</span>
+                        <span class="text-slate-400 font-normal">(<?= (int)($cruise['reviews_count'] ?: 380) ?> reviews)</span>
                     </div>
                 </div>
 
-                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                <h1 class="text-xl sm:text-3xl md:text-4xl font-extrabold sm:font-black text-slate-900 tracking-tight leading-tight">
                     <?= htmlspecialchars($cruise['title']) ?>
                 </h1>
 
-                <p class="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
+                <p class="text-[11px] sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
                     <?= htmlspecialchars($cruise['subtitle'] ?: 'Experience luxury ocean travel with all-inclusive dining, pools, and non-stop entertainment.') ?>
                 </p>
             </div>
 
             <!-- Header Quick Price Strip (Mobile / Responsive) -->
-            <div class="shrink-0 text-left lg:text-right p-3 bg-slate-50 rounded-2xl border border-slate-200 lg:border-none lg:bg-transparent lg:p-0">
-                <span class="text-xs text-slate-400 block font-medium">Starting Cabin Fare</span>
-                <div class="flex items-baseline lg:justify-end gap-2">
-                    <span class="text-2xl sm:text-3xl font-black text-slate-900 font-space">₹<?= number_format((float)$cruise['starting_price']) ?></span>
-                    <?php if (!empty($cruise['original_price']) && $cruise['original_price'] > $cruise['starting_price']): ?>
-                        <span class="text-sm text-slate-400 line-through">₹<?= number_format((float)$cruise['original_price']) ?></span>
-                    <?php endif; ?>
+            <div class="shrink-0 text-left lg:text-right p-3 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 lg:border-none lg:bg-transparent lg:p-0 flex lg:block items-center justify-between">
+                <div>
+                    <span class="text-[10px] sm:text-xs text-slate-400 block font-medium">Starting Cabin Fare</span>
+                    <div class="flex items-baseline lg:justify-end gap-1.5 sm:gap-2">
+                        <span class="text-xl sm:text-3xl font-black text-slate-900 font-space">₹<?= number_format((float)$cruise['starting_price']) ?></span>
+                        <?php if (!empty($cruise['original_price']) && $cruise['original_price'] > $cruise['starting_price']): ?>
+                            <span class="text-[11px] sm:text-sm text-slate-400 line-through">₹<?= number_format((float)$cruise['original_price']) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] text-slate-500 block">per person &bull; twin stateroom</span>
                 </div>
-                <span class="text-[11px] text-slate-500 block">per person &bull; twin stateroom</span>
+                <a href="#cabinSelectionSection" class="lg:hidden px-4 py-2 rounded-full bg-brand-600 text-white font-bold text-xs uppercase tracking-wider active:scale-95 transition">
+                    Select Cabin
+                </a>
             </div>
         </div>
     </div>
 </div>
 
 <!-- ==========================================
-     5-PHOTO MAGAZINE GALLERY
+     MAGAZINE PHOTO GALLERY & MOBILE CAROUSEL
 =========================================== -->
-<div class="bg-slate-100 py-4 px-4 sm:px-8 xl:px-12 border-b border-slate-200">
+<div class="bg-white py-3 sm:py-4 px-3 sm:px-8 xl:px-12 border-b border-slate-200">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5 h-[340px] sm:h-[420px] md:h-[460px] rounded-3xl overflow-hidden">
+        <!-- Desktop Grid View -->
+        <div class="hidden md:grid grid-cols-1 md:grid-cols-4 gap-2.5 h-[340px] sm:h-[420px] md:h-[460px] rounded-3xl overflow-hidden bg-slate-100 border border-slate-200">
             <!-- Main Hero Image (Spans 2 cols, full height) -->
             <div class="md:col-span-2 h-full relative group overflow-hidden bg-slate-200">
                 <img src="<?= htmlspecialchars($gallery[0] ?? $cruise['featured_image']) ?>" 
                      alt="Cruise Liner Main" 
                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer">
-                <div class="absolute bottom-3 left-3 bg-slate-900/80 text-white text-[11px] font-bold px-3 py-1 rounded-full backdrop-blur-xs flex items-center space-x-1.5">
-                    <i class="fa-solid fa-ship text-indigo-400"></i>
+                <div class="absolute bottom-3 left-3 bg-slate-900/80 text-white text-[11px] font-bold px-3 py-1 rounded-full backdrop-blur-xs flex items-center space-x-1.5 border border-white/20">
+                    <i class="fa-solid fa-ship text-brand-300"></i>
                     <span><?= htmlspecialchars($cruise['ship_name']) ?> Ocean Liner</span>
                 </div>
             </div>
@@ -223,31 +233,72 @@ require_once 'components/navbar.php';
                 <?php endfor; ?>
             </div>
         </div>
+
+        <!-- Mobile Auto-Scrolling Carousel with swipe & touch support -->
+        <div class="block md:hidden relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[16/10] max-h-[280px]">
+            <div id="mobileCruiseCarousel" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-full">
+                <?php foreach ($gallery as $gIdx => $gPhoto): ?>
+                    <div class="w-full shrink-0 snap-center h-full relative" data-carousel-slide="<?= $gIdx ?>">
+                        <img src="<?= htmlspecialchars($gPhoto) ?>" 
+                             alt="<?= htmlspecialchars($cruise['title']) ?> Photo <?= $gIdx + 1 ?>" 
+                             class="w-full h-full object-cover">
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Mobile Badge Overlay -->
+            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20 shadow-xs">
+                <i class="fa-solid fa-ship mr-1 text-teal-300"></i> <?= htmlspecialchars($cruise['ship_name']) ?>
+            </span>
+
+            <!-- Counter Pill -->
+            <div class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20 flex items-center space-x-1 pointer-events-none">
+                <i class="fa-solid fa-images text-[9px] text-teal-300"></i>
+                <span id="mobileCruiseGalleryCounter">1 / <?= count($gallery) ?></span>
+            </div>
+
+            <!-- Left & Right Arrow controls -->
+            <?php if (count($gallery) > 1): ?>
+                <button type="button" id="prevCruiseSlideBtn" aria-label="Previous image" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-xs flex items-center justify-center border border-white/20 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+                <button type="button" id="nextCruiseSlideBtn" aria-label="Next image" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-xs flex items-center justify-center border border-white/20 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                
+                <!-- Dot indicators -->
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1.5 pointer-events-none" id="mobileCruiseCarouselDots">
+                    <?php foreach ($gallery as $dIdx => $dP): ?>
+                        <span class="h-1.5 rounded-full transition-all duration-300 <?= $dIdx === 0 ? 'bg-white w-4' : 'bg-white/50 w-1.5' ?>" data-dot-index="<?= $dIdx ?>"></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
 <!-- ==========================================
      MAIN CONTENT & STICKY BOOKING SIDEBAR
 =========================================== -->
-<main class="w-full py-10 px-4 sm:px-8 xl:px-12 bg-slate-50 min-h-screen">
+<main class="w-full py-6 sm:py-10 px-3 sm:px-8 xl:px-12 bg-slate-50 min-h-screen">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row gap-8 items-start">
+        <div class="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
 
             <!-- LEFT COLUMN: CRUISE SPECS, CABINS & ITINERARY (Width ~ 65%) -->
-            <div class="flex-1 w-full space-y-8">
+            <div class="flex-1 w-full space-y-5 sm:space-y-8">
 
                 <!-- 1. Quick Voyage Highlights Strip -->
-                <div class="bg-white rounded-3xl border border-slate-200 p-6">
-                    <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center space-x-2">
-                        <i class="fa-solid fa-sparkles text-indigo-600"></i>
+                <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-6">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 mb-3 sm:mb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-sparkles text-brand-600"></i>
                         <span>On-Board Voyage Highlights</span>
                     </h3>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <?php if (!empty($highlights) && is_array($highlights)): ?>
                             <?php foreach ($highlights as $hl): ?>
                                 <div class="flex items-start space-x-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 text-sm">
+                                    <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 text-sm">
                                         <i class="<?= htmlspecialchars($hl['icon'] ?? 'fa-solid fa-circle-check') ?>"></i>
                                     </div>
                                     <div>
@@ -258,7 +309,7 @@ require_once 'components/navbar.php';
                             <?php endforeach; ?>
                         <?php else: ?>
                             <div class="flex items-start space-x-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 text-sm">
+                                <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 text-sm">
                                     <i class="fa-solid fa-water-ladder"></i>
                                 </div>
                                 <div>
@@ -267,7 +318,7 @@ require_once 'components/navbar.php';
                                 </div>
                             </div>
                             <div class="flex items-start space-x-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 text-sm">
+                                <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 text-sm">
                                     <i class="fa-solid fa-masks-theater"></i>
                                 </div>
                                 <div>
@@ -284,7 +335,7 @@ require_once 'components/navbar.php';
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
-                                <i class="fa-solid fa-bed text-indigo-600"></i>
+                                <i class="fa-solid fa-bed text-brand-600"></i>
                                 <span>Choose Your Stateroom / Cabin Category</span>
                             </h3>
                             <p class="text-xs text-slate-500 mt-0.5">Select a stateroom to lock in your live price and advance token calculation</p>
@@ -298,7 +349,7 @@ require_once 'components/navbar.php';
                             $cbImg = !empty($cb['image']) ? $cb['image'] : 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80';
                             $isSelected = ($index === 0);
                         ?>
-                            <div class="cabin-option-card rounded-2xl border <?= $isSelected ? 'border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-500' : 'border-slate-200 bg-white' ?> p-4 transition-all hover:border-indigo-400 flex flex-col md:flex-row gap-4 items-start md:items-center cursor-pointer"
+                            <div class="cabin-option-card rounded-2xl border <?= $isSelected ? 'border-brand-600 bg-brand-50/20 ring-1 ring-brand-500' : 'border-slate-200 bg-white' ?> p-4 transition-all hover:border-brand-500 flex flex-col md:flex-row gap-4 items-start md:items-center cursor-pointer"
                                  onclick="selectCabinCategory('<?= htmlspecialchars(addslashes($cb['name'])) ?>', <?= $cbPrice ?>, '<?= htmlspecialchars(addslashes($cb['type'] ?? 'Cabin')) ?>', this)">
                                 
                                 <!-- Cabin Thumbnail -->
@@ -335,7 +386,7 @@ require_once 'components/navbar.php';
                                     </div>
 
                                     <button type="button" 
-                                            class="cabin-select-btn mt-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase transition <?= $isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600' ?>">
+                                            class="cabin-select-btn mt-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase transition <?= $isSelected ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-700' ?>">
                                         <?= $isSelected ? 'Selected' : 'Select Cabin' ?>
                                     </button>
                                 </div>
@@ -350,30 +401,30 @@ require_once 'components/navbar.php';
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
-                                <i class="fa-solid fa-route text-indigo-600"></i>
+                                <i class="fa-solid fa-route text-brand-600"></i>
                                 <span>Day-by-Day Sailing Itinerary</span>
                             </h3>
                             <p class="text-xs text-slate-500 mt-0.5">Explore your sea voyage ports of call and schedule</p>
                         </div>
-                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-brand-50 text-brand-700 border border-brand-200">
                             <?= htmlspecialchars($cruise['duration_text'] ?: ($cruise['duration_nights'] . 'N / ' . $cruise['duration_days'] . 'D')) ?>
                         </span>
                     </div>
 
-                    <div class="relative pl-6 sm:pl-8 space-y-8 before:absolute before:left-2.5 sm:before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-indigo-200">
+                    <div class="relative pl-6 sm:pl-8 space-y-8 before:absolute before:left-2.5 sm:before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-brand-200">
                         <?php foreach ($itinerary as $stepIndex => $day): ?>
                             <div class="relative group">
                                 <!-- Marker Icon -->
-                                <div class="absolute -left-6 sm:-left-8 top-0.5 w-6 h-6 rounded-full bg-white border-2 border-indigo-600 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                                <div class="absolute -left-6 sm:-left-8 top-0.5 w-6 h-6 rounded-full bg-white border-2 border-brand-600 text-brand-600 flex items-center justify-center text-[10px] font-bold">
                                     <i class="fa-solid fa-anchor text-[9px]"></i>
                                 </div>
 
                                 <div class="space-y-1.5">
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-indigo-600 text-white">
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-extrabold bg-brand-600 text-white">
                                             <?= htmlspecialchars($day['day'] ?? ('Day ' . ($stepIndex + 1))) ?>
                                         </span>
-                                        <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200/60">
+                                        <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-200/60">
                                             <?= htmlspecialchars($day['port'] ?? 'Port of Call') ?>
                                         </span>
                                         <?php if (!empty($day['arrive']) || !empty($day['depart'])): ?>
@@ -434,7 +485,7 @@ require_once 'components/navbar.php';
                 <!-- 5. Sailing Policies & Health Guidelines -->
                 <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-4">
                     <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
-                        <i class="fa-solid fa-shield-halved text-indigo-600"></i>
+                        <i class="fa-solid fa-shield-halved text-brand-600"></i>
                         <span>Boarding Policies &amp; Important Information</span>
                     </h3>
                     <div class="text-xs text-slate-600 space-y-2 leading-relaxed">
@@ -459,7 +510,7 @@ require_once 'components/navbar.php';
                                 <?= htmlspecialchars($cabins[0]['name'] ?? 'Interior Stateroom') ?>
                             </h4>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
                             Instant Confirmation
                         </span>
                     </div>
@@ -476,7 +527,7 @@ require_once 'components/navbar.php';
                         <!-- Sailing Date Picker -->
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                                <i class="fa-regular fa-calendar-check text-indigo-600 mr-1"></i>Departure Sailing Date
+                                <i class="fa-regular fa-calendar-check text-brand-600 mr-1"></i>Departure Sailing Date
                             </label>
                             <input type="date" 
                                    required 
@@ -484,14 +535,14 @@ require_once 'components/navbar.php';
                                    name="sailing_date" 
                                    min="<?= date('Y-m-d', strtotime('+2 days')) ?>" 
                                    value="<?= date('Y-m-d', strtotime('+10 days')) ?>"
-                                   class="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:bg-white focus:border-indigo-500 outline-none transition">
+                                   class="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:bg-white focus:border-brand-500 outline-none transition">
                         </div>
 
                         <!-- Guests Selector Grid -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Adults (12+ yrs)</label>
-                                <select id="adultsCountSelect" name="adults_count" onchange="recalculateCruisePrice()" class="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-indigo-500 outline-none">
+                                <select id="adultsCountSelect" name="adults_count" onchange="recalculateCruisePrice()" class="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-brand-500 outline-none">
                                     <option value="1">1 Adult</option>
                                     <option value="2" selected>2 Adults (1 Cabin)</option>
                                     <option value="3">3 Adults (Triple)</option>
@@ -500,7 +551,7 @@ require_once 'components/navbar.php';
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Kids (2-11 yrs)</label>
-                                <select id="kidsCountSelect" name="kids_count" onchange="recalculateCruisePrice()" class="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-indigo-500 outline-none">
+                                <select id="kidsCountSelect" name="kids_count" onchange="recalculateCruisePrice()" class="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-brand-500 outline-none">
                                     <option value="0" selected>0 Children</option>
                                     <option value="1">1 Child</option>
                                     <option value="2">2 Children</option>
@@ -517,7 +568,7 @@ require_once 'components/navbar.php';
                                        name="lead_name" 
                                        placeholder="e.g. Vikram Sharma" 
                                        value="<?= htmlspecialchars($_SESSION['user_name'] ?? '') ?>"
-                                       class="w-full px-3.5 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:bg-white focus:border-indigo-500 outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:bg-white focus:border-brand-500 outline-none">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
@@ -527,7 +578,7 @@ require_once 'components/navbar.php';
                                            name="lead_phone" 
                                            placeholder="e.g. 9876543210" 
                                            value="<?= htmlspecialchars($_SESSION['user_phone'] ?? '') ?>"
-                                           class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:bg-white focus:border-indigo-500 outline-none">
+                                           class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:bg-white focus:border-brand-500 outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Email ID</label>
@@ -536,7 +587,7 @@ require_once 'components/navbar.php';
                                            name="lead_email" 
                                            placeholder="e.g. vikram@gmail.com" 
                                            value="<?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>"
-                                           class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:bg-white focus:border-indigo-500 outline-none">
+                                           class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 font-medium focus:bg-white focus:border-brand-500 outline-none">
                                 </div>
                             </div>
                         </div>
@@ -555,12 +606,12 @@ require_once 'components/navbar.php';
                                 <span class="font-bold text-slate-900">Total Sailing Amount:</span>
                                 <span class="text-base font-black text-slate-900 font-space" id="summaryTotalAmount">₹43,598</span>
                             </div>
-                            <div class="pt-2 border-t border-slate-200 flex justify-between items-center text-indigo-700 bg-indigo-50/60 p-2 rounded-xl">
+                            <div class="pt-2 border-t border-slate-200 flex justify-between items-center text-brand-800 bg-brand-50 p-2.5 rounded-xl border border-brand-200/60">
                                 <div>
                                     <span class="font-bold block text-[11px]">Pay Token Advance Today:</span>
                                     <span class="text-[10px] text-slate-500">Balance payable before sailing</span>
                                 </div>
-                                <span class="text-base font-black text-indigo-700 font-space" id="summaryTokenAdvance">₹6,000</span>
+                                <span class="text-base font-black text-brand-700 font-space" id="summaryTokenAdvance">₹6,000</span>
                             </div>
                         </div>
 
@@ -568,14 +619,14 @@ require_once 'components/navbar.php';
                         <div class="space-y-2 pt-2">
                             <button type="submit" 
                                     id="bookCruiseBtn" 
-                                    class="w-full py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-2">
+                                    class="w-full py-3.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-black text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-2">
                                 <i class="fa-solid fa-lock text-xs"></i>
                                 <span>Lock Cabin with Token Advance</span>
                             </button>
 
                             <button type="button" 
                                     onclick="openCruiseInquiryModal('<?= htmlspecialchars(addslashes($cruise['title'])) ?>', '<?= htmlspecialchars(addslashes($cruise['ship_name'])) ?>')"
-                                    class="w-full py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-1.5">
+                                    class="w-full py-2.5 rounded-full bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-1.5">
                                 <i class="fa-regular fa-comment-dots text-xs"></i>
                                 <span>Request Custom Cabin Advice</span>
                             </button>
@@ -603,7 +654,7 @@ require_once 'components/navbar.php';
     <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                <div class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold">
                     <i class="fa-solid fa-ship"></i>
                 </div>
                 <div>
@@ -625,15 +676,15 @@ require_once 'components/navbar.php';
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Your Full Name</label>
-                    <input type="text" required id="inqName" placeholder="e.g. John Doe" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                    <input type="text" required id="inqName" placeholder="e.g. John Doe" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Contact Phone</label>
-                    <input type="tel" required id="inqPhone" placeholder="e.g. +91 9876543210" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                    <input type="tel" required id="inqPhone" placeholder="e.g. +91 9876543210" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                 </div>
             </div>
 
-            <button type="submit" id="inqSubmitBtn" class="w-full py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95">
+            <button type="submit" id="inqSubmitBtn" class="w-full py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95">
                 Send Request to Cruise Concierge
             </button>
         </form>
@@ -653,11 +704,11 @@ function selectCabinCategory(cabinName, price, type, el) {
 
     // Highlight selected card
     document.querySelectorAll('.cabin-option-card').forEach(card => {
-        card.classList.remove('border-indigo-600', 'bg-indigo-50/20', 'ring-1', 'ring-indigo-500');
+        card.classList.remove('border-brand-600', 'bg-brand-50/20', 'ring-1', 'ring-brand-500');
         card.classList.add('border-slate-200', 'bg-white');
         const btn = card.querySelector('.cabin-select-btn');
         if (btn) {
-            btn.classList.remove('bg-indigo-600', 'text-white');
+            btn.classList.remove('bg-brand-600', 'text-white');
             btn.classList.add('bg-slate-100', 'text-slate-700');
             btn.innerText = 'Select Cabin';
         }
@@ -665,11 +716,11 @@ function selectCabinCategory(cabinName, price, type, el) {
 
     if (el) {
         el.classList.remove('border-slate-200', 'bg-white');
-        el.classList.add('border-indigo-600', 'bg-indigo-50/20', 'ring-1', 'ring-indigo-500');
+        el.classList.add('border-brand-600', 'bg-brand-50/20', 'ring-1', 'ring-brand-500');
         const btn = el.querySelector('.cabin-select-btn');
         if (btn) {
             btn.classList.remove('bg-slate-100', 'text-slate-700');
-            btn.classList.add('bg-indigo-600', 'text-white');
+            btn.classList.add('bg-brand-600', 'text-white');
             btn.innerText = 'Selected';
         }
     }
@@ -738,7 +789,7 @@ function showLoginModalForCruise(title) {
     const modalHtml = `
         <div id="loginRequiredModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
-                <div class="w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center mx-auto text-2xl">
+                <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center mx-auto text-2xl">
                     <i class="fa-solid fa-ship"></i>
                 </div>
                 <div class="space-y-1">
@@ -746,13 +797,13 @@ function showLoginModalForCruise(title) {
                         Traveler Account Required
                     </span>
                     <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Lock Cruise Stateroom</h3>
-                    <p class="text-xs text-slate-500">Please sign in to your GuideFlux / Orion account to secure your cruise cabin and receive official boarding passes.</p>
+                    <p class="text-xs text-slate-500">Please sign in to your <?php echo htmlspecialchars($siteName); ?> account to secure your cruise cabin and receive official boarding passes.</p>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 truncate">
                     <span>${title}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-1">
-                    <a href="login.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
+                    <a href="login.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
                         Log In Now
                     </a>
                     <a href="signup.php?redirect=${encodeURIComponent(currentUrl)}" class="py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider text-center transition">
@@ -776,7 +827,7 @@ function showCruiseBookingSuccessModal(code, title, cabin, name, date, token, to
                     <i class="fa-solid fa-anchor"></i>
                 </div>
                 <div class="space-y-1">
-                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 border border-brand-200">
                         Ocean Stateroom Confirmed
                     </span>
                     <h3 class="text-xl font-black text-slate-900 font-space">Cabin Reserved!</h3>
@@ -785,7 +836,7 @@ function showCruiseBookingSuccessModal(code, title, cabin, name, date, token, to
                 <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left space-y-2 text-xs">
                     <div class="flex justify-between font-mono">
                         <span class="text-slate-400">Booking Code:</span>
-                        <span class="font-bold text-indigo-600">${code}</span>
+                        <span class="font-bold text-brand-600">${code}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-400">Liner:</span>
@@ -805,7 +856,7 @@ function showCruiseBookingSuccessModal(code, title, cabin, name, date, token, to
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-1">
-                    <a href="booking-confirmation.php?code=${encodeURIComponent(code)}" class="py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
+                    <a href="booking-confirmation.php?code=${encodeURIComponent(code)}" class="py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider text-center transition">
                         View Boarding Pass
                     </a>
                     <button type="button" onclick="document.getElementById('cruiseSuccessModalOverlay').remove()" class="py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider text-center transition">
@@ -844,6 +895,98 @@ function submitCruiseInquiry(e) {
 // Initial calculation on load
 document.addEventListener('DOMContentLoaded', () => {
     recalculateCruisePrice();
+
+    // Mobile Cruise Photo Gallery Auto-Scroll
+    const carousel = document.getElementById('mobileCruiseCarousel');
+    if (carousel) {
+        const slides = carousel.querySelectorAll('[data-carousel-slide]');
+        const totalSlides = slides.length;
+        if (totalSlides > 1) {
+            const counter = document.getElementById('mobileCruiseGalleryCounter');
+            const dots = document.querySelectorAll('#mobileCruiseCarouselDots [data-dot-index]');
+            const prevBtn = document.getElementById('prevCruiseSlideBtn');
+            const nextBtn = document.getElementById('nextCruiseSlideBtn');
+            let currentIndex = 0;
+            let autoScrollTimer = null;
+            let userPauseTimeout = null;
+
+            function goToSlide(idx) {
+                currentIndex = (idx + totalSlides) % totalSlides;
+                const width = carousel.clientWidth;
+                carousel.scrollTo({
+                    left: currentIndex * width,
+                    behavior: 'smooth'
+                });
+                updateIndicators();
+            }
+
+            function updateIndicators() {
+                if (counter) counter.textContent = `${currentIndex + 1} / ${totalSlides}`;
+                dots.forEach((dot, dIdx) => {
+                    if (dIdx === currentIndex) {
+                        dot.className = 'h-1.5 rounded-full transition-all duration-300 bg-white w-4';
+                    } else {
+                        dot.className = 'h-1.5 rounded-full transition-all duration-300 bg-white/50 w-1.5';
+                    }
+                });
+            }
+
+            function startAutoScroll() {
+                stopAutoScroll();
+                autoScrollTimer = setInterval(() => {
+                    goToSlide(currentIndex + 1);
+                }, 3200);
+            }
+
+            function stopAutoScroll() {
+                if (autoScrollTimer) {
+                    clearInterval(autoScrollTimer);
+                    autoScrollTimer = null;
+                }
+            }
+
+            function handleUserInteraction() {
+                stopAutoScroll();
+                if (userPauseTimeout) clearTimeout(userPauseTimeout);
+                userPauseTimeout = setTimeout(() => {
+                    startAutoScroll();
+                }, 4500);
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleUserInteraction();
+                    goToSlide(currentIndex - 1);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleUserInteraction();
+                    goToSlide(currentIndex + 1);
+                });
+            }
+
+            carousel.addEventListener('scroll', function() {
+                const width = carousel.clientWidth;
+                if (width > 0) {
+                    const detectedIdx = Math.round(carousel.scrollLeft / width);
+                    if (detectedIdx !== currentIndex && detectedIdx >= 0 && detectedIdx < totalSlides) {
+                        currentIndex = detectedIdx;
+                        updateIndicators();
+                    }
+                }
+            }, { passive: true });
+
+            carousel.addEventListener('touchstart', handleUserInteraction, { passive: true });
+            carousel.addEventListener('mouseenter', stopAutoScroll);
+            carousel.addEventListener('mouseleave', startAutoScroll);
+
+            startAutoScroll();
+        }
+    }
 });
 </script>
 

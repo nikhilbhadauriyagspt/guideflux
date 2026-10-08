@@ -106,7 +106,7 @@ function getOtpEmailTemplate($userName, $otpCode, $purpose = 'signup') {
     
     $title = $purpose === 'forgot' ? 'Password Reset Verification' : 'Verify Your Email Address';
     $message = $purpose === 'forgot' 
-        ? 'We received a request to reset your GuideFlux travel account password. Use the verification code below to set a new password.'
+        ? 'We received a request to reset your ' . htmlspecialchars($siteName) . ' travel account password. Use the verification code below to set a new password.'
         : 'Welcome to ' . htmlspecialchars($siteName) . '! Please confirm your email address to activate your travel account and claim your ₹1,500 welcome discount.';
 
     return '
@@ -251,7 +251,7 @@ function generateBookingConfirmationEmailHtml(array $b) {
                 </div>
 
                 <div style="text-align: center; margin: 24px 0;">
-                    <a href="https://wa.me/' . htmlspecialchars($siteWhatsapp) . '?text=' . urlencode("Hi GuideFlux, I booked " . $itemTitle . " (ID: " . $bookingCode . ") and need support.") . '" class="btn-cta" target="_blank">
+                    <a href="https://wa.me/' . htmlspecialchars($siteWhatsapp) . '?text=' . urlencode("Hi " . $siteName . ", I booked " . $itemTitle . " (ID: " . $bookingCode . ") and need support.") . '" class="btn-cta" target="_blank">
                         Chat with Tour Concierge on WhatsApp
                     </a>
                 </div>
@@ -349,7 +349,7 @@ function generateFlightInquiryEmailHtml(array $f) {
                 </div>
 
                 <div style="text-align: center; margin: 24px 0;">
-                    <a href="https://wa.me/' . htmlspecialchars($siteWhatsapp) . '?text=' . urlencode("Hi GuideFlux Flight Desk, I submitted flight query " . $flightTitle . " (ID: " . $bookingCode . ").") . '" style="display: inline-block; background: #0284c7; color: #ffffff; padding: 12px 24px; font-weight: bold; font-size: 13px; text-decoration: none; border-radius: 6px;" target="_blank">
+                    <a href="https://wa.me/' . htmlspecialchars($siteWhatsapp) . '?text=' . urlencode("Hi " . $siteName . " Flight Desk, I submitted flight query " . $flightTitle . " (ID: " . $bookingCode . ").") . '" style="display: inline-block; background: #0284c7; color: #ffffff; padding: 12px 24px; font-weight: bold; font-size: 13px; text-decoration: none; border-radius: 6px;" target="_blank">
                         Connect with Flight Ticketing Desk on WhatsApp
                     </a>
                 </div>

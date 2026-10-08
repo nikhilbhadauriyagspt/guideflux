@@ -103,47 +103,46 @@ if (empty($featuredCruises)) {
      - Interactive Port & Category Filter Tabs
      - Font Awesome 6 Icons Only
 =========================================== -->
-<section id="ocean-cruises" class="py-16 md:py-20 px-4 sm:px-8 xl:px-12 bg-white border-b border-slate-200">
+<section id="ocean-cruises" class="py-10 sm:py-16 md:py-20 px-3 sm:px-8 xl:px-12 bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto">
 
         <!-- 1. Section Header -->
-        <div class="max-w-3xl mx-auto text-center space-y-3 mb-10">
-            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                <i class="fa-solid fa-ship text-indigo-600"></i>
+        <div class="max-w-3xl mx-auto text-center space-y-2.5 sm:space-y-3 mb-8 sm:mb-10">
+            <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                <i class="fa-solid fa-ship text-brand-600 text-[11px]"></i>
                 <span>Luxury Ocean Sailings</span>
             </div>
 
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
                 <span>Trending Ocean</span>
-                <span class="inline-block align-middle mx-1.5 sm:mx-2.5">
-                    <img src="assets/images/banner/heading-bg-02.webp" 
-                         alt="Ocean Waves" 
-                         onerror="this.style.display='none'"
-                         class="h-8 sm:h-11 md:h-12 w-auto rounded-full object-cover border border-slate-200 hover:scale-105 transition-transform duration-300 select-none">
+                <span class="inline-block align-middle mx-1 sm:mx-2.5">
+                    <img src="assets/images/banner/heading-cruise-01.jpg" 
+                         alt="Ocean Cruise Liner" 
+                         class="h-7 sm:h-11 md:h-12 w-auto rounded-full object-cover border border-slate-200 hover:scale-105 transition-transform duration-300 select-none">
                 </span>
-                <span class="text-indigo-600">Cruises &amp; Liners</span>
+                <span class="text-brand-600">Cruises &amp; Liners</span>
             </h2>
 
-            <p class="text-xs sm:text-sm text-slate-500 font-normal max-w-xl mx-auto">
+            <p class="text-xs sm:text-sm text-slate-500 font-normal max-w-xl mx-auto px-2">
                 Unpack once and sail in unmatched luxury. All-inclusive fine dining, Broadway theatrical shows, infinity ocean pools, and breathtaking open sea sunsets.
             </p>
 
             <!-- Filter Category Pills -->
-            <div class="flex items-center justify-start sm:justify-center space-x-2 overflow-x-auto pt-3 pb-1 px-1 sm:px-0 whitespace-nowrap scrollbar-none">
-                <button type="button" data-cruise-filter="all" class="cruise-filter-btn px-4 py-2 rounded-full text-xs font-bold bg-indigo-600 text-white transition shrink-0">
+            <div class="flex items-center justify-start sm:justify-center space-x-2 overflow-x-auto pt-2 sm:pt-3 pb-1 px-1 sm:px-0 whitespace-nowrap no-scrollbar">
+                <button type="button" data-cruise-filter="all" class="cruise-filter-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold bg-brand-600 text-white transition shrink-0">
                     All Sailings
                 </button>
-                <button type="button" data-cruise-filter="domestic" class="cruise-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 hover:text-indigo-700 hover:bg-slate-50 transition shrink-0">
-                    <i class="fa-solid fa-map-pin mr-1.5 text-indigo-500"></i>Domestic India
+                <button type="button" data-cruise-filter="domestic" class="cruise-filter-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-700 hover:bg-brand-50/50 transition shrink-0">
+                    <i class="fa-solid fa-map-pin mr-1.5 text-brand-600 text-[10px]"></i>Domestic India
                 </button>
-                <button type="button" data-cruise-filter="international" class="cruise-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 hover:text-indigo-700 hover:bg-slate-50 transition shrink-0">
-                    <i class="fa-solid fa-globe mr-1.5 text-sky-500"></i>International
+                <button type="button" data-cruise-filter="international" class="cruise-filter-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-700 hover:bg-brand-50/50 transition shrink-0">
+                    <i class="fa-solid fa-globe mr-1.5 text-sky-500 text-[10px]"></i>International
                 </button>
-                <button type="button" data-cruise-filter="mumbai" class="cruise-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 hover:text-indigo-700 hover:bg-slate-50 transition shrink-0">
-                    <i class="fa-solid fa-anchor mr-1.5 text-amber-500"></i>Ex-Mumbai
+                <button type="button" data-cruise-filter="mumbai" class="cruise-filter-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-700 hover:bg-brand-50/50 transition shrink-0">
+                    <i class="fa-solid fa-anchor mr-1.5 text-amber-500 text-[10px]"></i>Ex-Mumbai
                 </button>
-                <button type="button" data-cruise-filter="chennai" class="cruise-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 hover:text-indigo-700 hover:bg-slate-50 transition shrink-0">
-                    <i class="fa-solid fa-anchor mr-1.5 text-rose-500"></i>Ex-Chennai
+                <button type="button" data-cruise-filter="chennai" class="cruise-filter-btn px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 hover:text-brand-700 hover:bg-brand-50/50 transition shrink-0">
+                    <i class="fa-solid fa-anchor mr-1.5 text-rose-500 text-[10px]"></i>Ex-Chennai
                 </button>
             </div>
         </div>
@@ -154,7 +153,7 @@ if (empty($featuredCruises)) {
             <button type="button" 
                     id="cruiseSlidePrev" 
                     aria-label="Previous Cruises"
-                    class="absolute -left-2 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-slate-300 text-slate-700 hover:text-indigo-600 hover:border-indigo-500 hover:bg-slate-50 flex items-center justify-center transition active:scale-95 disabled:opacity-0 disabled:pointer-events-none">
+                    class="hidden sm:flex absolute -left-2 sm:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-slate-300 text-slate-700 hover:text-brand-600 hover:border-brand-500 hover:bg-slate-50 items-center justify-center transition active:scale-95 disabled:opacity-0 disabled:pointer-events-none">
                 <i class="fa-solid fa-chevron-left text-sm"></i>
             </button>
 
@@ -162,13 +161,13 @@ if (empty($featuredCruises)) {
             <button type="button" 
                     id="cruiseSlideNext" 
                     aria-label="Next Cruises"
-                    class="absolute -right-2 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-slate-300 text-slate-700 hover:text-indigo-600 hover:border-indigo-500 hover:bg-slate-50 flex items-center justify-center transition active:scale-95 disabled:opacity-0 disabled:pointer-events-none">
+                    class="hidden sm:flex absolute -right-2 sm:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-slate-300 text-slate-700 hover:text-brand-600 hover:border-brand-500 hover:bg-slate-50 items-center justify-center transition active:scale-95 disabled:opacity-0 disabled:pointer-events-none">
                 <i class="fa-solid fa-chevron-right text-sm"></i>
             </button>
 
             <!-- Slider Wrapper -->
             <div id="cruiseSlider" 
-                 class="flex items-stretch space-x-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 pt-1 px-1"
+                 class="flex items-stretch space-x-4 sm:space-x-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 pt-1 px-1 no-scrollbar"
                  style="scrollbar-width: none; -ms-overflow-style: none;">
 
                 <?php foreach ($featuredCruises as $cr): 
@@ -179,19 +178,19 @@ if (empty($featuredCruises)) {
                     $detailUrl = 'cruise-details.php?slug=' . urlencode($cr['slug'] ?: $cr['id']);
                 ?>
                     <!-- Cruise Card -->
-                    <div class="cruise-card w-[300px] sm:w-[335px] md:w-[360px] flex-shrink-0 snap-start bg-white rounded-2xl border border-slate-200 hover:border-indigo-500 transition-all flex flex-col overflow-hidden group"
+                    <div class="cruise-card w-[285px] sm:w-[335px] md:w-[360px] flex-shrink-0 snap-start bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition-all flex flex-col overflow-hidden group"
                          data-category="<?= htmlspecialchars($filterCategories) ?>">
                         
                         <!-- Image Container -->
-                        <div class="h-52 overflow-hidden relative bg-slate-100">
+                        <div class="h-44 sm:h-52 overflow-hidden relative bg-slate-100">
                             <img src="<?= htmlspecialchars($imgUrl) ?>" 
                                  alt="<?= htmlspecialchars($cr['title']) ?>" 
-                                 loading="lazy"
+                                 loading="lazy" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
 
                             <!-- Top Badges -->
-                            <div class="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-600 text-white">
+                            <div class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex items-center gap-1.5 z-10">
+                                <span class="px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-brand-600 text-white">
                                     <?= htmlspecialchars($cr['badge'] ?: 'Premier Cruise') ?>
                                 </span>
                                 <?php if ($catLower === 'international'): ?>
@@ -202,82 +201,82 @@ if (empty($featuredCruises)) {
                             </div>
 
                             <!-- Duration Pill Bottom-Right -->
-                            <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center space-x-1.5 border border-white/20">
-                                <i class="fa-regular fa-clock text-[10px]"></i>
+                            <div class="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full flex items-center space-x-1 sm:space-x-1.5 border border-white/20">
+                                <i class="fa-regular fa-clock text-[9px] sm:text-[10px]"></i>
                                 <span><?= htmlspecialchars($cr['duration_text'] ?: ($cr['duration_nights'] . 'N / ' . $cr['duration_days'] . 'D')) ?></span>
                             </div>
 
                             <!-- Departure Port Bottom-Left -->
-                            <div class="absolute bottom-3 left-3 bg-white/95 text-slate-800 text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center space-x-1.5 border border-slate-200">
-                                <i class="fa-solid fa-anchor text-indigo-600 text-[10px]"></i>
+                            <div class="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 bg-white/95 text-slate-800 text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full flex items-center space-x-1 sm:space-x-1.5 border border-slate-200">
+                                <i class="fa-solid fa-anchor text-brand-600 text-[9px] sm:text-[10px]"></i>
                                 <span>Ex-<?= htmlspecialchars($cr['departure_port']) ?></span>
                             </div>
                         </div>
 
                         <!-- Card Body -->
-                        <div class="p-5 flex flex-col flex-1 justify-between space-y-4">
+                        <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between space-y-3 sm:space-y-4">
                             <div class="space-y-2">
                                 <!-- Ship Name & Rating -->
                                 <div class="flex items-center justify-between text-xs">
-                                    <span class="font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md flex items-center gap-1 text-[11px]">
-                                        <i class="fa-solid fa-ship text-[10px]"></i>
+                                    <span class="font-bold text-brand-700 bg-brand-50 border border-brand-200/60 px-2 py-0.5 rounded-md flex items-center gap-1 text-[10px] sm:text-[11px]">
+                                        <i class="fa-solid fa-ship text-[9px] sm:text-[10px]"></i>
                                         <?= htmlspecialchars($cr['cruise_line'] . ' • ' . $cr['ship_name']) ?>
                                     </span>
-                                    <div class="flex items-center space-x-1 text-slate-600 font-semibold text-[11px]">
+                                    <div class="flex items-center space-x-1 text-slate-600 font-semibold text-[10px] sm:text-[11px]">
                                         <i class="fa-solid fa-star text-amber-500 text-[10px]"></i>
                                         <span><?= number_format((float)($cr['rating'] ?: 4.9), 1) ?></span>
-                                        <span class="text-slate-400 font-normal">(<?= (int)($cr['reviews_count'] ?: 200) ?>)</span>
+                                        <span class="text-slate-400 font-normal hidden sm:inline">(<?= (int)($cr['reviews_count'] ?: 200) ?>)</span>
                                     </div>
                                 </div>
 
                                 <!-- Title -->
-                                <h3 class="text-base font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-indigo-600 transition">
+                                <h3 class="text-sm sm:text-base font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-brand-600 transition">
                                     <a href="<?= $detailUrl ?>">
                                         <?= htmlspecialchars($cr['title']) ?>
                                     </a>
                                 </h3>
 
                                 <!-- Ports of Call Route -->
-                                <div class="text-xs text-slate-500 flex items-center gap-1.5 font-medium line-clamp-1">
-                                    <i class="fa-solid fa-route text-indigo-500 shrink-0 text-xs"></i>
-                                    <span><?= htmlspecialchars($cr['destination_ports'] ?: 'High Seas Cruising') ?></span>
+                                <div class="text-[11px] sm:text-xs text-slate-500 flex items-center gap-1.5 font-medium line-clamp-1">
+                                    <i class="fa-solid fa-route text-brand-600 shrink-0 text-[10px] sm:text-xs"></i>
+                                    <span class="truncate"><?= htmlspecialchars($cr['destination_ports'] ?: 'High Seas Cruising') ?></span>
                                 </div>
 
                                 <!-- Key Cruise Inclusions -->
-                                <div class="grid grid-cols-2 gap-1.5 pt-2">
-                                    <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                        <i class="fa-solid fa-utensils text-indigo-500 text-[10px]"></i>
-                                        <span>All-Day Buffet Meals</span>
+                                <div class="grid grid-cols-2 gap-1.5 pt-1.5 sm:pt-2">
+                                    <div class="flex items-center space-x-1.5 text-[10px] sm:text-[11px] text-slate-600 truncate">
+                                        <i class="fa-solid fa-utensils text-brand-600 text-[10px] shrink-0"></i>
+                                        <span class="truncate">All-Day Buffet Meals</span>
                                     </div>
-                                    <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                        <i class="fa-solid fa-masks-theater text-indigo-500 text-[10px]"></i>
-                                        <span>Broadway Shows</span>
+                                    <div class="flex items-center space-x-1.5 text-[10px] sm:text-[11px] text-slate-600 truncate">
+                                        <i class="fa-solid fa-masks-theater text-brand-600 text-[10px] shrink-0"></i>
+                                        <span class="truncate">Broadway Shows</span>
                                     </div>
-                                    <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                        <i class="fa-solid fa-water-ladder text-indigo-500 text-[10px]"></i>
-                                        <span>Infinity Deck Pools</span>
+                                    <div class="flex items-center space-x-1.5 text-[10px] sm:text-[11px] text-slate-600 truncate">
+                                        <i class="fa-solid fa-water-ladder text-brand-600 text-[10px] shrink-0"></i>
+                                        <span class="truncate">Infinity Deck Pools</span>
                                     </div>
-                                    <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                        <i class="fa-solid fa-dice text-indigo-500 text-[10px]"></i>
-                                        <span>Casino &amp; Lounges</span>
+                                    <div class="flex items-center space-x-1.5 text-[10px] sm:text-[11px] text-slate-600 truncate">
+                                        <i class="fa-solid fa-dice text-brand-600 text-[10px] shrink-0"></i>
+                                        <span class="truncate">Casino &amp; Lounges</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Pricing & CTA -->
-                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                                 <div>
-                                    <div class="flex items-baseline space-x-1.5">
-                                        <span class="text-lg font-black text-slate-900">₹<?= number_format((float)$cr['starting_price']) ?></span>
+                                    <div class="flex items-baseline space-x-1">
+                                        <span class="text-base sm:text-lg font-black text-slate-900">₹<?= number_format((float)$cr['starting_price']) ?></span>
                                         <?php if (!empty($cr['original_price']) && $cr['original_price'] > $cr['starting_price']): ?>
-                                            <span class="text-xs text-slate-400 line-through">₹<?= number_format((float)$cr['original_price']) ?></span>
+                                            <span class="text-[10px] sm:text-xs text-slate-400 line-through">₹<?= number_format((float)$cr['original_price']) ?></span>
                                         <?php endif; ?>
                                     </div>
-                                    <span class="text-[10px] text-slate-400 block font-medium">per person • twin sharing</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-400 block font-medium">per person</span>
                                 </div>
 
                                 <a href="<?= $detailUrl ?>" 
-                                   class="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center space-x-1.5">
+                                   class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-[11px] sm:text-xs uppercase tracking-wider transition active:scale-95 flex items-center space-x-1 sm:space-x-1.5 shrink-0">
                                     <span>View Sailing</span>
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </a>
@@ -291,11 +290,11 @@ if (empty($featuredCruises)) {
         </div>
 
         <!-- Bottom View All Sailings Pill -->
-        <div class="text-center mt-10">
+        <div class="text-center mt-8 sm:mt-10">
             <a href="cruises.php" 
-               class="inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 font-bold text-xs uppercase tracking-wider transition">
-                <i class="fa-solid fa-ship text-indigo-600"></i>
-                <span>Explore All Ocean Sailings &amp; Luxury Cabins</span>
+               class="inline-flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-300 font-bold text-[11px] sm:text-xs uppercase tracking-wider transition text-center">
+                <i class="fa-solid fa-ship text-brand-600 text-xs"></i>
+                <span>Explore All Ocean Sailings</span>
                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </a>
         </div>
@@ -325,11 +324,11 @@ document.addEventListener('DOMContentLoaded', function () {
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function () {
             filterBtns.forEach(b => {
-                b.classList.remove('bg-indigo-600', 'text-white');
+                b.classList.remove('bg-brand-600', 'text-white');
                 b.classList.add('bg-slate-100', 'text-slate-700', 'border', 'border-slate-200');
             });
             this.classList.remove('bg-slate-100', 'text-slate-700', 'border', 'border-slate-200');
-            this.classList.add('bg-indigo-600', 'text-white');
+            this.classList.add('bg-brand-600', 'text-white');
 
             const filter = this.getAttribute('data-cruise-filter');
 

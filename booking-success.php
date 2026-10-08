@@ -175,7 +175,7 @@ require_once 'components/navbar.php';
 
                 <!-- Actions Footer -->
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                    <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>?text=<?php echo urlencode("Hi GuideFlux, I booked " . $booking['package_title'] . " (Booking ID: " . $booking['booking_code'] . "). Please share my travel coordinator details."); ?>" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs">
+                    <a href="https://wa.me/<?php echo htmlspecialchars($siteWhatsapp); ?>?text=<?php echo urlencode("Hi " . $siteName . ", I booked " . $booking['package_title'] . " (Booking ID: " . $booking['booking_code'] . "). Please share my travel coordinator details."); ?>" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                         <span>Chat on WhatsApp (24x7)</span>
                     </a>

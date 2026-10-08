@@ -5,8 +5,10 @@
  * 100% Flat, Border-First (Zero Shadows), Font Awesome 6 icons only.
  */
 
-$pageTitle = 'Luxury Ocean Cruises & High Seas Sailings | Orion Advent';
 require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/settings.php';
+$siteName = getSetting('site_name', 'GuideFlux');
+$pageTitle = 'Luxury Ocean Cruises & High Seas Sailings | ' . htmlspecialchars($siteName);
 
 $pdo = getDBConnection();
 $cruises = [];
@@ -112,15 +114,15 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      HERO BANNER FOR CRUISES (Dedicated Portal)
 =========================================== -->
-<section class="bg-indigo-900 text-white border-b border-indigo-950 relative overflow-hidden">
+<section class="bg-slate-900 text-white border-b border-slate-800 relative overflow-hidden">
     <!-- Decorative background elements -->
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(99,102,241,0.25),transparent_70%)] pointer-events-none"></div>
-    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(13,148,136,0.18),transparent_70%)] pointer-events-none"></div>
+    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-8 xl:px-12 py-12 md:py-16 relative z-10">
         <div class="max-w-3xl space-y-4">
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-indigo-200 border border-white/20">
-                <i class="fa-solid fa-ship text-indigo-300"></i>
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-brand-200 border border-white/20">
+                <i class="fa-solid fa-ship text-brand-300"></i>
                 <span>Official Partner: Cordelia Cruises &bull; Royal Caribbean</span>
             </div>
 
@@ -128,18 +130,18 @@ require_once 'components/navbar.php';
                 Luxury Ocean Cruises &amp; High Seas Sailings
             </h1>
 
-            <p class="text-sm sm:text-base text-indigo-100 font-normal leading-relaxed max-w-2xl">
+            <p class="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl">
                 Wake up to endless ocean horizons. Choose from weekend high seas getaways to exotic international voyages with all-inclusive gourmet dining, pools, casino lounges, and Broadway entertainment.
             </p>
 
             <!-- Quick Port Pills in Banner -->
             <div class="pt-2 flex flex-wrap items-center gap-2">
-                <span class="text-xs text-indigo-300 font-medium mr-1">Popular Departure Ports:</span>
+                <span class="text-xs text-slate-400 font-medium mr-1">Popular Departure Ports:</span>
                 <?php foreach ($allPorts as $p): ?>
                     <button type="button" 
                             onclick="filterCruisesByPort('<?= htmlspecialchars(strtolower($p)) ?>')" 
-                            class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 hover:bg-white text-white hover:text-indigo-900 border border-white/20 transition">
-                        <i class="fa-solid fa-anchor text-[10px] mr-1"></i><?= htmlspecialchars($p) ?>
+                            class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 hover:bg-white text-white hover:text-slate-900 border border-white/20 transition">
+                        <i class="fa-solid fa-anchor text-[10px] mr-1 text-brand-300"></i><?= htmlspecialchars($p) ?>
                     </button>
                 <?php endforeach; ?>
             </div>
@@ -161,21 +163,21 @@ require_once 'components/navbar.php';
                 <input type="text" 
                        id="cruiseSearchInput" 
                        placeholder="Search by ship, port, destination (e.g. Goa, Mumbai, Sri Lanka)..." 
-                       class="w-full pl-10 pr-4 py-2.5 rounded-full text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition font-medium">
+                       class="w-full pl-10 pr-4 py-2.5 rounded-full text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition font-medium">
             </div>
 
             <!-- Filter Tabs -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
-                <button type="button" data-filter="all" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-600 text-white transition shrink-0">
+                <button type="button" data-filter="all" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-bold bg-brand-600 text-white transition shrink-0">
                     All Sailings (<span id="countAll"><?= count($cruises) ?></span>)
                 </button>
-                <button type="button" data-filter="domestic" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 transition shrink-0">
-                    <i class="fa-solid fa-map-pin mr-1 text-indigo-600"></i>Domestic India
+                <button type="button" data-filter="domestic" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 transition shrink-0">
+                    <i class="fa-solid fa-map-pin mr-1 text-brand-600"></i>Domestic India
                 </button>
-                <button type="button" data-filter="international" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 transition shrink-0">
+                <button type="button" data-filter="international" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 transition shrink-0">
                     <i class="fa-solid fa-globe mr-1 text-sky-600"></i>International
                 </button>
-                <button type="button" data-filter="weekend" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-indigo-500 transition shrink-0">
+                <button type="button" data-filter="weekend" class="c-tab px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:border-brand-500 transition shrink-0">
                     <i class="fa-solid fa-calendar-check mr-1 text-amber-600"></i>Weekend Trips (2-3N)
                 </button>
             </div>
@@ -183,7 +185,7 @@ require_once 'components/navbar.php';
             <!-- Sort By Selector -->
             <div class="flex items-center gap-2 shrink-0">
                 <span class="text-xs text-slate-400 font-medium">Sort:</span>
-                <select id="cruiseSortSelect" class="py-1.5 px-3 rounded-full text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 focus:border-indigo-500 outline-none cursor-pointer">
+                <select id="cruiseSortSelect" class="py-1.5 px-3 rounded-full text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-700 focus:border-brand-500 outline-none cursor-pointer">
                     <option value="featured">Best Recommended</option>
                     <option value="price_low">Price: Low to High</option>
                     <option value="price_high">Price: High to Low</option>
@@ -205,7 +207,7 @@ require_once 'components/navbar.php';
                 $detailUrl = 'cruise-details.php?slug=' . urlencode($slug);
             ?>
                 <!-- Cruise Listing Card -->
-                <article class="cruise-item-card bg-white rounded-2xl border border-slate-200 hover:border-indigo-500 transition-all flex flex-col overflow-hidden group"
+                <article class="cruise-item-card bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition-all flex flex-col overflow-hidden group"
                          data-category="<?= htmlspecialchars($cat) ?>"
                          data-port="<?= htmlspecialchars($port) ?>"
                          data-weekend="<?= htmlspecialchars($isWeekend) ?>"
@@ -222,7 +224,7 @@ require_once 'components/navbar.php';
 
                         <!-- Badges -->
                         <div class="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-600 text-white">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-brand-600 text-white">
                                 <?= htmlspecialchars($c['badge'] ?: 'Premier Cruise') ?>
                             </span>
                             <?php if ($cat === 'international'): ?>
@@ -240,7 +242,7 @@ require_once 'components/navbar.php';
 
                         <!-- Departure Port Bottom-Left -->
                         <div class="absolute bottom-3 left-3 bg-white/95 text-slate-800 text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center space-x-1.5 border border-slate-200">
-                            <i class="fa-solid fa-anchor text-indigo-600 text-[10px]"></i>
+                            <i class="fa-solid fa-anchor text-brand-600 text-[10px]"></i>
                             <span>Ex-<?= htmlspecialchars($c['departure_port']) ?></span>
                         </div>
                     </div>
@@ -250,7 +252,7 @@ require_once 'components/navbar.php';
                         <div class="space-y-2.5">
                             <!-- Cruise Line & Ship Name & Rating -->
                             <div class="flex items-center justify-between text-xs">
-                                <span class="font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md flex items-center gap-1 text-[11px]">
+                                <span class="font-bold text-brand-700 bg-brand-50 border border-brand-200/60 px-2 py-0.5 rounded-md flex items-center gap-1 text-[11px]">
                                     <i class="fa-solid fa-ship text-[10px]"></i>
                                     <?= htmlspecialchars($c['cruise_line'] . ' • ' . $c['ship_name']) ?>
                                 </span>
@@ -262,7 +264,7 @@ require_once 'components/navbar.php';
                             </div>
 
                             <!-- Title -->
-                            <h3 class="text-base font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-indigo-600 transition">
+                            <h3 class="text-base font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-brand-600 transition">
                                 <a href="<?= $detailUrl ?>">
                                     <?= htmlspecialchars($c['title']) ?>
                                 </a>
@@ -270,32 +272,32 @@ require_once 'components/navbar.php';
 
                             <!-- Route -->
                             <div class="text-xs text-slate-500 flex items-center gap-1.5 font-medium line-clamp-1">
-                                <i class="fa-solid fa-route text-indigo-500 shrink-0 text-xs"></i>
+                                <i class="fa-solid fa-route text-brand-600 shrink-0 text-xs"></i>
                                 <span><?= htmlspecialchars($c['destination_ports'] ?: 'High Seas Cruising') ?></span>
                             </div>
 
                             <!-- Sailing Schedule -->
                             <div class="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
-                                <i class="fa-regular fa-calendar-days text-indigo-500 text-[10px]"></i>
+                                <i class="fa-regular fa-calendar-days text-brand-600 text-[10px]"></i>
                                 <span><?= htmlspecialchars($c['sailing_dates'] ?: 'Weekly departures available') ?></span>
                             </div>
 
                             <!-- Inclusions Grid -->
                             <div class="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100">
                                 <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                    <i class="fa-solid fa-utensils text-indigo-500 text-[10px]"></i>
+                                    <i class="fa-solid fa-utensils text-brand-600 text-[10px]"></i>
                                     <span>All Buffet Meals</span>
                                 </div>
                                 <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                    <i class="fa-solid fa-masks-theater text-indigo-500 text-[10px]"></i>
+                                    <i class="fa-solid fa-masks-theater text-brand-600 text-[10px]"></i>
                                     <span>Broadway Shows</span>
                                 </div>
                                 <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                    <i class="fa-solid fa-water-ladder text-indigo-500 text-[10px]"></i>
+                                    <i class="fa-solid fa-water-ladder text-brand-600 text-[10px]"></i>
                                     <span>Infinity Pools</span>
                                 </div>
                                 <div class="flex items-center space-x-1.5 text-[11px] text-slate-600">
-                                    <i class="fa-solid fa-dice text-indigo-500 text-[10px]"></i>
+                                    <i class="fa-solid fa-dice text-brand-600 text-[10px]"></i>
                                     <span>Casino &amp; Lounges</span>
                                 </div>
                             </div>
@@ -316,12 +318,12 @@ require_once 'components/navbar.php';
                             <div class="flex items-center gap-2">
                                 <button type="button" 
                                         onclick="openCruiseInquiryModal('<?= htmlspecialchars(addslashes($c['title'])) ?>', '<?= htmlspecialchars(addslashes($c['ship_name'])) ?>')"
-                                        class="px-3 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" 
+                                        class="px-3 py-2 rounded-full bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 font-bold text-xs transition" 
                                         title="Quick Inquiry">
                                     <i class="fa-regular fa-message text-xs"></i>
                                 </button>
                                 <a href="<?= $detailUrl ?>" 
-                                   class="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center space-x-1.5">
+                                   class="px-4 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center space-x-1.5">
                                     <span>View Sailing</span>
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </a>
@@ -335,12 +337,12 @@ require_once 'components/navbar.php';
 
         <!-- Empty Results Message -->
         <div id="noCruisesFound" class="hidden bg-white rounded-3xl border border-slate-200 p-12 text-center max-w-lg mx-auto space-y-4 my-8">
-            <div class="w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center mx-auto text-2xl">
+            <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center mx-auto text-2xl">
                 <i class="fa-solid fa-ship"></i>
             </div>
             <h3 class="text-lg font-bold text-slate-900">No Ocean Sailings Found</h3>
             <p class="text-xs text-slate-500">We couldn't find any cruises matching your current filters. Try resetting the filters or searching for another port.</p>
-            <button type="button" onclick="resetCruiseFilters()" class="px-5 py-2.5 rounded-full bg-indigo-600 text-white font-bold text-xs uppercase tracking-wider">
+            <button type="button" onclick="resetCruiseFilters()" class="px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition">
                 Reset All Filters
             </button>
         </div>
@@ -355,7 +357,7 @@ require_once 'components/navbar.php';
     <div class="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-200">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                <div class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-sm font-bold">
                     <i class="fa-solid fa-ship"></i>
                 </div>
                 <div>
@@ -377,22 +379,22 @@ require_once 'components/navbar.php';
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Your Full Name</label>
-                    <input type="text" required id="inqName" placeholder="e.g. John Doe" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                    <input type="text" required id="inqName" placeholder="e.g. John Doe" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Contact Phone</label>
-                    <input type="tel" required id="inqPhone" placeholder="e.g. +91 9876543210" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                    <input type="tel" required id="inqPhone" placeholder="e.g. +91 9876543210" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Preferred Sailing Month</label>
-                    <input type="text" id="inqMonth" placeholder="e.g. Next Month / Nov" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                    <input type="text" id="inqMonth" placeholder="e.g. Next Month / Nov" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Total Guests</label>
-                    <select id="inqGuests" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                    <select id="inqGuests" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                         <option value="2 Adults">2 Adults (1 Cabin)</option>
                         <option value="2 Adults + 1 Child">2 Adults + 1 Child</option>
                         <option value="4 Adults">4 Adults (2 Cabins)</option>
@@ -403,7 +405,7 @@ require_once 'components/navbar.php';
 
             <div>
                 <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Preferred Cabin Type</label>
-                <select id="inqCabin" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 outline-none">
+                <select id="inqCabin" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 outline-none">
                     <option value="Any Cabin">Best Value Cabin</option>
                     <option value="Ocean View">Ocean View (Window)</option>
                     <option value="Balcony Suite">Private Balcony Suite</option>
@@ -411,7 +413,7 @@ require_once 'components/navbar.php';
                 </select>
             </div>
 
-            <button type="submit" id="inqSubmitBtn" class="w-full py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95">
+            <button type="submit" id="inqSubmitBtn" class="w-full py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95">
                 Send Request to Cruise Specialist
             </button>
         </form>
@@ -432,11 +434,11 @@ document.addEventListener('DOMContentLoaded', function () {
     tabs.forEach(tab => {
         tab.addEventListener('click', function () {
             tabs.forEach(t => {
-                t.classList.remove('bg-indigo-600', 'text-white');
+                t.classList.remove('bg-brand-600', 'text-white');
                 t.classList.add('bg-slate-100', 'text-slate-700', 'border', 'border-slate-200');
             });
             this.classList.remove('bg-slate-100', 'text-slate-700', 'border', 'border-slate-200');
-            this.classList.add('bg-indigo-600', 'text-white');
+            this.classList.add('bg-brand-600', 'text-white');
 
             activeFilter = this.getAttribute('data-filter');
             applyFilters();

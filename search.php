@@ -9,9 +9,15 @@
  * - Integrated Quick Concierge Booking/Inquiry Modal
  */
 
-$pageTitle = 'Search Holiday Packages, Flights & Hotels | Orion Advent';
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/settings.php';
+require_once __DIR__ . '/includes/flights_service.php';
 
-// Initial Server-Side Query Fallbacks (can be refined via JS client-side instantly)
+$siteName = getSetting('site_name', 'GuideFlux');
+$siteWhatsapp = getSetting('site_whatsapp', '919876543210');
+$pageTitle = 'Search Holiday Packages, Flights & Hotels | ' . htmlspecialchars($siteName);
+
+// Initial Server-Side Query Fallbacks (refined via JS client-side instantly)
 $initialType = isset($_GET['type']) ? strtolower(trim($_GET['type'])) : 'all';
 $initialCategory = isset($_GET['category']) ? strtolower(trim($_GET['category'])) : '';
 
@@ -52,9 +58,6 @@ if (!empty($_GET['theme'])) {
     elseif (str_contains($tRaw, 'spiritual') || str_contains($tRaw, 'pilgrimage')) $initialTheme = 'spiritual';
     elseif (str_contains($tRaw, 'luxury')) $initialTheme = 'luxury';
 }
-
-require_once __DIR__ . '/config/db.php';
-require_once __DIR__ . '/includes/flights_service.php';
 
 $pdoSearch = getDBConnection();
 $searchItems = [];
@@ -211,7 +214,7 @@ if ($pdoSearch) {
                 'route' => $c['destination_ports'] ?: 'Ocean Cruising',
                 'duration' => $c['duration_text'] ?: ($c['duration_nights'] . 'N / ' . $c['duration_days'] . 'D'),
                 'badge' => $c['badge'] ?: 'Premier Cruise',
-                'badge_class' => 'bg-indigo-600 text-white',
+                'badge_class' => 'bg-brand-600 text-white',
                 'price' => (float)$c['starting_price'],
                 'original_price' => (float)($c['original_price'] ?: ($c['starting_price'] * 1.3)),
                 'price_unit' => '/ person',
@@ -312,17 +315,17 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      TOP REFINEMENT SEARCH BANNER (100% Flat, No Shadows)
 =========================================== -->
-<section class="w-full bg-slate-900 text-white border-b border-slate-800 relative py-8 md:py-10 px-4 sm:px-8 xl:px-12">
+<section class="w-full bg-slate-900 text-white border-b border-slate-800 relative py-4 sm:py-8 px-3 sm:px-8 xl:px-12">
     <div class="max-w-7xl mx-auto">
         
         <!-- Breadcrumb & Tagline -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div class="flex items-center space-x-2 text-xs text-slate-400">
+        <div class="flex items-center justify-between gap-3 mb-3 sm:mb-5">
+            <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs text-slate-400">
                 <a href="index.php" class="hover:text-white transition flex items-center space-x-1">
-                    <i class="fa-solid fa-house text-[11px]"></i>
+                    <i class="fa-solid fa-house text-[10px] sm:text-[11px]"></i>
                     <span>Home</span>
                 </a>
-                <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+                <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] text-slate-600"></i>
                 <span class="text-teal-400 font-semibold">Search Portal</span>
             </div>
 
@@ -333,13 +336,13 @@ require_once 'components/navbar.php';
         </div>
 
         <!-- Universal Search Input Bar -->
-        <div class="bg-white rounded-2xl sm:rounded-full p-2 border border-slate-700 flex flex-col sm:flex-row items-center gap-2">
-            <div class="w-full flex-1 flex items-center px-4 py-2 sm:py-1">
-                <i class="fa-solid fa-magnifying-glass text-brand-600 text-base mr-3 shrink-0"></i>
+        <div class="bg-white rounded-2xl sm:rounded-full p-1.5 sm:p-2 border border-slate-700 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2">
+            <div class="w-full flex-1 flex items-center px-3 sm:px-4 py-1 sm:py-1">
+                <i class="fa-solid fa-magnifying-glass text-brand-600 text-sm sm:text-base mr-2.5 sm:mr-3 shrink-0"></i>
                 <input type="text" 
                        id="liveSearchInput"
                        value="<?= htmlspecialchars($initialQuery) ?>"
-                       placeholder="Search any destination, hotel, airline, package (e.g. Kashmir, Goa, IndiGo, Dubai)..." 
+                       placeholder="Search destination, hotel, cruise, airline..." 
                        class="w-full text-slate-900 placeholder-slate-400 text-xs sm:text-sm font-semibold bg-transparent focus:outline-none"
                        autocomplete="off">
                 <button type="button" id="clearSearchBtn" class="text-slate-400 hover:text-slate-600 px-2 <?= empty($initialQuery) ? 'hidden' : '' ?>" title="Clear input">
@@ -348,24 +351,24 @@ require_once 'components/navbar.php';
             </div>
 
             <!-- Instant Search Button -->
-            <button type="button" id="searchActionBtn" class="w-full sm:w-auto px-8 py-3 rounded-xl sm:rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition active:scale-95 shrink-0 flex items-center justify-center space-x-2">
+            <button type="button" id="searchActionBtn" class="w-full sm:w-auto px-5 sm:px-8 py-2 sm:py-3 rounded-xl sm:rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition active:scale-95 shrink-0 flex items-center justify-center space-x-1.5 sm:space-x-2">
                 <span>Filter Results</span>
-                <i class="fa-solid fa-arrow-right text-xs"></i>
+                <i class="fa-solid fa-arrow-right text-[11px] sm:text-xs"></i>
             </button>
         </div>
 
         <!-- Trending Quick Keywords Pills -->
-        <div class="flex flex-wrap items-center gap-2 mt-4 text-xs">
-            <span class="text-slate-400 font-medium mr-1">Trending Searches:</span>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Kashmir">Kashmir</button>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Goa">Goa</button>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Dubai">Dubai</button>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Himachal">Himachal</button>
+        <div class="flex items-center space-x-1.5 sm:space-x-2 mt-2.5 sm:mt-4 text-[11px] sm:text-xs overflow-x-auto no-scrollbar whitespace-nowrap py-0.5">
+            <span class="text-slate-400 font-medium mr-0.5 shrink-0">Trending:</span>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Kashmir">Kashmir</button>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Goa">Goa</button>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Dubai">Dubai</button>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Himachal">Himachal</button>
             <?php if ($showFlights): ?>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="IndiGo">IndiGo</button>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="IndiGo">IndiGo</button>
             <?php endif; ?>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Bali">Bali</button>
-            <button type="button" class="quick-term-pill px-3 py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Kerala">Kerala</button>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Bali">Bali</button>
+            <button type="button" class="quick-term-pill shrink-0 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-slate-800 hover:bg-brand-600 text-slate-300 hover:text-white border border-slate-700 transition" data-term="Kerala">Kerala</button>
         </div>
 
     </div>
@@ -374,85 +377,85 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      CATEGORY SWITCHER STRIP (Sticky & Minimal)
 =========================================== -->
-<div class="w-full bg-white border-b border-slate-200 sticky top-20 md:top-24 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 xl:px-12">
-        <div class="flex items-center justify-between overflow-x-auto no-scrollbar py-3 gap-3">
+<div class="w-full bg-white border-b border-slate-200 sticky top-14 md:top-24 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-8 xl:px-12">
+        <div class="flex items-center justify-between overflow-x-auto no-scrollbar py-2 sm:py-3 gap-2 sm:gap-3">
             
             <!-- Category Navigation Tabs -->
-            <div class="flex items-center space-x-2 shrink-0" id="searchCategoryTabs">
+            <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0" id="searchCategoryTabs">
                 <!-- All Holidays & Stays (Tour Packages + Hotels) -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'all' || empty($initialType)) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 <?= ($initialType === 'all' || empty($initialType)) ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="all">
-                    <i class="fa-solid fa-layer-group text-xs"></i>
+                    <i class="fa-solid fa-layer-group text-[10px] sm:text-xs"></i>
                     <span>Tours &amp; Hotels</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-all"><?= $countHolidays ?></span>
+                    <span class="rounded-full bg-white/25 px-1.5 py-0.2 text-[9px] sm:text-[10px] cat-count-all"><?= $countHolidays ?></span>
                 </button>
 
                 <!-- Domestic Tours & Stays -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'domestic') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 <?= ($initialType === 'domestic') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="domestic">
-                    <i class="fa-solid fa-map-location-dot text-xs"></i>
+                    <i class="fa-solid fa-map-location-dot text-[10px] sm:text-xs"></i>
                     <span>Domestic Tours</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-domestic"><?= $countDomestic ?></span>
+                    <span class="rounded-full bg-white/25 px-1.5 py-0.2 text-[9px] sm:text-[10px] cat-count-domestic"><?= $countDomestic ?></span>
                 </button>
 
                 <!-- International Tours & Stays -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'international') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 <?= ($initialType === 'international') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="international">
-                    <i class="fa-solid fa-globe text-xs"></i>
+                    <i class="fa-solid fa-globe text-[10px] sm:text-xs"></i>
                     <span>International Tours</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-international"><?= $countInternational ?></span>
+                    <span class="rounded-full bg-white/25 px-1.5 py-0.2 text-[9px] sm:text-[10px] cat-count-international"><?= $countInternational ?></span>
                 </button>
 
                 <!-- Hotels & Resorts Only -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'hotel') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 <?= ($initialType === 'hotel') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="hotel">
-                    <i class="fa-solid fa-hotel text-xs"></i>
+                    <i class="fa-solid fa-hotel text-[10px] sm:text-xs"></i>
                     <span>Hotels Only</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-hotel"><?= $countHotels ?></span>
+                    <span class="rounded-full bg-white/25 px-1.5 py-0.2 text-[9px] sm:text-[10px] cat-count-hotel"><?= $countHotels ?></span>
                 </button>
 
                 <!-- Ocean Cruises Only -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'cruise') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 <?= ($initialType === 'cruise') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="cruise">
-                    <i class="fa-solid fa-ship text-xs"></i>
+                    <i class="fa-solid fa-ship text-[10px] sm:text-xs"></i>
                     <span>Ocean Cruises</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-cruise"><?= $countCruises ?></span>
+                    <span class="rounded-full bg-white/25 px-1.5 py-0.2 text-[9px] sm:text-[10px] cat-count-cruise"><?= $countCruises ?></span>
                 </button>
 
                 <?php if ($showFlights): ?>
                 <!-- Flights (Separate - Only when clicked/searched) -->
                 <button type="button" 
-                        class="cat-tab-btn px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-2 <?= ($initialType === 'flight') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
+                        class="cat-tab-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 <?= ($initialType === 'flight') ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' ?>" 
                         data-type="flight">
-                    <i class="fa-solid fa-plane-departure text-xs"></i>
+                    <i class="fa-solid fa-plane-departure text-[10px] sm:text-xs"></i>
                     <span>Flights</span>
-                    <span class="rounded-full bg-white/25 px-2 py-0.5 text-[10px] cat-count-flight"><?= $countFlights ?></span>
+                    <span class="rounded-full bg-white/25 px-1.5 py-0.2 text-[9px] sm:text-[10px] cat-count-flight"><?= $countFlights ?></span>
                 </button>
                 <?php endif; ?>
             </div>
 
             <!-- Sort By Select Box -->
-            <div class="flex items-center space-x-2 shrink-0 ml-auto">
+            <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0 ml-auto">
                 <span class="text-xs text-slate-500 font-semibold hidden md:inline">Sort:</span>
                 <div class="relative">
-                    <select id="sortBySelect" class="appearance-none bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2 pl-3 pr-8 rounded-full border border-slate-200 focus:outline-none focus:border-brand-500 cursor-pointer transition">
+                    <select id="sortBySelect" class="appearance-none bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] sm:text-xs font-bold py-1.5 sm:py-2 pl-2.5 sm:pl-3 pr-7 sm:pr-8 rounded-full border border-slate-200 focus:outline-none focus:border-brand-500 cursor-pointer transition">
                         <option value="recommended">Best Recommended</option>
                         <option value="price-low">Price: Low to High</option>
                         <option value="price-high">Price: High to Low</option>
                         <option value="rating">Top Rated (5★ first)</option>
                     </select>
-                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <i class="fa-solid fa-chevron-down text-[9px] sm:text-[10px] text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
                 </div>
 
                 <!-- Mobile Filter Drawer Toggle Button -->
-                <button type="button" id="mobileFilterToggleBtn" class="lg:hidden px-3.5 py-2 rounded-full bg-brand-50 text-brand-700 border border-brand-200 text-xs font-bold flex items-center space-x-1.5">
-                    <i class="fa-solid fa-sliders text-xs"></i>
+                <button type="button" id="mobileFilterToggleBtn" class="lg:hidden px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-brand-50 text-brand-700 border border-brand-200 text-[11px] sm:text-xs font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-sliders text-[10px] sm:text-xs"></i>
                     <span>Filters</span>
                 </button>
             </div>
@@ -464,17 +467,17 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      MAIN SEARCH RESULTS & FILTER LAYOUT
 =========================================== -->
-<main class="w-full py-8 md:py-10 px-4 sm:px-8 xl:px-12 bg-slate-50 min-h-screen">
+<main class="w-full py-5 sm:py-10 px-3 sm:px-8 xl:px-12 bg-slate-50 min-h-screen">
     <div class="max-w-7xl mx-auto">
 
         <!-- Top Header Status Bar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-200">
             <div>
-                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
+                <h1 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight flex items-center space-x-1.5 sm:space-x-2">
                     <span id="resultsTypeTitle"><?= htmlspecialchars($initialHeading) ?></span>
-                    <span class="text-slate-400 font-normal text-sm sm:text-base">(&bull; <span id="resultsCount"><?= $initialCount ?></span> available)</span>
+                    <span class="text-slate-400 font-normal text-xs sm:text-base">(&bull; <span id="resultsCount"><?= $initialCount ?></span> available)</span>
                 </h1>
-                <p class="text-xs text-slate-500 mt-0.5" id="resultsSubtext">
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5" id="resultsSubtext">
                     <?= htmlspecialchars($initialSubtext) ?>
                 </p>
             </div>
@@ -844,30 +847,30 @@ require_once 'components/navbar.php';
                                  data-title="<?= htmlspecialchars($item['title']) ?>">
                             
                             <!-- Thumbnail with Duration Pill -->
-                            <div class="w-full md:w-64 h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
+                            <div class="w-full md:w-64 h-40 sm:h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
                                 <img src="<?= htmlspecialchars($item['image']) ?>" 
                                      alt="<?= htmlspecialchars($item['title']) ?>" 
                                      loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
                                 
-                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold <?= $item['badge_class'] ?>">
+                                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold <?= $item['badge_class'] ?>">
                                     <?= htmlspecialchars($item['badge']) ?>
                                 </span>
 
-                                <span class="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-900/80 backdrop-blur-sm text-white">
-                                    <i class="fa-regular fa-clock text-[10px] mr-1"></i>
+                                <span class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-slate-900/80 backdrop-blur-sm text-white">
+                                    <i class="fa-regular fa-clock text-[9px] mr-1"></i>
                                     <?= htmlspecialchars($item['duration']) ?>
                                 </span>
                             </div>
 
                             <!-- Content Body -->
-                            <div class="flex-1 p-5 flex flex-col justify-between">
+                            <div class="flex-1 p-3.5 sm:p-5 flex flex-col justify-between">
                                 <div>
                                     <!-- Destination Track & Rating -->
-                                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                    <div class="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-1">
                                         <div class="flex items-center gap-1.5">
-                                            <span class="inline-flex items-center space-x-1.5 text-[11px] font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full">
-                                                <i class="fa-solid fa-map-pin text-[10px]"></i>
+                                            <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-bold text-brand-700 bg-brand-50 px-2 sm:px-2.5 py-0.5 rounded-full">
+                                                <i class="fa-solid fa-map-pin text-[9px]"></i>
                                                 <span><?= htmlspecialchars($item['sub_type']) ?></span>
                                             </span>
 
@@ -880,37 +883,37 @@ require_once 'components/navbar.php';
                                                 elseif ($cMode === 'cab') { $cModeIcon = 'fa-solid fa-car text-teal-600'; $cModeLabel = 'By Private Cab'; }
                                                 elseif ($cMode === 'land_only') { $cModeIcon = 'fa-solid fa-hotel text-indigo-600'; $cModeLabel = 'Land Only'; }
                                             ?>
-                                            <span class="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
-                                                <i class="<?= $cModeIcon ?> text-[9px]"></i>
+                                            <span class="inline-flex items-center space-x-1 text-[9px] sm:text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-1.5 sm:px-2 py-0.5 rounded-full">
+                                                <i class="<?= $cModeIcon ?> text-[8px] sm:text-[9px]"></i>
                                                 <span><?= $cModeLabel ?></span>
                                             </span>
                                         </div>
 
-                                        <div class="flex items-center space-x-1 text-xs">
-                                            <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[11px] flex items-center space-x-1">
-                                                <i class="fa-solid fa-star text-[10px] text-amber-500"></i>
+                                        <div class="flex items-center space-x-1 text-[11px]">
+                                            <span class="px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[10px] sm:text-[11px] flex items-center space-x-0.5">
+                                                <i class="fa-solid fa-star text-[9px] text-amber-500"></i>
                                                 <span><?= $item['rating'] ?></span>
                                             </span>
-                                            <span class="text-[11px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
+                                            <span class="text-[10px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
                                         </div>
                                     </div>
 
                                     <!-- Title -->
-                                    <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug hover:text-brand-700 transition">
+                                    <h3 class="text-sm sm:text-lg font-bold text-slate-900 leading-snug hover:text-brand-700 transition">
                                         <?= htmlspecialchars($item['title']) ?>
                                     </h3>
 
                                     <!-- Route Circuit -->
-                                    <p class="text-xs text-slate-500 mt-1 flex items-center space-x-1.5 font-medium">
-                                        <i class="fa-solid fa-route text-slate-400 text-xs"></i>
-                                        <span><?= htmlspecialchars($item['route']) ?></span>
+                                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 flex items-center space-x-1 font-medium">
+                                        <i class="fa-solid fa-route text-slate-400 text-[10px] sm:text-xs"></i>
+                                        <span class="truncate"><?= htmlspecialchars($item['route']) ?></span>
                                     </p>
 
                                     <!-- Inclusions Pill Strip -->
-                                    <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-2 sm:mt-3">
                                         <?php foreach ($item['inclusions'] as $inc): ?>
-                                            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200/60">
-                                                <i class="<?= $inc['icon'] ?> text-brand-600 text-[10px]"></i>
+                                            <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200/60">
+                                                <i class="<?= $inc['icon'] ?> text-brand-600 text-[8px] sm:text-[10px]"></i>
                                                 <span><?= htmlspecialchars($inc['label']) ?></span>
                                             </span>
                                         <?php endforeach; ?>
@@ -918,38 +921,38 @@ require_once 'components/navbar.php';
                                 </div>
 
                                 <!-- Bottom Perks -->
-                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                                    <span class="flex items-center space-x-1.5 text-emerald-600 font-semibold">
-                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500">
+                                    <span class="flex items-center space-x-1 text-emerald-600 font-semibold truncate">
+                                        <i class="fa-solid fa-check text-[9px] sm:text-[10px]"></i>
                                         <span><?= htmlspecialchars($item['perks']) ?></span>
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Right CTA & Price Strip -->
-                            <div class="md:w-56 shrink-0 p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
+                            <div class="md:w-56 shrink-0 p-3.5 sm:p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
                                 <div>
-                                    <span class="text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
-                                    <div class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                                    <span class="text-[10px] sm:text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
+                                    <div class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
                                         ₹<?= number_format($item['price']) ?>
                                     </div>
-                                    <span class="text-[10px] text-slate-500 block mt-1">per person &bull; incl. taxes</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-500 block mt-0.5">per person &bull; incl. taxes</span>
                                 </div>
 
-                                <div class="space-y-1.5 shrink-0 md:w-full text-right">
+                                <div class="flex md:flex-col items-center gap-1.5 shrink-0 md:w-full text-right">
                                     <a href="package-details.php?id=<?= urlencode($item['id']) ?>" 
-                                       class="w-full px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
-                                        <span>View Details</span>
+                                       class="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
+                                        <span>Details</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
                                     <button type="button" 
-                                            class="open-inquire-btn w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center justify-center space-x-1"
+                                            class="open-inquire-btn hidden sm:flex w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition items-center justify-center space-x-1"
                                             data-title="<?= htmlspecialchars($item['title']) ?>"
                                             data-category="Tour Package"
                                             data-price="₹<?= number_format($item['price']) ?>"
                                             data-duration="<?= htmlspecialchars($item['duration']) ?>">
                                         <i class="fa-solid fa-paper-plane text-[9px] text-brand-600"></i>
-                                        <span>Quick Inquiry</span>
+                                        <span>Inquiry</span>
                                     </button>
                                 </div>
                             </div>
@@ -969,20 +972,20 @@ require_once 'components/navbar.php';
                                  data-title="<?= htmlspecialchars($item['title']) ?>">
 
                             <!-- Airline Identity Column -->
-                            <div class="w-full md:w-48 p-5 shrink-0 bg-slate-50/50 border-b md:border-b-0 md:border-r border-slate-200 flex md:flex-col items-center justify-between md:justify-center text-center">
-                                <div class="flex md:flex-col items-center space-x-3 md:space-x-0 md:space-y-2">
+                            <div class="w-full md:w-48 p-3.5 sm:p-5 shrink-0 bg-slate-50/50 border-b md:border-b-0 md:border-r border-slate-200 flex md:flex-col items-center justify-between md:justify-center text-center">
+                                <div class="flex md:flex-col items-center space-x-2.5 md:space-x-0 md:space-y-2">
                                     <?php if (!empty($item['airline_logo'])): ?>
-                                        <div class="h-10 w-24 bg-white border border-slate-200 rounded-xl p-1 flex items-center justify-center shadow-xs">
+                                        <div class="h-8 sm:h-10 w-20 sm:w-24 bg-white border border-slate-200 rounded-lg sm:rounded-xl p-1 flex items-center justify-center shadow-xs">
                                             <img src="<?= htmlspecialchars($item['airline_logo']) ?>" alt="<?= htmlspecialchars($item['airline']) ?>" class="max-h-full max-w-full object-contain">
                                         </div>
                                     <?php else: ?>
-                                        <span class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-sm">
-                                            <i class="fa-solid fa-plane-departure text-sm"></i>
+                                        <span class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-xs sm:text-sm">
+                                            <i class="fa-solid fa-plane-departure text-xs sm:text-sm"></i>
                                         </span>
                                     <?php endif; ?>
                                     <div>
-                                        <h4 class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($item['airline']) ?></h4>
-                                        <span class="text-[11px] font-mono text-slate-500 block"><?= htmlspecialchars($item['airline_code']) ?></span>
+                                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm"><?= htmlspecialchars($item['airline']) ?></h4>
+                                        <span class="text-[10px] sm:text-[11px] font-mono text-slate-500 block"><?= htmlspecialchars($item['airline_code']) ?></span>
                                     </div>
                                 </div>
 
@@ -992,71 +995,71 @@ require_once 'components/navbar.php';
                             </div>
 
                             <!-- Flight Timeline & Details -->
-                            <div class="flex-1 p-5 flex flex-col justify-between">
+                            <div class="flex-1 p-3.5 sm:p-5 flex flex-col justify-between">
                                 <div>
                                     <!-- Route & Times Strip -->
-                                    <div class="flex items-center justify-between gap-4 py-2">
+                                    <div class="flex items-center justify-between gap-3 sm:gap-4 py-1 sm:py-2">
                                         <!-- Departure -->
                                         <div class="text-left">
-                                            <span class="text-xl sm:text-2xl font-black text-slate-900 block"><?= htmlspecialchars($item['from_time']) ?></span>
-                                            <span class="text-xs font-bold text-brand-700"><?= htmlspecialchars($item['from_code']) ?></span>
-                                            <span class="text-[11px] text-slate-500 block"><?= htmlspecialchars($item['from_city']) ?></span>
+                                            <span class="text-lg sm:text-2xl font-black text-slate-900 block"><?= htmlspecialchars($item['from_time']) ?></span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-brand-700"><?= htmlspecialchars($item['from_code']) ?></span>
+                                            <span class="text-[10px] sm:text-[11px] text-slate-500 block"><?= htmlspecialchars($item['from_city']) ?></span>
                                         </div>
 
                                         <!-- Duration & Direct Bar -->
-                                        <div class="flex-1 max-w-xs flex flex-col items-center px-4">
-                                            <span class="text-[11px] font-bold text-slate-500 mb-1"><?= htmlspecialchars($item['duration']) ?></span>
+                                        <div class="flex-1 max-w-xs flex flex-col items-center px-2 sm:px-4">
+                                            <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 mb-0.5 sm:mb-1"><?= htmlspecialchars($item['duration']) ?></span>
                                             <div class="w-full flex items-center">
                                                 <div class="h-0.5 bg-slate-300 flex-1"></div>
-                                                <i class="fa-solid fa-plane text-brand-600 text-xs mx-2"></i>
+                                                <i class="fa-solid fa-plane text-brand-600 text-[10px] sm:text-xs mx-1.5 sm:mx-2"></i>
                                                 <div class="h-0.5 bg-slate-300 flex-1"></div>
                                             </div>
-                                            <span class="text-[10px] font-semibold text-emerald-600 mt-1"><?= htmlspecialchars($item['stops']) ?></span>
+                                            <span class="text-[9px] sm:text-[10px] font-semibold text-emerald-600 mt-0.5 sm:mt-1"><?= htmlspecialchars($item['stops']) ?></span>
                                         </div>
 
                                         <!-- Arrival -->
                                         <div class="text-right">
-                                            <span class="text-xl sm:text-2xl font-black text-slate-900 block"><?= htmlspecialchars($item['to_time']) ?></span>
-                                            <span class="text-xs font-bold text-brand-700"><?= htmlspecialchars($item['to_code']) ?></span>
-                                            <span class="text-[11px] text-slate-500 block"><?= htmlspecialchars($item['to_city']) ?></span>
+                                            <span class="text-lg sm:text-2xl font-black text-slate-900 block"><?= htmlspecialchars($item['to_time']) ?></span>
+                                            <span class="text-[11px] sm:text-xs font-bold text-brand-700"><?= htmlspecialchars($item['to_code']) ?></span>
+                                            <span class="text-[10px] sm:text-[11px] text-slate-500 block"><?= htmlspecialchars($item['to_city']) ?></span>
                                         </div>
                                     </div>
 
                                     <!-- Flight Baggage & Amenities Strip -->
-                                    <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-100">
-                                        <span class="inline-flex items-center space-x-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
-                                            <i class="fa-solid fa-suitcase-rolling text-slate-500 text-[10px]"></i>
+                                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100">
+                                        <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
+                                            <i class="fa-solid fa-suitcase-rolling text-slate-500 text-[9px] sm:text-[10px]"></i>
                                             <span><?= htmlspecialchars($item['baggage']) ?></span>
                                         </span>
-                                        <span class="inline-flex items-center space-x-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
-                                            <i class="fa-solid fa-couch text-slate-500 text-[10px]"></i>
+                                        <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
+                                            <i class="fa-solid fa-couch text-slate-500 text-[9px] sm:text-[10px]"></i>
                                             <span><?= htmlspecialchars($item['airline_class'] ?? 'Economy Standard') ?></span>
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Perks Note -->
-                                <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500">
-                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1">
-                                        <i class="fa-solid fa-shield-check text-[10px]"></i>
+                                <div class="mt-2.5 sm:mt-3 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500">
+                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1 truncate">
+                                        <i class="fa-solid fa-shield-check text-[9px] sm:text-[10px]"></i>
                                         <span><?= htmlspecialchars($item['perks']) ?></span>
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Right CTA & Price Strip -->
-                            <div class="md:w-56 shrink-0 p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
+                            <div class="md:w-56 shrink-0 p-3.5 sm:p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
                                 <div>
-                                    <span class="text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
-                                    <div class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                                    <span class="text-[10px] sm:text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
+                                    <div class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
                                         ₹<?= number_format($item['price']) ?>
                                     </div>
-                                    <span class="text-[10px] text-slate-500 block mt-1">per traveler &bull; all fees incl.</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-500 block mt-0.5">per traveler &bull; all fees incl.</span>
                                 </div>
 
-                                <div class="space-y-1.5 shrink-0 md:w-full text-right">
+                                <div class="shrink-0 md:w-full text-right">
                                     <button type="button" 
-                                            class="open-inquire-btn w-full px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5"
+                                            class="open-inquire-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5"
                                             data-title="<?= htmlspecialchars($item['title']) ?>"
                                             data-category="Flight Ticket"
                                             data-price="₹<?= number_format($item['price']) ?>"
@@ -1084,52 +1087,52 @@ require_once 'components/navbar.php';
                                  data-title="<?= htmlspecialchars($item['title']) ?>">
 
                             <!-- Resort Photo with Star Pill -->
-                            <div class="w-full md:w-64 h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
+                            <div class="w-full md:w-64 h-40 sm:h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
                                 <img src="<?= htmlspecialchars($item['image']) ?>" 
                                      alt="<?= htmlspecialchars($item['title']) ?>" 
                                      loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
 
-                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold <?= $item['badge_class'] ?>">
+                                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold <?= $item['badge_class'] ?>">
                                     <?= htmlspecialchars($item['badge']) ?>
                                 </span>
                             </div>
 
                             <!-- Resort Content Body -->
-                            <div class="flex-1 p-5 flex flex-col justify-between">
+                            <div class="flex-1 p-3.5 sm:p-5 flex flex-col justify-between">
                                 <div>
                                     <!-- Location & Rating -->
-                                    <div class="flex items-center justify-between gap-2 mb-1.5">
-                                        <span class="inline-flex items-center space-x-1 text-[11px] font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full">
-                                            <i class="fa-solid fa-location-dot text-[10px]"></i>
+                                    <div class="flex items-center justify-between gap-1.5 sm:gap-2 mb-1">
+                                        <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-bold text-brand-700 bg-brand-50 px-2 sm:px-2.5 py-0.5 rounded-full">
+                                            <i class="fa-solid fa-location-dot text-[9px]"></i>
                                             <span><?= htmlspecialchars($item['location']) ?></span>
                                         </span>
 
-                                        <div class="flex items-center space-x-1 text-xs">
-                                            <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[11px] flex items-center space-x-1">
-                                                <i class="fa-solid fa-star text-[10px] text-amber-500"></i>
+                                        <div class="flex items-center space-x-1 text-[11px]">
+                                            <span class="px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[10px] sm:text-[11px] flex items-center space-x-0.5">
+                                                <i class="fa-solid fa-star text-[9px] text-amber-500"></i>
                                                 <span><?= $item['rating'] ?></span>
                                             </span>
-                                            <span class="text-[11px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
+                                            <span class="text-[10px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
                                         </div>
                                     </div>
 
                                     <!-- Title -->
-                                    <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug hover:text-brand-700 transition">
+                                    <h3 class="text-sm sm:text-lg font-bold text-slate-900 leading-snug hover:text-brand-700 transition">
                                         <?= htmlspecialchars($item['title']) ?>
                                     </h3>
 
                                     <!-- Room Type -->
-                                    <p class="text-xs text-slate-500 mt-1 flex items-center space-x-1.5 font-medium">
-                                        <i class="fa-solid fa-bed text-slate-400 text-xs"></i>
-                                        <span><?= htmlspecialchars($item['room_type']) ?></span>
+                                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 flex items-center space-x-1 font-medium">
+                                        <i class="fa-solid fa-bed text-slate-400 text-[10px] sm:text-xs"></i>
+                                        <span class="truncate"><?= htmlspecialchars($item['room_type']) ?></span>
                                     </p>
 
                                     <!-- Amenities Pills -->
-                                    <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-2 sm:mt-3">
                                         <?php foreach ($item['amenities'] as $am): ?>
-                                            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200/60">
-                                                <i class="<?= $am['icon'] ?> text-brand-600 text-[10px]"></i>
+                                            <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200/60">
+                                                <i class="<?= $am['icon'] ?> text-brand-600 text-[8px] sm:text-[10px]"></i>
                                                 <span><?= htmlspecialchars($am['label']) ?></span>
                                             </span>
                                         <?php endforeach; ?>
@@ -1137,38 +1140,38 @@ require_once 'components/navbar.php';
                                 </div>
 
                                 <!-- Perks Note -->
-                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1">
-                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500">
+                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1 truncate">
+                                        <i class="fa-solid fa-check text-[9px] sm:text-[10px]"></i>
                                         <span><?= htmlspecialchars($item['perks']) ?></span>
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Right CTA & Price Strip -->
-                            <div class="md:w-56 shrink-0 p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
+                            <div class="md:w-56 shrink-0 p-3.5 sm:p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
                                 <div>
-                                    <span class="text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
-                                    <div class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                                    <span class="text-[10px] sm:text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
+                                    <div class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
                                         ₹<?= number_format($item['price']) ?>
                                     </div>
-                                    <span class="text-[10px] text-slate-500 block mt-1"><?= $item['price_unit'] ?> &bull; plus taxes</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-500 block mt-0.5"><?= $item['price_unit'] ?> &bull; plus taxes</span>
                                 </div>
 
-                                <div class="space-y-1.5 shrink-0 md:w-full text-right">
+                                <div class="flex md:flex-col items-center gap-1.5 shrink-0 md:w-full text-right">
                                     <a href="hotel-details.php?id=<?= urlencode($item['id']) ?>" 
-                                       class="w-full px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
-                                        <span>View Rooms</span>
+                                       class="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
+                                        <span>Rooms</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
                                     <button type="button" 
-                                            class="open-inquire-btn w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center justify-center space-x-1"
+                                            class="open-inquire-btn hidden sm:flex w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition items-center justify-center space-x-1"
                                             data-title="<?= htmlspecialchars($item['title']) ?>"
                                             data-category="Hotel & Resort"
                                             data-price="₹<?= number_format($item['price']) ?>"
                                             data-duration="<?= htmlspecialchars($item['room_type']) ?>">
                                         <i class="fa-solid fa-paper-plane text-[9px] text-brand-600"></i>
-                                        <span>Quick Inquiry</span>
+                                        <span>Inquiry</span>
                                     </button>
                                 </div>
                             </div>
@@ -1179,7 +1182,7 @@ require_once 'components/navbar.php';
                         <!-- ==========================================
                              OCEAN CRUISE CARD (Lightweight Minimal)
                         =========================================== -->
-                        <article class="search-result-card bg-white rounded-2xl border border-slate-200 hover:border-indigo-500 transition flex flex-col md:flex-row overflow-hidden"
+                        <article class="search-result-card bg-white rounded-2xl border border-slate-200 hover:border-brand-500 transition flex flex-col md:flex-row overflow-hidden"
                                  data-id="<?= htmlspecialchars($item['id']) ?>"
                                  data-type="cruise"
                                  data-package-category="<?= htmlspecialchars($item['category'] ?? 'domestic') ?>"
@@ -1190,64 +1193,64 @@ require_once 'components/navbar.php';
                                  data-title="<?= htmlspecialchars($item['title']) ?>">
 
                             <!-- Cruise Photo with Badge & Duration -->
-                            <div class="w-full md:w-64 h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
+                            <div class="w-full md:w-64 h-40 sm:h-48 md:h-auto shrink-0 relative overflow-hidden bg-slate-100">
                                 <img src="<?= htmlspecialchars($item['image']) ?>" 
                                      alt="<?= htmlspecialchars($item['title']) ?>" 
                                      loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
 
-                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-bold <?= $item['badge_class'] ?>">
+                                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold <?= $item['badge_class'] ?>">
                                     <?= htmlspecialchars($item['badge']) ?>
                                 </span>
 
-                                <span class="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-slate-800 border border-slate-200">
-                                    <i class="fa-solid fa-anchor text-indigo-600 mr-1"></i>Ex-<?= htmlspecialchars($item['departure_city']) ?>
+                                <span class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-white/95 text-slate-800 border border-slate-200">
+                                    <i class="fa-solid fa-anchor text-brand-600 mr-1"></i>Ex-<?= htmlspecialchars($item['departure_city']) ?>
                                 </span>
                             </div>
 
                             <!-- Cruise Content Body -->
-                            <div class="flex-1 p-5 flex flex-col justify-between">
+                            <div class="flex-1 p-3.5 sm:p-5 flex flex-col justify-between">
                                 <div>
                                     <!-- Ship & Rating -->
-                                    <div class="flex items-center justify-between gap-2 mb-1.5">
-                                        <span class="inline-flex items-center space-x-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200/60">
-                                            <i class="fa-solid fa-ship text-[10px]"></i>
+                                    <div class="flex items-center justify-between gap-1.5 sm:gap-2 mb-1">
+                                        <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-bold text-brand-700 bg-brand-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-brand-200/60">
+                                            <i class="fa-solid fa-ship text-[9px]"></i>
                                             <span><?= htmlspecialchars($item['sub_type']) ?></span>
                                         </span>
 
-                                        <div class="flex items-center space-x-1 text-xs">
-                                            <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[11px] flex items-center space-x-1">
-                                                <i class="fa-solid fa-star text-[10px] text-amber-500"></i>
+                                        <div class="flex items-center space-x-1 text-[11px]">
+                                            <span class="px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200 text-[10px] sm:text-[11px] flex items-center space-x-0.5">
+                                                <i class="fa-solid fa-star text-[9px] text-amber-500"></i>
                                                 <span><?= $item['rating'] ?></span>
                                             </span>
-                                            <span class="text-[11px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
+                                            <span class="text-[10px] text-slate-400 hidden sm:inline">(<?= $item['reviews'] ?>)</span>
                                         </div>
                                     </div>
 
                                     <!-- Title -->
-                                    <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug hover:text-indigo-600 transition">
+                                    <h3 class="text-sm sm:text-lg font-bold text-slate-900 leading-snug hover:text-brand-600 transition">
                                         <a href="cruise-details.php?slug=<?= urlencode($item['slug']) ?>">
                                             <?= htmlspecialchars($item['title']) ?>
                                         </a>
                                     </h3>
 
                                     <!-- Route & Duration -->
-                                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
-                                        <span class="flex items-center space-x-1 text-indigo-700">
-                                            <i class="fa-solid fa-route text-indigo-500 text-xs"></i>
-                                            <span><?= htmlspecialchars($item['route']) ?></span>
+                                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 font-medium">
+                                        <span class="flex items-center space-x-1 text-brand-700">
+                                            <i class="fa-solid fa-route text-brand-600 text-[10px] sm:text-xs"></i>
+                                            <span class="truncate"><?= htmlspecialchars($item['route']) ?></span>
                                         </span>
                                         <span class="flex items-center space-x-1">
-                                            <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
+                                            <i class="fa-regular fa-clock text-slate-400 text-[10px] sm:text-xs"></i>
                                             <span><?= htmlspecialchars($item['duration']) ?></span>
                                         </span>
                                     </div>
 
                                     <!-- Inclusions Pills -->
-                                    <div class="flex flex-wrap items-center gap-1.5 mt-3">
+                                    <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 mt-2 sm:mt-3">
                                         <?php foreach ($item['inclusions'] as $inc): ?>
-                                            <span class="inline-flex items-center space-x-1 text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full border border-slate-200/60">
-                                                <i class="<?= $inc['icon'] ?> text-indigo-600 text-[10px]"></i>
+                                            <span class="inline-flex items-center space-x-1 text-[10px] sm:text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200/60">
+                                                <i class="<?= $inc['icon'] ?> text-brand-600 text-[8px] sm:text-[10px]"></i>
                                                 <span><?= htmlspecialchars($inc['label']) ?></span>
                                             </span>
                                         <?php endforeach; ?>
@@ -1255,38 +1258,38 @@ require_once 'components/navbar.php';
                                 </div>
 
                                 <!-- Perks Note -->
-                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1">
-                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500">
+                                    <span class="text-emerald-600 font-semibold flex items-center space-x-1 truncate">
+                                        <i class="fa-solid fa-check text-[9px] sm:text-[10px]"></i>
                                         <span><?= htmlspecialchars($item['perks']) ?></span>
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Right CTA & Price Strip -->
-                            <div class="md:w-56 shrink-0 p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
+                            <div class="md:w-56 shrink-0 p-3.5 sm:p-5 bg-slate-50/70 border-t md:border-t-0 md:border-l border-slate-200 flex md:flex-col justify-between items-center md:items-end text-left md:text-right">
                                 <div>
-                                    <span class="text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
-                                    <div class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none font-space">
+                                    <span class="text-[10px] sm:text-[11px] text-slate-400 block line-through">₹<?= number_format($item['original_price']) ?></span>
+                                    <div class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none font-space">
                                         ₹<?= number_format($item['price']) ?>
                                     </div>
-                                    <span class="text-[10px] text-slate-500 block mt-1"><?= $item['price_unit'] ?> &bull; twin stateroom</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-500 block mt-0.5"><?= $item['price_unit'] ?> &bull; twin stateroom</span>
                                 </div>
 
-                                <div class="space-y-1.5 shrink-0 md:w-full text-right">
+                                <div class="flex md:flex-col items-center gap-1.5 shrink-0 md:w-full text-right">
                                     <a href="cruise-details.php?slug=<?= urlencode($item['slug']) ?>" 
-                                       class="w-full px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
-                                        <span>View Staterooms</span>
+                                       class="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center justify-center space-x-1.5">
+                                        <span>Staterooms</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
                                     <button type="button" 
-                                            class="open-inquire-btn w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition flex items-center justify-center space-x-1"
+                                            class="open-inquire-btn hidden sm:flex w-full px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition items-center justify-center space-x-1"
                                             data-title="<?= htmlspecialchars($item['title']) ?>"
                                             data-category="Ocean Cruise"
                                             data-price="₹<?= number_format($item['price']) ?>"
                                             data-duration="<?= htmlspecialchars($item['duration']) ?>">
-                                        <i class="fa-solid fa-paper-plane text-[9px] text-indigo-600"></i>
-                                        <span>Quick Inquiry</span>
+                                        <i class="fa-solid fa-paper-plane text-[9px] text-brand-600"></i>
+                                        <span>Inquiry</span>
                                     </button>
                                 </div>
                             </div>
@@ -1915,8 +1918,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Prepare WhatsApp direct link
             if (whatsappLink) {
-                const message = encodeURIComponent(`Hi Orion Advent Concierge, I am interested in booking: "${title}" (${price}). Please share the full itinerary and booking availability.`);
-                whatsappLink.href = `https://wa.me/919876543210?text=${message}`;
+                const message = encodeURIComponent(`Hi <?= addslashes($siteName) ?> Concierge, I am interested in booking: "${title}" (${price}). Please share the full itinerary and booking availability.`);
+                whatsappLink.href = `https://wa.me/<?= htmlspecialchars($siteWhatsapp) ?>?text=${message}`;
             }
 
             if (inquireModal) {

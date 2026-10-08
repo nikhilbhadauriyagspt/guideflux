@@ -48,11 +48,13 @@ $toAirportInfo = $airportsList[$destination] ?? ['name' => $destination . ' Airp
 $from2AirportInfo = $airportsList[$from2] ?? ['name' => $from2 . ' Airport', 'city' => $from2];
 $to2AirportInfo = $airportsList[$to2] ?? ['name' => $to2 . ' Airport', 'city' => $to2];
 
+$siteName = getSetting('site_name', 'GuideFlux');
+
 $pageTitle = ($tripType === 'roundtrip')
-    ? "Round-Trip Flights: {$fromAirportInfo['city']} ({$origin}) ⇄ {$toAirportInfo['city']} ({$destination}) | GuideFlux"
+    ? "Round-Trip Flights: {$fromAirportInfo['city']} ({$origin}) ⇄ {$toAirportInfo['city']} ({$destination}) | " . htmlspecialchars($siteName)
     : (($tripType === 'multicity')
-        ? "Multi-City Flights: {$origin} → {$destination} → {$to2} | GuideFlux"
-        : "Flights from {$fromAirportInfo['city']} ({$origin}) to {$toAirportInfo['city']} ({$destination}) | GuideFlux");
+        ? "Multi-City Flights: {$origin} → {$destination} → {$to2} | " . htmlspecialchars($siteName)
+        : "Flights from {$fromAirportInfo['city']} ({$origin}) to {$toAirportInfo['city']} ({$destination}) | " . htmlspecialchars($siteName));
 
 require_once 'components/header.php';
 require_once 'components/navbar.php';
@@ -1451,7 +1453,7 @@ function showLoginRequiredModal(type, title) {
                         Sign In Required
                     </span>
                     <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Continue Booking</h3>
-                    <p class="text-xs text-slate-500">Please log in to your GuideFlux account to secure your reservation and receive vouchers.</p>
+                    <p class="text-xs text-slate-500">Please log in to your <?php echo htmlspecialchars($siteName); ?> account to secure your reservation and receive vouchers.</p>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700">
                     <span>${title}</span>

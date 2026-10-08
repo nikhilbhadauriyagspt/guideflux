@@ -124,7 +124,7 @@ require_once 'components/navbar.php';
             <!-- Right: Our Story Content -->
             <div class="lg:col-span-6 space-y-6">
                 <div class="space-y-2">
-                    <span class="text-xs font-bold uppercase tracking-widest text-teal-600">The GuideFlux Story</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-teal-600">The <?php echo htmlspecialchars($siteName); ?> Story</span>
                     <h2 class="text-2xl sm:text-4xl font-black font-space text-slate-900 tracking-tight leading-tight">
                         Travel Isn't Just Visiting Places. <br>
                         It's Collecting Lifelong Memories.
@@ -261,7 +261,7 @@ require_once 'components/navbar.php';
 
             <div class="relative z-10 space-y-10">
                 <div class="max-w-2xl space-y-2">
-                    <span class="text-xs font-bold uppercase tracking-widest text-teal-400">The GuideFlux Advantage</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-teal-400">The <?php echo htmlspecialchars($siteName); ?> Advantage</span>
                     <h2 class="text-2xl sm:text-4xl font-black font-space tracking-tight">
                         Why Discerning Travelers Choose Us
                     </h2>

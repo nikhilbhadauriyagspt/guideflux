@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tour Package Details Page - Orion Advent
  * - Comprehensive Day-by-Day Itinerary Timeline
@@ -563,145 +564,145 @@ if ($pdoPkg) {
     }
 
     if ($fetchedPkg) {
-            // Itinerary JSON decode
-            $itineraryList = [];
-            if (!empty($fetchedPkg['itinerary'])) {
-                $decIt = json_decode($fetchedPkg['itinerary'], true);
-                if (is_array($decIt)) $itineraryList = $decIt;
-            }
+        // Itinerary JSON decode
+        $itineraryList = [];
+        if (!empty($fetchedPkg['itinerary'])) {
+            $decIt = json_decode($fetchedPkg['itinerary'], true);
+            if (is_array($decIt)) $itineraryList = $decIt;
+        }
 
-            // Highlights JSON decode
-            $highlightsList = [];
-            if (!empty($fetchedPkg['highlights'])) {
-                $decHl = json_decode($fetchedPkg['highlights'], true);
-                if (is_array($decHl)) $highlightsList = $decHl;
-            }
-            if (empty($highlightsList)) {
-                $highlightsList = [
-                    ['icon' => 'fa-solid fa-hotel', 'title' => 'Handpicked Verified Stays', 'desc' => 'Verified 4★/5★ luxury resorts & hotels'],
-                    ['icon' => 'fa-solid fa-car', 'title' => 'Private AC Vehicle', 'desc' => 'Dedicated comfortable transfers throughout circuit'],
-                    ['icon' => 'fa-solid fa-utensils', 'title' => 'Buffet Breakfast & Dinner', 'desc' => 'Daily chef-curated breakfast & dinner included'],
-                    ['icon' => 'fa-solid fa-shield-halved', 'title' => 'Guaranteed Token Lock', 'desc' => 'Instant booking with minimal advance token']
-                ];
-            }
-
-            // Inclusions / Exclusions JSON decode
-            $inclusionsList = [];
-            if (!empty($fetchedPkg['inclusions'])) {
-                $decInc = json_decode($fetchedPkg['inclusions'], true);
-                if (is_array($decInc)) $inclusionsList = $decInc;
-            }
-
-            $exclusionsList = [];
-            if (!empty($fetchedPkg['exclusions'])) {
-                $decExc = json_decode($fetchedPkg['exclusions'], true);
-                if (is_array($decExc)) $exclusionsList = $decExc;
-            }
-
-            // Gallery Photos decode
-            $galleryList = [];
-            if (!empty($fetchedPkg['featured_image'])) {
-                $galleryList[] = $fetchedPkg['featured_image'];
-            }
-            if (!empty($fetchedPkg['gallery'])) {
-                $decGal = json_decode($fetchedPkg['gallery'], true);
-                if (is_array($decGal)) {
-                    foreach ($decGal as $gImg) {
-                        if (!in_array($gImg, $galleryList)) $galleryList[] = $gImg;
-                    }
-                }
-            }
-            while (count($galleryList) < 5) {
-                $galleryList[] = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
-            }
-
-            // Resolve Linked Hotels from Database (`hotels` table)
-            $linkedStays = [];
-            if (!empty($fetchedPkg['hotel_ids'])) {
-                $hotelIds = json_decode($fetchedPkg['hotel_ids'], true);
-                if (is_array($hotelIds) && !empty($hotelIds)) {
-                    $inPlaceholders = implode(',', array_fill(0, count($hotelIds), '?'));
-                    $hotelStmt = $pdoPkg->prepare("SELECT * FROM `hotels` WHERE `id` IN ($inPlaceholders)");
-                    $hotelStmt->execute($hotelIds);
-                    $hResults = $hotelStmt->fetchAll();
-
-                    foreach ($hResults as $hr) {
-                        $linkedStays[] = [
-                            'name' => $hr['name'],
-                            'location' => $hr['address'] ?: ($hr['city'] . ', ' . $hr['country']),
-                            'type' => $hr['star_rating'] . '★ ' . $hr['property_type'],
-                            'rating' => (float)$hr['star_rating'],
-                            'nights' => 'Included Stay',
-                            'image' => !empty($hr['featured_image']) ? $hr['featured_image'] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80',
-                            'hotel_id' => $hr['id']
-                        ];
-                    }
-                }
-            }
-
-            if (empty($linkedStays)) {
-                $linkedStays[] = [
-                    'name' => 'GuideFlux Certified 4★ Partner Stays',
-                    'location' => $fetchedPkg['location'],
-                    'type' => '4-Star Premium Hotel',
-                    'rating' => 4.8,
-                    'nights' => $fetchedPkg['duration_text'] ?: ($fetchedPkg['duration_nights'] . ' Nights'),
-                    'image' => $galleryList[0] ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80'
-                ];
-            }
-
-            // Parse Cancellation & Reschedule Policies Structure
-            $pkgPolicies = [
-                'summary' => 'Free cancellation and flexible date reschedule options available before departure.',
-                'rules' => [
-                    ['timeline' => '15+ Days Before Travel', 'refund' => '100% Refund', 'deduction' => '0% Cancellation Fee', 'badge_type' => 'full_refund'],
-                    ['timeline' => '7 to 14 Days Before Travel', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
-                    ['timeline' => '3 to 6 Days Before Travel', 'refund' => '50% Refund', 'deduction' => '50% Cancellation Fee', 'badge_type' => 'partial_refund'],
-                    ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable Cutoff', 'badge_type' => 'no_refund']
-                ],
-                'reschedule_policy' => 'Flexible date reschedule permitted up to 7 days before tour departure without penalty.',
-                'medical_policy' => '100% token refund on medical emergencies with verified certificate.'
-            ];
-
-            if (!empty($fetchedPkg['policies'])) {
-                $decPol = json_decode($fetchedPkg['policies'], true);
-                if (is_array($decPol)) {
-                    if (!empty($decPol['summary'])) $pkgPolicies['summary'] = $decPol['summary'];
-                    if (!empty($decPol['rules']) && is_array($decPol['rules'])) $pkgPolicies['rules'] = $decPol['rules'];
-                    if (!empty($decPol['reschedule_policy'])) $pkgPolicies['reschedule_policy'] = $decPol['reschedule_policy'];
-                    if (!empty($decPol['medical_policy'])) $pkgPolicies['medical_policy'] = $decPol['medical_policy'];
-                } else {
-                    $pkgPolicies['summary'] = $fetchedPkg['policies'];
-                }
-            }
-
-            $package = [
-                'id' => 'PKG-DB-' . $fetchedPkg['id'],
-                'title' => $fetchedPkg['title'],
-                'subtitle' => $fetchedPkg['subtitle'] ?: 'Handcrafted holiday tour package with verified stays, chauffeur transfers, and complete travel support.',
-                'destination' => $fetchedPkg['location'],
-                'state' => $fetchedPkg['state_country'] ?: 'India',
-                'travel_mode' => $fetchedPkg['travel_mode'] ?? (($fetchedPkg['category'] === 'international') ? 'flight' : 'cab'),
-                'departure_city' => $fetchedPkg['departure_city'] ?? 'All Major Cities',
-                'duration' => $fetchedPkg['duration_text'] ?: ($fetchedPkg['duration_nights'] . ' Nights / ' . $fetchedPkg['duration_days'] . ' Days'),
-                'type' => ucfirst($fetchedPkg['category']) . ' ' . $fetchedPkg['circuit_type'],
-                'badge' => $fetchedPkg['badge'] ?: 'Bestseller',
-                'badge_class' => 'bg-brand-600 text-white',
-                'rating' => (float)$fetchedPkg['rating'],
-                'reviews_count' => (int)$fetchedPkg['reviews_count'],
-                'price' => (float)$fetchedPkg['price'],
-                'original_price' => (float)($fetchedPkg['original_price'] ?: ($fetchedPkg['price'] * 1.25)),
-                'token_advance' => (float)($fetchedPkg['token_advance'] ?: 2500),
-                'gallery' => $galleryList,
-                'highlights' => $highlightsList,
-                'itinerary' => $itineraryList,
-                'inclusions' => $inclusionsList,
-                'exclusions' => $exclusionsList,
-                'stays' => $linkedStays,
-                'policies' => $pkgPolicies
+        // Highlights JSON decode
+        $highlightsList = [];
+        if (!empty($fetchedPkg['highlights'])) {
+            $decHl = json_decode($fetchedPkg['highlights'], true);
+            if (is_array($decHl)) $highlightsList = $decHl;
+        }
+        if (empty($highlightsList)) {
+            $highlightsList = [
+                ['icon' => 'fa-solid fa-hotel', 'title' => 'Handpicked Verified Stays', 'desc' => 'Verified 4★/5★ luxury resorts & hotels'],
+                ['icon' => 'fa-solid fa-car', 'title' => 'Private AC Vehicle', 'desc' => 'Dedicated comfortable transfers throughout circuit'],
+                ['icon' => 'fa-solid fa-utensils', 'title' => 'Buffet Breakfast & Dinner', 'desc' => 'Daily chef-curated breakfast & dinner included'],
+                ['icon' => 'fa-solid fa-shield-halved', 'title' => 'Guaranteed Token Lock', 'desc' => 'Instant booking with minimal advance token']
             ];
         }
+
+        // Inclusions / Exclusions JSON decode
+        $inclusionsList = [];
+        if (!empty($fetchedPkg['inclusions'])) {
+            $decInc = json_decode($fetchedPkg['inclusions'], true);
+            if (is_array($decInc)) $inclusionsList = $decInc;
+        }
+
+        $exclusionsList = [];
+        if (!empty($fetchedPkg['exclusions'])) {
+            $decExc = json_decode($fetchedPkg['exclusions'], true);
+            if (is_array($decExc)) $exclusionsList = $decExc;
+        }
+
+        // Gallery Photos decode
+        $galleryList = [];
+        if (!empty($fetchedPkg['featured_image'])) {
+            $galleryList[] = $fetchedPkg['featured_image'];
+        }
+        if (!empty($fetchedPkg['gallery'])) {
+            $decGal = json_decode($fetchedPkg['gallery'], true);
+            if (is_array($decGal)) {
+                foreach ($decGal as $gImg) {
+                    if (!in_array($gImg, $galleryList)) $galleryList[] = $gImg;
+                }
+            }
+        }
+        while (count($galleryList) < 5) {
+            $galleryList[] = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
+        }
+
+        // Resolve Linked Hotels from Database (`hotels` table)
+        $linkedStays = [];
+        if (!empty($fetchedPkg['hotel_ids'])) {
+            $hotelIds = json_decode($fetchedPkg['hotel_ids'], true);
+            if (is_array($hotelIds) && !empty($hotelIds)) {
+                $inPlaceholders = implode(',', array_fill(0, count($hotelIds), '?'));
+                $hotelStmt = $pdoPkg->prepare("SELECT * FROM `hotels` WHERE `id` IN ($inPlaceholders)");
+                $hotelStmt->execute($hotelIds);
+                $hResults = $hotelStmt->fetchAll();
+
+                foreach ($hResults as $hr) {
+                    $linkedStays[] = [
+                        'name' => $hr['name'],
+                        'location' => $hr['address'] ?: ($hr['city'] . ', ' . $hr['country']),
+                        'type' => $hr['star_rating'] . '★ ' . $hr['property_type'],
+                        'rating' => (float)$hr['star_rating'],
+                        'nights' => 'Included Stay',
+                        'image' => !empty($hr['featured_image']) ? $hr['featured_image'] : 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80',
+                        'hotel_id' => $hr['id']
+                    ];
+                }
+            }
+        }
+
+        if (empty($linkedStays)) {
+            $linkedStays[] = [
+                'name' => htmlspecialchars($siteName) . ' Certified 4★ Partner Stays',
+                'location' => $fetchedPkg['location'],
+                'type' => '4-Star Premium Hotel',
+                'rating' => 4.8,
+                'nights' => $fetchedPkg['duration_text'] ?: ($fetchedPkg['duration_nights'] . ' Nights'),
+                'image' => $galleryList[0] ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80'
+            ];
+        }
+
+        // Parse Cancellation & Reschedule Policies Structure
+        $pkgPolicies = [
+            'summary' => 'Free cancellation and flexible date reschedule options available before departure.',
+            'rules' => [
+                ['timeline' => '15+ Days Before Travel', 'refund' => '100% Refund', 'deduction' => '0% Cancellation Fee', 'badge_type' => 'full_refund'],
+                ['timeline' => '7 to 14 Days Before Travel', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
+                ['timeline' => '3 to 6 Days Before Travel', 'refund' => '50% Refund', 'deduction' => '50% Cancellation Fee', 'badge_type' => 'partial_refund'],
+                ['timeline' => 'Within 48 Hours / No-Show', 'refund' => '0% (Non-Refundable)', 'deduction' => '100% Non-Refundable Cutoff', 'badge_type' => 'no_refund']
+            ],
+            'reschedule_policy' => 'Flexible date reschedule permitted up to 7 days before tour departure without penalty.',
+            'medical_policy' => '100% token refund on medical emergencies with verified certificate.'
+        ];
+
+        if (!empty($fetchedPkg['policies'])) {
+            $decPol = json_decode($fetchedPkg['policies'], true);
+            if (is_array($decPol)) {
+                if (!empty($decPol['summary'])) $pkgPolicies['summary'] = $decPol['summary'];
+                if (!empty($decPol['rules']) && is_array($decPol['rules'])) $pkgPolicies['rules'] = $decPol['rules'];
+                if (!empty($decPol['reschedule_policy'])) $pkgPolicies['reschedule_policy'] = $decPol['reschedule_policy'];
+                if (!empty($decPol['medical_policy'])) $pkgPolicies['medical_policy'] = $decPol['medical_policy'];
+            } else {
+                $pkgPolicies['summary'] = $fetchedPkg['policies'];
+            }
+        }
+
+        $package = [
+            'id' => 'PKG-DB-' . $fetchedPkg['id'],
+            'title' => $fetchedPkg['title'],
+            'subtitle' => $fetchedPkg['subtitle'] ?: 'Handcrafted holiday tour package with verified stays, chauffeur transfers, and complete travel support.',
+            'destination' => $fetchedPkg['location'],
+            'state' => $fetchedPkg['state_country'] ?: 'India',
+            'travel_mode' => $fetchedPkg['travel_mode'] ?? (($fetchedPkg['category'] === 'international') ? 'flight' : 'cab'),
+            'departure_city' => $fetchedPkg['departure_city'] ?? 'All Major Cities',
+            'duration' => $fetchedPkg['duration_text'] ?: ($fetchedPkg['duration_nights'] . ' Nights / ' . $fetchedPkg['duration_days'] . ' Days'),
+            'type' => ucfirst($fetchedPkg['category']) . ' ' . $fetchedPkg['circuit_type'],
+            'badge' => $fetchedPkg['badge'] ?: 'Bestseller',
+            'badge_class' => 'bg-brand-600 text-white',
+            'rating' => (float)$fetchedPkg['rating'],
+            'reviews_count' => (int)$fetchedPkg['reviews_count'],
+            'price' => (float)$fetchedPkg['price'],
+            'original_price' => (float)($fetchedPkg['original_price'] ?: ($fetchedPkg['price'] * 1.25)),
+            'token_advance' => (float)($fetchedPkg['token_advance'] ?: 2500),
+            'gallery' => $galleryList,
+            'highlights' => $highlightsList,
+            'itinerary' => $itineraryList,
+            'inclusions' => $inclusionsList,
+            'exclusions' => $exclusionsList,
+            'stays' => $linkedStays,
+            'policies' => $pkgPolicies
+        ];
     }
+}
 
 if (!isset($package)) {
     $searchLower = strtolower($rawSearch);
@@ -719,7 +720,11 @@ if (!isset($package)) {
     $package = isset($packagesDb[$lookupKey]) ? $packagesDb[$lookupKey] : $packagesDb['PKG-KASHMIR-01'];
 }
 
-$pageTitle = $package['title'] . ' | GuideFlux Travel Portal';
+require_once __DIR__ . '/config/settings.php';
+$siteName = getSetting('site_name', 'GuideFlux');
+$siteWhatsapp = getSetting('site_whatsapp', '919876543210');
+
+$pageTitle = $package['title'] . ' | ' . htmlspecialchars($siteName);
 require_once 'components/header.php';
 require_once 'components/navbar.php';
 ?>
@@ -727,22 +732,22 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      BREADCRUMB & BACK NAVIGATION
 =========================================== -->
-<section class="w-full bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8 xl:px-12">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center space-x-2 text-slate-500">
-            <a href="index.php" class="hover:text-brand-700 transition flex items-center space-x-1">
-                <i class="fa-solid fa-house text-[11px]"></i>
-                <span>Home</span>
+<section class="w-full bg-white border-b border-slate-200 py-2 sm:py-3 px-3 sm:px-8 xl:px-12">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 text-[11px] sm:text-xs">
+        <nav class="flex items-center space-x-1.5 sm:space-x-2 text-slate-500 overflow-x-auto no-scrollbar whitespace-nowrap py-0.5">
+            <a href="index.php" class="hover:text-brand-700 transition flex items-center space-x-1 shrink-0 font-medium">
+                <i class="fa-solid fa-house text-[10px] sm:text-[11px]"></i>
+                <span class="hidden sm:inline">Home</span>
             </a>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
-            <a href="search.php?type=package" class="hover:text-brand-700 transition">Tour Packages</a>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
-            <span class="text-brand-700 font-bold truncate max-w-xs sm:max-w-md"><?= htmlspecialchars($package['title']) ?></span>
-        </div>
+            <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] text-slate-400 shrink-0"></i>
+            <a href="search.php?type=package" class="hover:text-brand-700 transition shrink-0 font-medium">Tour Packages</a>
+            <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] text-slate-400 shrink-0"></i>
+            <span class="text-brand-700 font-bold truncate max-w-[150px] sm:max-w-xs md:max-w-md"><?= htmlspecialchars($package['title']) ?></span>
+        </nav>
 
-        <a href="search.php?type=package" class="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-brand-700 transition">
+        <a href="search.php?type=package" class="hidden sm:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-brand-700 transition shrink-0">
             <i class="fa-solid fa-arrow-left text-[11px]"></i>
-            <span>Back to All Packages</span>
+            <span>Back to Packages</span>
         </a>
     </div>
 </section>
@@ -750,68 +755,68 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      HERO TITLE & QUICK DETAILS STRIP
 =========================================== -->
-<section class="w-full bg-white pt-6 pb-4 px-4 sm:px-8 xl:px-12">
+<section class="w-full bg-white pt-4 sm:pt-6 pb-3 sm:pb-4 px-3 sm:px-8 xl:px-12">
     <div class="max-w-7xl mx-auto">
-        
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div class="space-y-2">
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+            <div class="space-y-1.5 sm:space-y-2">
                 <!-- Badges Strip -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-3 py-0.5 rounded-full text-xs font-bold <?= $package['badge_class'] ?>">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span class="px-2.5 sm:px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-bold <?= $package['badge_class'] ?>">
                         <?= htmlspecialchars($package['badge']) ?>
                     </span>
-                    <span class="px-3 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
-                        <i class="fa-regular fa-clock text-[10px] mr-1"></i>
+                    <span class="px-2.5 sm:px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200">
+                        <i class="fa-regular fa-clock text-[9px] sm:text-[10px] mr-1"></i>
                         <?= htmlspecialchars($package['duration']) ?>
                     </span>
-                    <?php 
-                        $tMode = $package['travel_mode'] ?? 'flight';
-                        $tBadge = match($tMode) {
-                            'flight' => ['icon' => 'fa-plane-departure', 'label' => 'Return Flights Included', 'class' => 'bg-sky-50 text-sky-800 border-sky-200'],
-                            'train' => ['icon' => 'fa-train', 'label' => 'By Train Included', 'class' => 'bg-amber-50 text-amber-800 border-amber-200'],
-                            'bus' => ['icon' => 'fa-bus', 'label' => 'By Luxury Volvo Bus', 'class' => 'bg-emerald-50 text-emerald-800 border-emerald-200'],
-                            'cab' => ['icon' => 'fa-car', 'label' => 'By Private Cab', 'class' => 'bg-teal-50 text-teal-800 border-teal-200'],
-                            'land_only' => ['icon' => 'fa-hotel', 'label' => 'Land Package Only', 'class' => 'bg-indigo-50 text-indigo-800 border-indigo-200'],
-                            default => ['icon' => 'fa-route', 'label' => 'Transfers Included', 'class' => 'bg-slate-100 text-slate-700 border-slate-200']
-                        };
+                    <?php
+                    $tMode = $package['travel_mode'] ?? 'flight';
+                    $tBadge = match ($tMode) {
+                        'flight' => ['icon' => 'fa-plane-departure', 'label' => 'Return Flights Included', 'class' => 'bg-sky-50 text-sky-800 border-sky-200'],
+                        'train' => ['icon' => 'fa-train', 'label' => 'By Train Included', 'class' => 'bg-amber-50 text-amber-800 border-amber-200'],
+                        'bus' => ['icon' => 'fa-bus', 'label' => 'By Luxury Volvo Bus', 'class' => 'bg-emerald-50 text-emerald-800 border-emerald-200'],
+                        'cab' => ['icon' => 'fa-car', 'label' => 'By Private Cab', 'class' => 'bg-teal-50 text-teal-800 border-teal-200'],
+                        'land_only' => ['icon' => 'fa-hotel', 'label' => 'Land Package Only', 'class' => 'bg-indigo-50 text-indigo-800 border-indigo-200'],
+                        default => ['icon' => 'fa-route', 'label' => 'Transfers Included', 'class' => 'bg-slate-100 text-slate-700 border-slate-200']
+                    };
                     ?>
-                    <span class="px-3 py-0.5 rounded-full text-xs font-semibold border <?= $tBadge['class'] ?>">
-                        <i class="fa-solid <?= $tBadge['icon'] ?> text-[10px] mr-1"></i>
+                    <span class="px-2.5 sm:px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border <?= $tBadge['class'] ?>">
+                        <i class="fa-solid <?= $tBadge['icon'] ?> text-[9px] sm:text-[10px] mr-1"></i>
                         <?= htmlspecialchars($tBadge['label']) ?>
                     </span>
-                    <span class="px-3 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                        <i class="fa-solid fa-location-dot text-[10px] text-brand-600 mr-1"></i>
+                    <span class="px-2.5 sm:px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold bg-slate-100 text-slate-700">
+                        <i class="fa-solid fa-location-dot text-[9px] sm:text-[10px] text-brand-600 mr-1"></i>
                         <?= htmlspecialchars($package['state']) ?>
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center space-x-1">
-                        <i class="fa-solid fa-star text-amber-500 text-[10px]"></i>
+                    <span class="px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center space-x-1">
+                        <i class="fa-solid fa-star text-amber-500 text-[9px] sm:text-[10px]"></i>
                         <span><?= $package['rating'] ?></span>
                         <span class="text-slate-400 font-normal">(<?= number_format($package['reviews_count']) ?> reviews)</span>
                     </span>
                 </div>
 
                 <!-- Main Package Heading -->
-                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                <h1 class="text-xl sm:text-3xl lg:text-4xl font-extrabold sm:font-black text-slate-900 tracking-tight leading-tight">
                     <?= htmlspecialchars($package['title']) ?>
                 </h1>
 
                 <!-- Route Highlights -->
-                <p class="text-xs sm:text-sm text-slate-500 flex items-center space-x-2 font-medium">
-                    <i class="fa-solid fa-route text-brand-600"></i>
+                <p class="text-[11px] sm:text-sm text-slate-500 flex items-center space-x-1.5 font-medium">
+                    <i class="fa-solid fa-route text-brand-600 text-xs"></i>
                     <span>Route: <strong class="text-slate-700"><?= htmlspecialchars($package['destination']) ?></strong></span>
                 </p>
             </div>
 
-            <!-- Price Pill on Mobile / Tablet -->
-            <div class="flex items-center space-x-4 shrink-0 lg:text-right">
+            <!-- Price on Mobile / Tablet -->
+            <div class="flex items-center justify-between lg:justify-end space-x-4 shrink-0 lg:text-right pt-2 lg:pt-0 border-t border-slate-100 lg:border-t-0">
                 <div>
-                    <span class="text-xs text-slate-400 block line-through">₹<?= number_format($package['original_price']) ?></span>
-                    <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                    <span class="text-[10px] sm:text-xs text-slate-400 block line-through">₹<?= number_format($package['original_price']) ?></span>
+                    <div class="text-xl sm:text-3xl font-extrabold sm:font-black text-slate-900 tracking-tight leading-none">
                         ₹<?= number_format($package['price']) ?>
                     </div>
-                    <span class="text-[11px] text-slate-500 block">per person &bull; twin sharing</span>
+                    <span class="text-[10px] sm:text-[11px] text-slate-500 block mt-0.5">per person &bull; twin sharing</span>
                 </div>
-                <a href="#bookingSidebar" class="lg:hidden px-5 py-2.5 rounded-full bg-brand-600 text-white font-bold text-xs uppercase tracking-wider">
+                <a href="#bookingSidebar" class="lg:hidden px-4 py-2 rounded-full bg-brand-600 text-white font-bold text-xs uppercase tracking-wider active:scale-95 transition">
                     Book Now
                 </a>
             </div>
@@ -821,33 +826,77 @@ require_once 'components/navbar.php';
 </section>
 
 <!-- ==========================================
-     MAGAZINE PHOTO GALLERY (1 Big Left + 4 Right)
+     MAGAZINE PHOTO GALLERY (Dynamic Real Photos Only)
 =========================================== -->
-<section class="w-full bg-white pb-8 px-4 sm:px-8 xl:px-12">
+<section class="w-full bg-white pb-4 sm:pb-8 px-3 sm:px-8 xl:px-12">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 h-[260px] sm:h-[340px] md:h-[480px]">
-            
+        <!-- Desktop Grid (Hidden on Mobile) -->
+        <div class="hidden md:grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 h-[340px] md:h-[480px]">
+
             <!-- Large Main Photo (Cols 1 & 2) -->
             <div class="md:col-span-2 h-full relative overflow-hidden group">
-                <img src="<?= htmlspecialchars($package['gallery'][0]) ?>" 
-                     alt="<?= htmlspecialchars($package['title']) ?>" 
-                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                <img src="<?= htmlspecialchars($package['gallery'][0]) ?>"
+                    alt="<?= htmlspecialchars($package['title']) ?>"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                 <span class="absolute bottom-4 left-4 px-3 py-1 rounded-full text-xs font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20">
-                    <i class="fa-solid fa-camera mr-1 text-teal-300"></i> Dal Lake Shikara Experience
+                    <i class="fa-solid fa-camera mr-1 text-teal-300"></i> Featured Experience
                 </span>
             </div>
 
             <!-- Right 4 Photos (Cols 3 & 4) -->
             <div class="hidden md:grid md:col-span-2 grid-cols-2 gap-3 h-full">
                 <?php for ($i = 1; $i < 5; $i++): ?>
-                    <div class="h-[233px] relative overflow-hidden group">
-                        <img src="<?= htmlspecialchars($package['gallery'][$i]) ?>" 
-                             alt="Tour highlight <?= $i ?>" 
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                    </div>
+                    <?php if (!empty($package['gallery'][$i])): ?>
+                        <div class="h-[233px] relative overflow-hidden group">
+                            <img src="<?= htmlspecialchars($package['gallery'][$i]) ?>"
+                                alt="Tour highlight <?= $i ?>"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        </div>
+                    <?php endif; ?>
                 <?php endfor; ?>
             </div>
 
+        </div>
+
+        <!-- Mobile Auto-Scrolling Carousel with swipe & touch support -->
+        <div class="block md:hidden relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[16/10] max-h-[280px]">
+            <div id="mobilePackageCarousel" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full h-full">
+                <?php foreach ($package['gallery'] as $pIdx => $pPhoto): ?>
+                    <div class="w-full shrink-0 snap-center h-full relative" data-carousel-slide="<?= $pIdx ?>">
+                        <img src="<?= htmlspecialchars($pPhoto) ?>"
+                            alt="<?= htmlspecialchars($package['title']) ?> Photo <?= $pIdx + 1 ?>"
+                            class="w-full h-full object-cover">
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Mobile Badge Overlay -->
+            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20 shadow-xs">
+                <i class="fa-solid fa-umbrella-beach mr-1 text-teal-300"></i> <?= htmlspecialchars($package['badge'] ?: 'Bestseller') ?>
+            </span>
+
+            <!-- Counter Pill -->
+            <div class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white border border-white/20 flex items-center space-x-1 pointer-events-none">
+                <i class="fa-solid fa-images text-[9px] text-teal-300"></i>
+                <span id="mobilePackageGalleryCounter">1 / <?= count($package['gallery']) ?></span>
+            </div>
+
+            <!-- Left & Right Arrow controls -->
+            <?php if (count($package['gallery']) > 1): ?>
+                <button type="button" id="prevPackageSlideBtn" aria-label="Previous image" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-xs flex items-center justify-center border border-white/20 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+                <button type="button" id="nextPackageSlideBtn" aria-label="Next image" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-900/60 backdrop-blur-xs text-white text-xs flex items-center justify-center border border-white/20 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+
+                <!-- Dot indicators -->
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1.5 pointer-events-none" id="mobilePackageCarouselDots">
+                    <?php foreach ($package['gallery'] as $dIdx => $dP): ?>
+                        <span class="h-1.5 rounded-full transition-all duration-300 <?= $dIdx === 0 ? 'bg-white w-4' : 'bg-white/50 w-1.5' ?>" data-dot-index="<?= $dIdx ?>"></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -855,9 +904,9 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      IN-PAGE TAB NAVIGATION STRIP (Smooth Scroll)
 =========================================== -->
-<div class="w-full bg-white border-y border-slate-200 sticky top-20 md:top-24 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 xl:px-12">
-        <nav class="flex items-center space-x-6 overflow-x-auto no-scrollbar py-3 text-xs font-bold text-slate-600">
+<div class="w-full bg-white border-y border-slate-200 sticky top-14 md:top-24 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-8 xl:px-12">
+        <nav class="flex items-center space-x-4 sm:space-x-6 overflow-x-auto no-scrollbar py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold text-slate-600">
             <a href="#overviewSec" class="hover:text-brand-600 transition shrink-0">Overview</a>
             <a href="#highlightsSec" class="hover:text-brand-600 transition shrink-0">Key Highlights</a>
             <a href="#itinerarySec" class="hover:text-brand-600 transition shrink-0">Day-Wise Itinerary</a>
@@ -871,23 +920,23 @@ require_once 'components/navbar.php';
 <!-- ==========================================
      MAIN TWO-COLUMN DETAILS & BOOKING SECTION
 =========================================== -->
-<main class="w-full py-10 px-4 sm:px-8 xl:px-12 bg-slate-50">
+<main class="w-full py-6 sm:py-10 px-3 sm:px-8 xl:px-12 bg-slate-50">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row gap-8 items-start">
-            
+        <div class="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start">
+
             <!-- ==========================================
                  LEFT COLUMN: EXTENSIVE CONTENT
             =========================================== -->
-            <div class="flex-1 w-full space-y-8">
+            <div class="flex-1 w-full space-y-5 sm:space-y-8">
 
                 <!-- 1. OVERVIEW & EXPERIENCE DESCRIPTION -->
-                <div id="overviewSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4">
-                    <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="overviewSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-3.5 sm:space-y-4">
+                    <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                         <i class="fa-solid fa-sparkles"></i>
                         <span>Tour Overview</span>
                     </div>
 
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
                         Experience the Magic of Paradise on Earth
                     </h2>
 
@@ -896,50 +945,51 @@ require_once 'components/navbar.php';
                     </p>
 
                     <!-- Quick Guarantee Pills -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100">
-                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-1">
-                            <i class="fa-solid fa-shield-check text-brand-600 text-sm"></i>
-                            <h4 class="text-xs font-bold text-slate-900">100% Verified</h4>
-                            <p class="text-[10px] text-slate-500">Government Certified</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-slate-100">
+                        <div class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-0.5 sm:space-y-1">
+                            <i class="fa-solid fa-shield-check text-brand-600 text-xs sm:text-sm"></i>
+                            <h4 class="text-[11px] sm:text-xs font-bold text-slate-900">100% Verified</h4>
+                            <p class="text-[9px] sm:text-[10px] text-slate-500">Certified Stays</p>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-1">
-                            <i class="fa-solid fa-bolt text-brand-600 text-sm"></i>
-                            <h4 class="text-xs font-bold text-slate-900">Token Advance</h4>
-                            <p class="text-[10px] text-slate-500">Lock for ₹<?= number_format($package['token_advance']) ?></p>
+                        <div class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-0.5 sm:space-y-1">
+                            <i class="fa-solid fa-bolt text-brand-600 text-xs sm:text-sm"></i>
+                            <h4 class="text-[11px] sm:text-xs font-bold text-slate-900">Token Advance</h4>
+                            <p class="text-[9px] sm:text-[10px] text-slate-500">Lock for ₹<?= number_format($package['token_advance']) ?></p>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-1">
-                            <i class="fa-solid fa-user-tie text-brand-600 text-sm"></i>
-                            <h4 class="text-xs font-bold text-slate-900">Private Cab</h4>
-                            <p class="text-[10px] text-slate-500">Dedicated Chauffeur</p>
+                        <div class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-0.5 sm:space-y-1">
+                            <i class="fa-solid fa-user-tie text-brand-600 text-xs sm:text-sm"></i>
+                            <h4 class="text-[11px] sm:text-xs font-bold text-slate-900">Private Cab</h4>
+                            <p class="text-[9px] sm:text-[10px] text-slate-500">Dedicated Chauffeur</p>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-1">
-                            <i class="fa-solid fa-headset text-brand-600 text-sm"></i>
-                            <h4 class="text-xs font-bold text-slate-900">24/7 Concierge</h4>
-                            <p class="text-[10px] text-slate-500">Live Support On-Ground</p>
+                        <div class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-0.5 sm:space-y-1">
+                            <i class="fa-solid fa-headset text-brand-600 text-xs sm:text-sm"></i>
+                            <h4 class="text-[11px] sm:text-xs font-bold text-slate-900">24/7 Concierge</h4>
+                            <p class="text-[9px] sm:text-[10px] text-slate-500">Live Support</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. KEY HIGHLIGHTS GRID -->
-                <div id="highlightsSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-5">
-                    <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
-                        <i class="fa-solid fa-star"></i>
-                        <span>Package Highlights</span>
+                <div id="highlightsSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-5">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
+                            <i class="fa-solid fa-star"></i>
+                            <span>Package Highlights</span>
+                        </div>
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+                            What Makes This Circuit Extraordinary
+                        </h2>
                     </div>
 
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                        What Makes This Circuit Extraordinary
-                    </h2>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <?php foreach ($package['highlights'] as $hl): ?>
-                            <div class="flex items-start space-x-3.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-brand-500 transition">
-                                <span class="w-10 h-10 rounded-2xl bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center shrink-0">
-                                    <i class="<?= $hl['icon'] ?> text-sm"></i>
+                            <div class="flex items-start space-x-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-brand-500 transition">
+                                <span class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center shrink-0">
+                                    <i class="<?= $hl['icon'] ?> text-xs sm:text-sm"></i>
                                 </span>
                                 <div>
                                     <h4 class="text-xs sm:text-sm font-bold text-slate-900"><?= htmlspecialchars($hl['title']) ?></h4>
-                                    <p class="text-xs text-slate-500 mt-0.5 leading-relaxed"><?= htmlspecialchars($hl['desc']) ?></p>
+                                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed"><?= htmlspecialchars($hl['desc']) ?></p>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -947,53 +997,53 @@ require_once 'components/navbar.php';
                 </div>
 
                 <!-- 3. DAY-BY-DAY ITINERARY TIMELINE -->
-                <div id="itinerarySec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
+                <div id="itinerarySec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-6">
                     <div class="flex items-center justify-between">
-                        <div class="space-y-1">
-                            <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                        <div class="space-y-0.5 sm:space-y-1">
+                            <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                                 <i class="fa-solid fa-calendar-days"></i>
                                 <span>Day-Wise Plan</span>
                             </div>
-                            <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                            <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                                 Detailed Travel Schedule
                             </h2>
                         </div>
-                        <span class="rounded-full bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1">
-                            <?= count($package['itinerary']) ?> Days Detailed
+                        <span class="rounded-full bg-slate-100 text-slate-600 text-[11px] sm:text-xs font-bold px-2.5 sm:px-3 py-0.5 sm:py-1">
+                            <?= count($package['itinerary']) ?> Days
                         </span>
                     </div>
 
                     <!-- Timeline List -->
-                    <div class="space-y-4 relative before:absolute before:inset-0 before:left-5 before:w-0.5 before:bg-slate-200">
+                    <div class="space-y-3.5 sm:space-y-4 relative before:absolute before:inset-0 before:left-4 sm:before:left-5 before:w-0.5 before:bg-slate-200">
                         <?php foreach ($package['itinerary'] as $idx => $day): ?>
-                            <div class="relative flex items-start space-x-4 group">
+                            <div class="relative flex items-start space-x-3 sm:space-x-4 group">
                                 <!-- Day Badge Circle -->
-                                <span class="w-10 h-10 rounded-full bg-brand-600 text-white font-black text-xs flex items-center justify-center shrink-0 z-10 border-4 border-white">
+                                <span class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-600 text-white font-black text-[11px] sm:text-xs flex items-center justify-center shrink-0 z-10 border-2 sm:border-4 border-white">
                                     <?= str_pad($idx + 1, 2, '0', STR_PAD_LEFT) ?>
                                 </span>
 
                                 <!-- Content Card -->
-                                <div class="flex-1 bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 p-5 transition space-y-3">
-                                    <div class="flex flex-wrap items-center justify-between gap-2">
-                                        <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200">
+                                <div class="flex-1 bg-slate-50 hover:bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-3.5 sm:p-5 transition space-y-2 sm:space-y-3">
+                                    <div class="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+                                        <span class="text-[10px] sm:text-xs font-bold text-brand-700 bg-brand-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-brand-200">
                                             <?= htmlspecialchars($day['day']) ?>
                                         </span>
-                                        <span class="text-[11px] font-semibold text-slate-500 flex items-center space-x-1">
-                                            <i class="fa-solid fa-hotel text-[10px] text-slate-400"></i>
+                                        <span class="text-[10px] sm:text-[11px] font-semibold text-slate-500 flex items-center space-x-1">
+                                            <i class="fa-solid fa-hotel text-[9px] sm:text-[10px] text-slate-400"></i>
                                             <span><?= htmlspecialchars($day['stay']) ?></span>
                                         </span>
                                     </div>
 
-                                    <h3 class="text-sm sm:text-base font-bold text-slate-900">
+                                    <h3 class="text-xs sm:text-base font-bold text-slate-900 leading-snug">
                                         <?= htmlspecialchars($day['title']) ?>
                                     </h3>
 
-                                    <p class="text-xs text-slate-600 leading-relaxed font-normal">
+                                    <p class="text-[11px] sm:text-xs text-slate-600 leading-relaxed font-normal">
                                         <?= htmlspecialchars($day['desc']) ?>
                                     </p>
 
-                                    <div class="pt-2 border-t border-slate-200/60 flex items-center space-x-2 text-[11px] text-emerald-700 font-semibold">
-                                        <i class="fa-solid fa-utensils text-[10px]"></i>
+                                    <div class="pt-1.5 sm:pt-2 border-t border-slate-200/60 flex items-center space-x-2 text-[10px] sm:text-[11px] text-emerald-700 font-semibold">
+                                        <i class="fa-solid fa-utensils text-[9px] sm:text-[10px]"></i>
                                         <span><?= htmlspecialchars($day['meals']) ?></span>
                                     </div>
                                 </div>
@@ -1003,29 +1053,29 @@ require_once 'components/navbar.php';
                 </div>
 
                 <!-- 4. INCLUSIONS & EXCLUSIONS -->
-                <div id="inclusionsSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="inclusionsSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-6">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-clipboard-check"></i>
                             <span>Package Policy</span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                             Inclusions &amp; Exclusions
                         </h2>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <!-- What's Included -->
-                        <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-3">
-                            <h3 class="text-sm font-bold text-emerald-900 flex items-center space-x-2">
+                        <div class="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2.5 sm:space-y-3">
+                            <h3 class="text-xs sm:text-sm font-bold text-emerald-900 flex items-center space-x-2">
                                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                                <span>What's Included in This Package</span>
+                                <span>What's Included</span>
                             </h3>
 
-                            <ul class="space-y-2.5">
+                            <ul class="space-y-2 sm:space-y-2.5">
                                 <?php foreach ($package['inclusions'] as $inc): ?>
-                                    <li class="flex items-start space-x-2.5 text-xs text-slate-700 leading-snug">
-                                        <i class="fa-solid fa-check text-emerald-600 text-xs shrink-0 mt-0.5"></i>
+                                    <li class="flex items-start space-x-2 text-[11px] sm:text-xs text-slate-700 leading-snug">
+                                        <i class="fa-solid fa-check text-emerald-600 text-[10px] sm:text-xs shrink-0 mt-0.5"></i>
                                         <span><?= htmlspecialchars($inc) ?></span>
                                     </li>
                                 <?php endforeach; ?>
@@ -1033,16 +1083,16 @@ require_once 'components/navbar.php';
                         </div>
 
                         <!-- What's NOT Included -->
-                        <div class="p-5 rounded-2xl bg-rose-50/40 border border-rose-200 space-y-3">
-                            <h3 class="text-sm font-bold text-rose-900 flex items-center space-x-2">
+                        <div class="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-rose-50/40 border border-rose-200 space-y-2.5 sm:space-y-3">
+                            <h3 class="text-xs sm:text-sm font-bold text-rose-900 flex items-center space-x-2">
                                 <i class="fa-solid fa-circle-xmark text-rose-600"></i>
-                                <span>What's Excluded (Chargeable)</span>
+                                <span>What's Excluded</span>
                             </h3>
 
-                            <ul class="space-y-2.5">
+                            <ul class="space-y-2 sm:space-y-2.5">
                                 <?php foreach ($package['exclusions'] as $exc): ?>
-                                    <li class="flex items-start space-x-2.5 text-xs text-slate-700 leading-snug">
-                                        <i class="fa-solid fa-xmark text-rose-500 text-xs shrink-0 mt-0.5"></i>
+                                    <li class="flex items-start space-x-2 text-[11px] sm:text-xs text-slate-700 leading-snug">
+                                        <i class="fa-solid fa-xmark text-rose-500 text-[10px] sm:text-xs shrink-0 mt-0.5"></i>
                                         <span><?= htmlspecialchars($exc) ?></span>
                                     </li>
                                 <?php endforeach; ?>
@@ -1052,42 +1102,42 @@ require_once 'components/navbar.php';
                 </div>
 
                 <!-- 5. STAYS & ACCOMMODATIONS INCLUDED -->
-                <div id="staysSec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-5">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="staysSec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-5">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-hotel"></i>
                             <span>Handpicked Accommodations</span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                             Where You Will Stay
                         </h2>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <?php foreach ($package['stays'] as $stay): ?>
-                            <div class="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col justify-between">
-                                <div class="h-44 relative overflow-hidden">
+                            <div class="rounded-xl sm:rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col justify-between">
+                                <div class="h-36 sm:h-44 relative overflow-hidden">
                                     <img src="<?= htmlspecialchars($stay['image']) ?>" alt="<?= htmlspecialchars($stay['name']) ?>" class="w-full h-full object-cover">
-                                    <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900/80 text-white">
+                                    <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-900/80 text-white">
                                         <?= htmlspecialchars($stay['nights']) ?>
                                     </span>
                                 </div>
-                                <div class="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
+                                <div class="p-3 sm:p-4 space-y-1.5 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <div class="flex items-center justify-between text-xs mb-1">
+                                        <div class="flex items-center justify-between text-[11px] sm:text-xs mb-1">
                                             <span class="font-bold text-brand-700"><?= htmlspecialchars($stay['type']) ?></span>
-                                            <span class="text-amber-600 font-bold"><i class="fa-solid fa-star text-[10px]"></i> <?= $stay['rating'] ?></span>
+                                            <span class="text-amber-600 font-bold"><i class="fa-solid fa-star text-[9px] sm:text-[10px]"></i> <?= $stay['rating'] ?></span>
                                         </div>
-                                        <h4 class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($stay['name']) ?></h4>
-                                        <p class="text-xs text-slate-500 flex items-center space-x-1 mt-0.5">
-                                            <i class="fa-solid fa-location-dot text-[10px] text-slate-400"></i>
+                                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm"><?= htmlspecialchars($stay['name']) ?></h4>
+                                        <p class="text-[11px] sm:text-xs text-slate-500 flex items-center space-x-1 mt-0.5">
+                                            <i class="fa-solid fa-location-dot text-[9px] sm:text-[10px] text-slate-400"></i>
                                             <span><?= htmlspecialchars($stay['location']) ?></span>
                                         </p>
                                     </div>
-                                    <div class="pt-2 text-[11px] text-slate-500 flex items-center space-x-2">
-                                        <span class="px-2 py-0.5 rounded bg-slate-200/70 font-semibold">Free Wi-Fi</span>
-                                        <span class="px-2 py-0.5 rounded bg-slate-200/70 font-semibold">Central Heating</span>
-                                        <span class="px-2 py-0.5 rounded bg-slate-200/70 font-semibold">Breakfast</span>
+                                    <div class="pt-2 text-[10px] sm:text-[11px] text-slate-500 flex flex-wrap items-center gap-1 sm:gap-2">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-200/70 font-semibold">Free Wi-Fi</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-200/70 font-semibold">Heating/AC</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-200/70 font-semibold">Breakfast</span>
                                     </div>
                                 </div>
                             </div>
@@ -1096,13 +1146,13 @@ require_once 'components/navbar.php';
                 </div>
 
                 <!-- 6. CANCELLATION & RESCHEDULE POLICY (VISUAL TIMELINE) -->
-                <div id="policySec" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-5">
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2 text-xs font-bold text-brand-600 uppercase tracking-wider">
+                <div id="policySec" class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 p-4 sm:p-8 space-y-4 sm:space-y-5">
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <div class="flex items-center space-x-1.5 sm:space-x-2 text-[11px] sm:text-xs font-bold text-brand-600 uppercase tracking-wider">
                             <i class="fa-solid fa-shield-halved"></i>
                             <span>Booking Peace of Mind</span>
                         </div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                        <h2 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
                             Cancellation &amp; Date Change Policy
                         </h2>
                     </div>
@@ -1115,7 +1165,7 @@ require_once 'components/navbar.php';
                     <?php endif; ?>
 
                     <!-- Refund Tiers Timeline Cards Grid -->
-                    <?php 
+                    <?php
                     $pkgRules = !empty($package['policies']['rules']) ? $package['policies']['rules'] : [
                         ['timeline' => '15+ Days Before Travel', 'refund' => '100% Refund', 'deduction' => '0% Cancellation Fee', 'badge_type' => 'full_refund'],
                         ['timeline' => '7 to 14 Days Before Travel', 'refund' => '80% Refund', 'deduction' => '20% Cancellation / Reschedule Fee', 'badge_type' => 'partial_refund'],
@@ -1125,7 +1175,7 @@ require_once 'components/navbar.php';
                     ?>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
                         <?php foreach ($pkgRules as $rule): ?>
-                            <?php 
+                            <?php
                             $bType = $rule['badge_type'] ?? 'partial_refund';
                             $cardStyle = 'bg-amber-50/70 border-amber-200 text-amber-900';
                             $badgeStyle = 'bg-amber-100 text-amber-800 border-amber-300';
@@ -1196,9 +1246,9 @@ require_once 'components/navbar.php';
                  RIGHT COLUMN: STICKY BOOKING CARD
             =========================================== -->
             <aside id="bookingSidebar" class="w-full lg:w-96 shrink-0 lg:sticky lg:top-36 space-y-5">
-                
+
                 <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 space-y-5">
-                    
+
                     <!-- Pricing Header -->
                     <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
@@ -1232,11 +1282,11 @@ require_once 'components/navbar.php';
                             <label class="block text-xs font-bold text-slate-700 mb-1">Departure Date</label>
                             <div class="relative">
                                 <i class="fa-regular fa-calendar absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                <input type="date" 
-                                       id="bookTravelDate"
-                                       required
-                                       value="<?= date('Y-m-d', strtotime('+7 days')) ?>"
-                                       class="w-full pl-9 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-semibold text-slate-800">
+                                <input type="date"
+                                    id="bookTravelDate"
+                                    required
+                                    value="<?= date('Y-m-d', strtotime('+7 days')) ?>"
+                                    class="w-full pl-9 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-semibold text-slate-800">
                             </div>
                         </div>
 
@@ -1293,9 +1343,9 @@ require_once 'components/navbar.php';
                                 <span>Book with Token Advance</span>
                             </button>
 
-                            <a href="https://wa.me/919876543210?text=<?= urlencode('Hi Orion Advent, I want to book ' . $package['title'] . ' for ' . $package['price'] . ' per person. Please share itinerary.') ?>" 
-                               target="_blank" 
-                               class="w-full py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-2">
+                            <a href="https://wa.me/<?= htmlspecialchars($siteWhatsapp) ?>?text=<?= urlencode('Hi ' . $siteName . ', I want to book ' . $package['title'] . ' for ' . $package['price'] . ' per person. Please share itinerary.') ?>"
+                                target="_blank"
+                                class="w-full py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-2">
                                 <i class="fa-brands fa-whatsapp text-sm"></i>
                                 <span>Chat with Kashmir Expert</span>
                             </a>
@@ -1336,107 +1386,107 @@ require_once 'components/navbar.php';
 
 <!-- Interactive Price Calculator JS -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    let adults = 2;
-    const basePrice = <?= $package['price'] ?>;
-    const tokenPerPerson = <?= $package['token_advance'] ?>;
+    document.addEventListener('DOMContentLoaded', () => {
+        let adults = 2;
+        const basePrice = <?= $package['price'] ?>;
+        const tokenPerPerson = <?= $package['token_advance'] ?>;
 
-    const adultCountDisplay = document.getElementById('adultCountDisplay');
-    const adultSummaryCount = document.getElementById('adultSummaryCount');
-    const totalPriceDisplay = document.getElementById('totalPriceDisplay');
-    const tokenAdvanceDisplay = document.getElementById('tokenAdvanceDisplay');
-    const minusBtn = document.getElementById('adultMinusBtn');
-    const plusBtn = document.getElementById('adultPlusBtn');
+        const adultCountDisplay = document.getElementById('adultCountDisplay');
+        const adultSummaryCount = document.getElementById('adultSummaryCount');
+        const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+        const tokenAdvanceDisplay = document.getElementById('tokenAdvanceDisplay');
+        const minusBtn = document.getElementById('adultMinusBtn');
+        const plusBtn = document.getElementById('adultPlusBtn');
 
-    function updateCalculator() {
-        if (adultCountDisplay) adultCountDisplay.textContent = adults;
-        if (adultSummaryCount) adultSummaryCount.textContent = adults;
-        if (totalPriceDisplay) totalPriceDisplay.textContent = '₹' + (basePrice * adults).toLocaleString('en-IN');
-        if (tokenAdvanceDisplay) tokenAdvanceDisplay.textContent = '₹' + (tokenPerPerson * adults).toLocaleString('en-IN');
-    }
-
-    if (plusBtn) {
-        plusBtn.addEventListener('click', () => {
-            if (adults < 12) {
-                adults++;
-                updateCalculator();
-            }
-        });
-    }
-
-    if (minusBtn) {
-        minusBtn.addEventListener('click', () => {
-            if (adults > 1) {
-                adults--;
-                updateCalculator();
-            }
-        });
-    }
-});
-
-function submitBooking() {
-    const name = document.getElementById('leadName')?.value || 'Guest';
-    const phone = document.getElementById('leadPhone')?.value || '';
-    const date = document.getElementById('bookTravelDate')?.value || '';
-    const count = document.getElementById('adultCountDisplay')?.textContent || '2';
-    const packageTitle = <?= json_encode($package['title']) ?>;
-    const packageId = <?= json_encode($package['id'] ?? '') ?>;
-    const tokenRaw = document.getElementById('tokenAdvanceDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
-    const totalRaw = document.getElementById('totalPriceDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
-
-    const btn = document.querySelector('#bookingSidebar form button[type="submit"]');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Securing Reservation...</span>';
-    }
-
-    const formData = new FormData();
-    formData.append('package_id', packageId);
-    formData.append('lead_name', name);
-    formData.append('lead_phone', phone);
-    formData.append('package_title', packageTitle);
-    formData.append('travel_date', date);
-    formData.append('adults_count', count);
-    formData.append('token_amount', tokenRaw);
-    formData.append('total_amount', totalRaw);
-
-    fetch('api/book-package.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Book with Token Advance</span>';
+        function updateCalculator() {
+            if (adultCountDisplay) adultCountDisplay.textContent = adults;
+            if (adultSummaryCount) adultSummaryCount.textContent = adults;
+            if (totalPriceDisplay) totalPriceDisplay.textContent = '₹' + (basePrice * adults).toLocaleString('en-IN');
+            if (tokenAdvanceDisplay) tokenAdvanceDisplay.textContent = '₹' + (tokenPerPerson * adults).toLocaleString('en-IN');
         }
-        if (data.login_required) {
-            showLoginModalForBooking(packageTitle);
-            return;
+
+        if (plusBtn) {
+            plusBtn.addEventListener('click', () => {
+                if (adults < 12) {
+                    adults++;
+                    updateCalculator();
+                }
+            });
         }
-        if (data.success && data.redirect) {
-            window.location.href = data.redirect;
-        } else if (data.success) {
-            showPackageSuccessModal(data.booking_code, packageTitle, name, date, count, tokenRaw);
-        } else {
-            alert(data.message || 'Booking failed.');
+
+        if (minusBtn) {
+            minusBtn.addEventListener('click', () => {
+                if (adults > 1) {
+                    adults--;
+                    updateCalculator();
+                }
+            });
         }
-    })
-    .catch(err => {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Book with Token Advance</span>';
-        }
-        alert('Booking placed successfully! Concierge will call your phone shortly.');
     });
-}
 
-function showLoginModalForBooking(title) {
-    const existing = document.getElementById('loginRequiredModalOverlay');
-    if (existing) existing.remove();
+    function submitBooking() {
+        const name = document.getElementById('leadName')?.value || 'Guest';
+        const phone = document.getElementById('leadPhone')?.value || '';
+        const date = document.getElementById('bookTravelDate')?.value || '';
+        const count = document.getElementById('adultCountDisplay')?.textContent || '2';
+        const packageTitle = <?= json_encode($package['title']) ?>;
+        const packageId = <?= json_encode($package['id'] ?? '') ?>;
+        const tokenRaw = document.getElementById('tokenAdvanceDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
+        const totalRaw = document.getElementById('totalPriceDisplay')?.textContent.replace(/[^0-9]/g, '') || 0;
 
-    const currentUrl = window.location.href;
-    const modalHtml = `
+        const btn = document.querySelector('#bookingSidebar form button[type="submit"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Securing Reservation...</span>';
+        }
+
+        const formData = new FormData();
+        formData.append('package_id', packageId);
+        formData.append('lead_name', name);
+        formData.append('lead_phone', phone);
+        formData.append('package_title', packageTitle);
+        formData.append('travel_date', date);
+        formData.append('adults_count', count);
+        formData.append('token_amount', tokenRaw);
+        formData.append('total_amount', totalRaw);
+
+        fetch('api/book-package.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Book with Token Advance</span>';
+                }
+                if (data.login_required) {
+                    showLoginModalForBooking(packageTitle);
+                    return;
+                }
+                if (data.success && data.redirect) {
+                    window.location.href = data.redirect;
+                } else if (data.success) {
+                    showPackageSuccessModal(data.booking_code, packageTitle, name, date, count, tokenRaw);
+                } else {
+                    alert(data.message || 'Booking failed.');
+                }
+            })
+            .catch(err => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Book with Token Advance</span>';
+                }
+                alert('Booking placed successfully! Concierge will call your phone shortly.');
+            });
+    }
+
+    function showLoginModalForBooking(title) {
+        const existing = document.getElementById('loginRequiredModalOverlay');
+        if (existing) existing.remove();
+
+        const currentUrl = window.location.href;
+        const modalHtml = `
         <div id="loginRequiredModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
                 <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 border border-brand-200 flex items-center justify-center mx-auto text-2xl">
@@ -1447,7 +1497,7 @@ function showLoginModalForBooking(title) {
                         Traveler Account Required
                     </span>
                     <h3 class="text-xl font-black text-slate-900 font-space">Sign In to Lock Package</h3>
-                    <p class="text-xs text-slate-500">Please sign in to your GuideFlux account to secure your seats and receive instant travel vouchers.</p>
+                    <p class="text-xs text-slate-500">Please sign in to your <?php echo htmlspecialchars($siteName); ?> account to secure your seats and receive instant travel vouchers.</p>
                 </div>
                 <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 truncate">
                     <span>${title}</span>
@@ -1466,11 +1516,11 @@ function showLoginModalForBooking(title) {
             </div>
         </div>
     `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
 
-function showPackageSuccessModal(code, title, name, date, count, token) {
-    const modalHtml = `
+    function showPackageSuccessModal(code, title, name, date, count, token) {
+        const modalHtml = `
         <div id="pkgModalOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
                 <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto text-2xl">
@@ -1507,8 +1557,105 @@ function showPackageSuccessModal(code, title, name, date, count, token) {
             </div>
         </div>
     `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    // Mobile Package Photo Gallery Auto-Scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.getElementById('mobilePackageCarousel');
+        if (!carousel) return;
+        const slides = carousel.querySelectorAll('[data-carousel-slide]');
+        const totalSlides = slides.length;
+        if (totalSlides <= 1) return;
+
+        const counter = document.getElementById('mobilePackageGalleryCounter');
+        const dots = document.querySelectorAll('#mobilePackageCarouselDots [data-dot-index]');
+        const prevBtn = document.getElementById('prevPackageSlideBtn');
+        const nextBtn = document.getElementById('nextPackageSlideBtn');
+        let currentIndex = 0;
+        let autoScrollTimer = null;
+        let userPauseTimeout = null;
+
+        function goToSlide(idx) {
+            currentIndex = (idx + totalSlides) % totalSlides;
+            const width = carousel.clientWidth;
+            carousel.scrollTo({
+                left: currentIndex * width,
+                behavior: 'smooth'
+            });
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            if (counter) counter.textContent = `${currentIndex + 1} / ${totalSlides}`;
+            dots.forEach((dot, dIdx) => {
+                if (dIdx === currentIndex) {
+                    dot.className = 'h-1.5 rounded-full transition-all duration-300 bg-white w-4';
+                } else {
+                    dot.className = 'h-1.5 rounded-full transition-all duration-300 bg-white/50 w-1.5';
+                }
+            });
+        }
+
+        function startAutoScroll() {
+            stopAutoScroll();
+            autoScrollTimer = setInterval(() => {
+                goToSlide(currentIndex + 1);
+            }, 3200);
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollTimer) {
+                clearInterval(autoScrollTimer);
+                autoScrollTimer = null;
+            }
+        }
+
+        function handleUserInteraction() {
+            stopAutoScroll();
+            if (userPauseTimeout) clearTimeout(userPauseTimeout);
+            userPauseTimeout = setTimeout(() => {
+                startAutoScroll();
+            }, 4500);
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleUserInteraction();
+                goToSlide(currentIndex - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleUserInteraction();
+                goToSlide(currentIndex + 1);
+            });
+        }
+
+        carousel.addEventListener('scroll', function() {
+            const width = carousel.clientWidth;
+            if (width > 0) {
+                const detectedIdx = Math.round(carousel.scrollLeft / width);
+                if (detectedIdx !== currentIndex && detectedIdx >= 0 && detectedIdx < totalSlides) {
+                    currentIndex = detectedIdx;
+                    updateIndicators();
+                }
+            }
+        }, {
+            passive: true
+        });
+
+        carousel.addEventListener('touchstart', handleUserInteraction, {
+            passive: true
+        });
+        carousel.addEventListener('mouseenter', stopAutoScroll);
+        carousel.addEventListener('mouseleave', startAutoScroll);
+
+        startAutoScroll();
+    });
 </script>
 
 <!-- Mobile Sticky Floating Bottom Booking Bar (Hidden on desktop, flat border, zero shadows) -->
