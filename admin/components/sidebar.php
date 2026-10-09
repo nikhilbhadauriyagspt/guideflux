@@ -89,6 +89,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     </a>
                 </li>
                 <li>
+                    <a href="careers.php" class="flex items-center justify-between px-5 py-2.5 text-xs font-semibold transition-all <?php echo ($currentPage == 'careers.php' || $currentPage == 'career-edit.php') ? 'bg-cream-200/90 text-sage-900 border-l-4 border-sage-700 font-bold pl-[16px]' : 'text-slate-600 hover:bg-cream-100 hover:text-slate-900 border-l-4 border-transparent'; ?>">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-briefcase w-4 text-center text-xs <?php echo ($currentPage == 'careers.php' || $currentPage == 'career-edit.php') ? 'text-sage-700' : 'text-slate-400'; ?>"></i>
+                            <span>Careers &amp; Jobs</span>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 border border-brand-200 text-brand-700 bg-brand-50">Jobs</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="job-applications.php" class="flex items-center justify-between px-5 py-2.5 text-xs font-semibold transition-all <?php echo $currentPage == 'job-applications.php' ? 'bg-cream-200/90 text-sage-900 border-l-4 border-sage-700 font-bold pl-[16px]' : 'text-slate-600 hover:bg-cream-100 hover:text-slate-900 border-l-4 border-transparent'; ?>">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-user-tie w-4 text-center text-xs <?php echo $currentPage == 'job-applications.php' ? 'text-sage-700' : 'text-slate-400'; ?>"></i>
+                            <span>Job Applicants</span>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 border border-amber-200 text-amber-800 bg-amber-50">CVs</span>
+                    </a>
+                </li>
+                <li>
                     <a href="reviews.php" class="flex items-center justify-between px-5 py-2.5 text-xs font-semibold transition-all <?php echo $currentPage == 'reviews.php' ? 'bg-cream-200/90 text-sage-900 border-l-4 border-sage-700 font-bold pl-[16px]' : 'text-slate-600 hover:bg-cream-100 hover:text-slate-900 border-l-4 border-transparent'; ?>">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-star w-4 text-center text-xs <?php echo $currentPage == 'reviews.php' ? 'text-sage-700' : 'text-slate-400'; ?>"></i>

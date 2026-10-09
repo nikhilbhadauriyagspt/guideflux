@@ -368,3 +368,77 @@ function generateFlightInquiryEmailHtml(array $f) {
     </html>';
 }
 
+/**
+ * Generate a clean HTML email notification for Job Applicants (Shortlisted / Selected / Update)
+ */
+function generateJobStatusEmailHtml($candidateName, $jobTitle, $status, $customNotes = '') {
+    $siteName = getSetting('site_name', 'Orion Advent');
+    $siteEmail = getSetting('site_email', 'careers@orionadvent.com');
+    $sitePhone = getSetting('site_phone', '+91 98765 43210');
+
+    $isShortlisted = in_array(strtolower($status), ['shortlisted', 'selected', 'interview']);
+    $statusHeading = $isShortlisted ? 'Application Status Update: Congratulations!' : 'Application Status Update';
+    $statusBadge = strtoupper(htmlspecialchars($status));
+
+    $defaultMsg = $isShortlisted 
+        ? "We are delighted to inform you that your application for the <strong>" . htmlspecialchars($jobTitle) . "</strong> role at <strong>" . htmlspecialchars($siteName) . "</strong> has been shortlisted! Our talent acquisition team was impressed by your profile and would like to proceed with the next round of discussions."
+        : "Thank you for applying for the <strong>" . htmlspecialchars($jobTitle) . "</strong> position at <strong>" . htmlspecialchars($siteName) . "</strong>. Our recruitment team has reviewed your application.";
+
+    $notesSection = !empty($customNotes) ? '
+        <div style="background: #f8fafc; border-left: 4px solid #068285; padding: 14px 18px; margin: 18px 0; border-radius: 4px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #068285; margin-bottom: 4px;">Message from Talent Acquisition Team</div>
+            <div style="font-size: 13px; color: #334155; line-height: 1.6;">' . nl2br(htmlspecialchars($customNotes)) . '</div>
+        </div>
+    ' : '';
+
+    return '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>' . $statusHeading . '</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b; }
+            .container { max-width: 580px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+            .header { background: #068285; color: #ffffff; padding: 28px 24px; text-align: center; }
+            .badge { display: inline-block; background: #ffffff; color: #068285; padding: 6px 14px; font-size: 12px; font-weight: 800; border-radius: 9999px; margin-top: 10px; letter-spacing: 1px; }
+            .content { padding: 28px 24px; font-size: 14px; line-height: 1.6; color: #334155; }
+            .job-card { background: #f0fdfa; border: 1px solid #ccfbf1; padding: 14px 18px; border-radius: 8px; margin: 16px 0; }
+            .footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px 24px; text-align: center; font-size: 11px; color: #64748b; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; opacity: 0.9;">' . htmlspecialchars($siteName) . ' Careers</div>
+                <h1 style="margin: 6px 0 0 0; font-size: 22px; font-weight: 800;">' . $statusHeading . '</h1>
+                <div class="badge">' . $statusBadge . '</div>
+            </div>
+
+            <div class="content">
+                <p style="font-size: 15px; margin: 0 0 12px 0; color: #0f172a;">Dear <strong>' . htmlspecialchars($candidateName) . '</strong>,</p>
+                <p style="margin: 0 0 14px 0;">' . $defaultMsg . '</p>
+                
+                <div class="job-card">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #0f766e; margin-bottom: 2px;">Applied Position</div>
+                    <div style="font-size: 16px; font-weight: 800; color: #0f172a;">' . htmlspecialchars($jobTitle) . '</div>
+                </div>
+
+                ' . $notesSection . '
+
+                <p style="margin: 16px 0 0 0; font-size: 13px; color: #64748b;">
+                    If you have any questions regarding your application or the recruitment process, feel free to reply directly to this email or reach our talent team at <a href="mailto:' . htmlspecialchars($siteEmail) . '" style="color: #068285; font-weight: 700; text-decoration: none;">' . htmlspecialchars($siteEmail) . '</a>.
+                </p>
+            </div>
+
+            <div class="footer">
+                <p style="margin: 0 0 4px 0;">Talent Acquisition &bull; <strong>' . htmlspecialchars($siteName) . '</strong> &bull; ' . htmlspecialchars($sitePhone) . '</p>
+                <p style="margin: 0;">&copy; ' . date('Y') . ' ' . htmlspecialchars($siteName) . '. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>';
+}
+
+
